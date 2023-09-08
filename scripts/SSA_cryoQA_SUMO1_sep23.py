@@ -122,7 +122,11 @@ class SSA:
 
     
     #
-    def sq1_bias_sweeper():
+    def sq1_bias_sweeper(self):
+        start_time = time.time()
+        step_time= 0
+        print('Sarting row sweep of :/t' + str(self.number_steps) + ' steps\n')
+        print()
         return
     
     #takes bias sweep results, picks off Icmin when peaks occur, picks vmod and icmax when modulation amplitude is max
