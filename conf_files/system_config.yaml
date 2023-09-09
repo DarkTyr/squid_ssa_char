@@ -1,1 +1,247 @@
 
+# System wide defintions that are used to configure hardware level communications
+system:
+  system_name: "SUMO1"
+  daq_type: "NIST_TDM"
+  tower_type: "NIST_TOWER"
+  tower_port: ""  #  If empty string, will use named_serial, or user given port
+  daq_port: ""    #  If empty string, will use named_serial, or user given port
+  connected_columns: 8  # used for sanity check
+  connected_rows: 1 # For the SSA this is not used
+
+tower:
+  card0:
+    name: "SSA_BiasCard"  # Meaningful name
+    type: nist_legacy_amp # nist_legacy_amp / nist_hbwpa / nist_diff_amp
+    addr: 9
+    n_cols: 8
+    gain_effective:
+      - 101
+      - 101
+      - 101
+      - 101
+      - 101
+      - 101
+      - 101
+      - 101
+    bias_R:
+      - 14500
+      - 14500
+      - 14500
+      - 14500
+      - 14500
+      - 14500
+      - 14500
+      - 14500
+    dac_ref_v: 2.5  # DAC reference voltage in volts
+    dac_nbits: 14   # DAC number of bits
+    dac_gain: 1
+
+  card1:
+    name: "SSA_FB"  # Meaningful name
+    type: nist_bc
+    addr: 12
+    n_cols: 8
+    bias_R: # in ohms
+      - 5100
+      - 5100
+      - 5100
+      - 5100
+      - 5100
+      - 5100
+      - 5100
+      - 5100
+    dac_ref_v: 2.5  # DAC reference voltage in volts
+    dac_nbits: 14   # DAC number of bits
+    dac_gain: 1
+  
+  card2:
+    name: "SSA_IN"  # Meaningful name
+    type: nist_bc
+    addr: 14
+    n_cols: 8
+    bias_R: # in ohms
+      - 2000
+      - 2000
+      - 2000
+      - 2000
+      - 2000
+      - 2000
+      - 2000
+      - 2000
+    dac_ref_v: 2.5  # DAC reference voltage in volts
+    dac_nbits: 14   # DAC number of bits
+    dac_gain: 1
+
+crate:
+  card0:
+    name: "DFBx2_Clock"
+    type: "CLK"
+    slot: 0
+    fpga_addr: 1
+    dsp_addr: 0
+  card1:
+    name: "DFBx2 0"
+    type: "DFBx2"
+    slot: 2
+    fpga_addr: 3
+    dsp_addr: 2
+  card2:
+    name: "DFBx2 1"
+    type: "DFBx2"
+    slot: 2
+    fpga_addr: 3
+    dsp_addr: 2
+  card3:
+    name: "DFBx2 2"
+    type: "DFBx2"
+    slot: 2
+    fpga_addr: 3
+    dsp_addr: 2
+  card4:
+    name: "DFBx2 0"
+    type: "DFBx2"
+    slot: 2
+    fpga_addr: 3
+    dsp_addr: 2
+
+
+# Column specific settings that apply to all tests being ran
+# this provides a mapping between columns and physical card connections
+col0:  # supported Columns 0 thru 7
+  name: "col0"
+  SA_Bias:
+    tower_card: card0 # Can use either the default card number card0..cardn or the name
+    tower_col_n: 0
+  SA_FB:
+    tower_card: SSA_FB # nist_diff_bc
+    tower_col_n: 0
+  SA_Input: # Sometimes called SQ1 Bias
+    tower_card: card2 # nist_diff_bc
+    tower_col_n: 0
+  DAQ:
+    card: "card1"
+    chan: 0
+    A: FB
+    B: IN
+
+col1:  # supported Columns 0 thru 7
+  name: "col1"
+  SA_Bias:
+    tower_card: card0 # Can use either the default card number card0..cardn or the name
+    tower_col_n: 1
+  SA_FB:
+    tower_card: SSA_FB
+    tower_col_n: 1
+  SA_Input: # Sometimes called SQ1 Bias
+    tower_card: card2 
+    tower_col_n: 1
+  DAQ:
+    card: "card1"
+    chan: 1
+    A: FB
+    B: IN
+
+col2:  # supported Columns 0 thru 7
+  name: "col2"
+  SA_Bias:
+    tower_card: card0 # Can use either the default card number card0..cardn or the name
+    tower_col_n: 2
+  SA_FB:
+    tower_card: SSA_FB # nist_diff_bc
+    tower_col_n: 2
+  SA_Input: # Sometimes called SQ1 Bias
+    tower_card: card2 # nist_diff_bc
+    tower_col_n: 2
+  DAQ:
+    card: "card2"
+    chan: 0
+    A: FB
+    B: IN
+
+col3:  # supported Columns 0 thru 7
+  name: "col3"
+  SA_Bias:
+    tower_card: card0 # Can use either the default card number card0..cardn or the name
+    tower_col_n: 3
+  SA_FB:
+    tower_card: SSA_FB # nist_diff_bc
+    tower_col_n: 3
+  SA_Input: # Sometimes called SQ1 Bias
+    tower_card: card2 # nist_diff_bc
+    tower_col_n: 3
+  DAQ:
+    card: "card2"
+    chan: 1
+    A: FB
+    B: IN
+
+
+col4:  # supported Columns 0 thru 7
+  name: "col4"
+  SA_Bias:
+    tower_card: card0 # Can use either the default card number card0..cardn or the name
+    tower_col_n: 4
+  SA_FB:
+    tower_card: SSA_FB # nist_diff_bc
+    tower_col_n: 4
+  SA_Input: # Sometimes called SQ1 Bias
+    tower_card: card2 # nist_diff_bc
+    tower_col_n: 4
+  DAQ:
+    card: "card3"
+    chan: 0
+    A: FB
+    B: IN
+
+col5:  # supported Columns 0 thru 7
+  name: "col5"
+  SA_Bias:
+    tower_card: card0 # Can use either the default card number card0..cardn or the name
+    tower_col_n: 5
+  SA_FB:
+    tower_card: SSA_FB # nist_diff_bc
+    tower_col_n: 5
+  SA_Input: # Sometimes called SQ1 Bias
+    tower_card: card2 # nist_diff_bc
+    tower_col_n: 5
+  DAQ:
+    card: "card3"
+    chan: 1
+    A: FB
+    B: IN
+
+col6:  # supported Columns 0 thru 7
+  name: "col6"
+  SA_Bias:
+    tower_card: card0 # Can use either the default card number card0..cardn or the name
+    tower_col_n: 6
+  SA_FB:
+    tower_card: SSA_FB # nist_diff_bc
+    tower_col_n: 6
+  SA_Input: # Sometimes called SQ1 Bias
+    tower_card: card2 # nist_diff_bc
+    tower_col_n: 6
+  DAQ:
+    card: "card4"
+    chan: 0
+    A: FB
+    B: IN
+
+col7:  # supported Columns 0 thru 7
+  name: "col7"
+  SA_Bias:
+    tower_card: card0 # Can use either the default card number card0..cardn or the name
+    tower_col_n: 7
+  SA_FB:
+    tower_card: SSA_FB # nist_diff_bc
+    tower_col_n: 7
+  SA_Input: # Sometimes called SQ1 Bias
+    tower_card: card2 # nist_diff_bc
+    tower_col_n: 7
+  DAQ:
+    card: "card4"
+    chan: 1
+    A: FB
+    B: IN
+
