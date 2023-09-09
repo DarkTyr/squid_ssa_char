@@ -13,7 +13,9 @@ info:
     - "w00_c22_r00"
 
 test_globals:
+  # Which columns to run these tests on?
   column: [0,1,2,3,4,5,6,7]  # Supported columns 0 thru 7 or a sub set
+  # System configurations parameter, may be needed when we send LSync value
   n_rows: 4  # Can't change without effecting DASTARD/Server
 
 # Sweep SSA bias while sweeping feedback with triangle
