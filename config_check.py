@@ -61,9 +61,9 @@ if (__name__ == '__main__'):
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=textwrap.dedent(HELP_TEXT))
     
-    parser.add_argument('-s', '--sys_file', 
+    parser.add_argument('-s', '--sys_file_path', 
                         help='path to the system_config file')
-    parser.add_argument('-c', '--config_file', 
+    parser.add_argument('-c', '--config_file_path', 
                         help='path to config file')
     parser.add_argument('-v', '--verbosity', 
                         help='Set terminal debugging verbositiy',
@@ -74,44 +74,47 @@ if (__name__ == '__main__'):
                         action='store_true')
     args = parser.parse_args()
 
-    sys_file = args.sys_file
-    if(sys_file == None):
+    sys_file_path = args.sys_file_path  
+    if(sys_file_path == None):
         # Look in the directory where the script was called from
-        sys_file = glob.glob(SYSTEM_CONFIG_NAME)
-    if(sys_file == []):
+        sys_file_path = glob.glob(SYSTEM_CONFIG_NAME)
+    if(sys_file_path == []):
         # if nothing in local directory, look in some system folder
-        sys_file = glob.glob(SYSTEM_CONFIG_YAML)
-    if(sys_file == []):
-        sys_file = glob.glob(script_path + LOCAL_MODULE_CONFIG_PATH + SYSTEM_CONFIG_NAME)
+        sys_file_path = glob.glob(SYSTEM_CONFIG_YAML)
+    if(sys_file_path == []):
+        sys_file_path = glob.glob(script_path + LOCAL_MODULE_CONFIG_PATH + SYSTEM_CONFIG_NAME)
 
-    config_file = args.config_file
-    if(args.config_file == None):
+    config_file_path = args.config_file_path
+    if(args.config_file_path == None):
         # Look in the directory where the script was called from
-        config_file = glob.glob(SSA_TEST_CONFIG_NAME)
+        config_file_path = glob.glob(SSA_TEST_CONFIG_NAME)
 
 
     print('_____Arguments_____')
-    print('System Config File path: ' + sys_file[0]) #glob returns a list
-    print('SSA test Config File Path: ' + str(args.config_file))
+    print('System Config File path: ' + sys_file_path[0]) #glob returns a list
+    print('SSA test Config File Path: ' + str(args.config_file_path))
     print('Verbosity level: ' + str(args.verbosity))
     print('Interactive Flag: '+str(args.interactive))
     print('script location: ' + str(os.getcwd()))
 
     # Check that the config file paths are valid. If not, there is no point
     # in continuing
-    if(sys_file == None):
+    if(sys_file_path == None):
         raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),
                                 SYSTEM_CONFIG_NAME)
-    if(sys_file == []):
+    if(sys_file_path == []):
         raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),
                                 SYSTEM_CONFIG_NAME)
-    if(config_file == None):
+    if(config_file_path == None):
         raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),
                                 SSA_TEST_CONFIG_NAME)
-    if(config_file == []):
+    if(config_file_path == []):
         raise FileNotFoundError('SSA Test Config File path not given')
     
     # If the argument for interactive was passed, drop into embeded IPython
     if(args.interactive):
         IPython.embed()
+
+# Here we go, let us load up the yaml
+
 
