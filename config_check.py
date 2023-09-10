@@ -83,11 +83,13 @@ if (__name__ == '__main__'):
         sys_file_path = glob.glob(SYSTEM_CONFIG_YAML)
     if(sys_file_path == []):
         sys_file_path = glob.glob(script_path + LOCAL_MODULE_CONFIG_PATH + SYSTEM_CONFIG_NAME)
+    if(type(sys_file_path) == list):
+        sys_file_path = sys_file_path[0]
 
     config_file_path = args.config_file_path
     if(args.config_file_path == None):
         # Look in the directory where the script was called from
-        config_file_path = glob.glob(SSA_TEST_CONFIG_NAME)
+        config_file_path = glob.glob(SSA_TEST_CONFIG_NAME)[0]
 
 
     print('_____Arguments_____')
@@ -110,11 +112,25 @@ if (__name__ == '__main__'):
                                 SSA_TEST_CONFIG_NAME)
     if(config_file_path == []):
         raise FileNotFoundError('SSA Test Config File path not given')
-    
+
+    #####################################
+    # Here we go, let us load up the yaml
+    with open(sys_file_path, 'r') as file:
+        try:
+            sys_config = yaml.safe_load(file)
+        except yaml.YAMLError as exc:
+            print(exc)
+        
+    with open(config_file_path, 'r') as file:
+        try:
+            test_config = yaml.safe_load(file)
+        except yaml.YAMLError as exc:
+            print(exc)
+
+        
     # If the argument for interactive was passed, drop into embeded IPython
     if(args.interactive):
         IPython.embed()
 
-# Here we go, let us load up the yaml
-
-
+    # first check the number of columns list and verify it is valid
+    num_columns = len(test_config['test_globals']['column'])
