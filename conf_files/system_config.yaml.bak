@@ -88,7 +88,7 @@ crate:
     name: "DFBx2 0"
     type: "DFBx2"
     slot: 2
-    fpga_addr: 2
+    fpga_addr: 3
     dsp_addr: 3
     adc_vin_range: 1.0
     adc_n_bits: 14
