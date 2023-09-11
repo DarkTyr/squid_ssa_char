@@ -27,6 +27,10 @@ class SSA_Data_Class:
         self.dac_ic_max = 0.000 # Place to store the dac value IC Max occured at
         self.sa_bias_start = 0  # start value of series array bias sweep
         self.sa_bias_stop = 20000   # Stop value for SA bias sweep
+        self.baselines_std = np.array([])
+        self.baselines_range = np.array([])
+        self.baselines_average = np.array([])
+        self.baselines_SNR = np.array([])
         self.phase0_vmod_sab = np.array([]) # SSA V Modulation depth vs
         self.phase0_vmod_min = np.array([]) # Store min value of the modulation in adc units
         self.phase0_vmod_max = np.array([]) # Store max value of the modulation in adc units
@@ -37,6 +41,8 @@ class SSA_Data_Class:
         
         # Phase1_0 Bias to Ic_Max while sweeping Input and save V_Phi
         self.phase1_icmax_vphi = np.array([])
+        
+
 
     def save_npz(self, save_all=False):
         '''

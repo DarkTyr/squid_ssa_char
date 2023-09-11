@@ -20,44 +20,28 @@ import named_serial # Can be sourced from multiple repos at NIST
 from scipy.signal import butter, lfilter, freqz
 
 # Local Imports
+from squid_ssa_char.modules import ssa_data_class
+from squid_ssa_char.modules import daq
+from squid_ssa_char.modules import towerchannel
 
 # TODO: local imports (to come)
 
 
 class SSA:
     #initializes class - WHAT STAY WHAT GO?
-    def __init__(self, which_columns = [0]):
+    def __init__(self):
         self.save_all_data_flag = False
-        self.number_columns = len(which_columns)
         self.number_rows = 4
-        self.blines = np.zeros(self.number_columns)
-        self.baselines_std = np.zeros(self.number_columns)
-        self.baselines_range = np.zeros(self.number_columns)
-        self.baselines_average = np.zeros(self.number_columns)
-        self.baselines_SNR = np.zeros(self.number_columns)
-
-        self.icmin = np.zeros(self.number_columns)
-        self.icmax = np.zeros(self.number_columns)
-        self.icmod_max = np.zeros(self.number_columns)
-
-        self.icmin_xy = np.zeros((self.number_columns, 2))
-        self.icmax_xy = np.zeros((self.number_columns, 2))
-        self.icmod_max_xy = np.zeros((self.number_columns, 2))
-
-        self.safb_bias_phase2 = np.zeros(self.number_columns)
-        self.sq1_row_bias_phase2 = np.zeros(self.number_rows)
-        self.sabias_phase2 = np.zeros(self.number_columns)
-        self.safb_m = np.zeros((self.number_columns, 2))
-        self.sain_m = np.zeros((self.number_columns, 2))
-        self.sq1_row_fb_m = np.zeros((self.number_columns, 2))
-
-        self.chip_id = np.zeros(self.number_columns, dtype=object)
-        self.chip_id.fill('')
-        self.icmax.fill(None)
-        self.qa_name = None
+        
+        self.ncol = 8 #placeholder for number of columns
+        self.data = self.ncol*[ssa_data_class.SSA_Data_Class()]
         
         today = time.localtime()
         self.date = str(today.tm_year) + '_' + str(today.tm_mon) + '_' + str(today.tm_mday)
+        
+        self.serialport = named_serial.Serial(port='rack', shared=True)
+        self.tower = towerchannel.TowerChannel(cardaddr=0, column=0, serialport="tower")
+        
         return
     
     def tower_set_dacVoltage():
