@@ -45,3 +45,7 @@ class SSA_Data_Class:
         return
     
     def load_npz(self):
+        '''
+        Method to load the data from an NPZ for use by other programs
+        '''
+        return
