@@ -48,7 +48,7 @@ class Daq:
 
         return fb, err
 
-    def take_average_data(self):
+    def take_data_roll(self):
         # 
         # The assumption of for this method is that there is a triangle on the FB data channel
         # this method will then roll the error data to the next zero value in the FB.
