@@ -55,12 +55,15 @@ class Daq:
         # it will put the roll value from the first column and use that for the rest of the
         # columns  
         data = self.c.getNewData(minimumNumPoints=self.pointsPerSlice, exactNumPoints=True)
-
         fb = np.array(data[:, :, :, 1])
         err = np.array(data[:, :, :, 0])
-        nsamp_roll = -fb[0, 0, :].argmin()
-        fb = np.roll(fb, nsamp_roll)
-        err = np.roll(err, nsamp_roll)
+        #Determine how far to roll for each element in the 2D array of time streams
+        for i in fb.shape[0]:
+            for j in fb.shape[1]:
+                nsamp_roll = -fb[i, j, :].argmin()
+                fb[i, j, :] = np.roll(fb[i, j, :], nsamp_roll)
+                err[i, j, :] = np.roll(err[i, j, :], nsamp_roll)
+
         # If the average all rows has been passed in, return the average over all of the rows
         if(avg_all_rows):
             return np.average(fb, axis=1), np.average(err, axis=1)
