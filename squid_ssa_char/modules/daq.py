@@ -61,7 +61,6 @@ class Daq:
         for i in range(fb.shape[0]):
             for j in range(fb.shape[1]):
                 nsamp_roll = -fb[i, j, :].argmin()
-                print("i:{}  j:{}  Roll:{}".format(i, j, nsamp_roll))
                 fb[i, j, :] = np.roll(fb[i, j, :], nsamp_roll)
                 err[i, j, :] = np.roll(err[i, j, :], nsamp_roll)
 
@@ -77,11 +76,11 @@ class Daq:
     def take_average_data_roll(self, avg_all_rows=False):
 
         if(self.averages >= 1):
-            data = self.take_average_data_roll(avg_all_rows=avg_all_rows)
+            data = self.take_data_roll(avg_all_rows=avg_all_rows)
         else:
             avg_cnt = self.averages - 1
-            data = self.take_average_data_roll(avg_all_rows=avg_all_rows)
+            data = self.take_data_roll(avg_all_rows=avg_all_rows)
             for i in avg_cnt:
-                data += self.take_average_data_roll(avg_all_rows=avg_all_rows)
+                data += self.take_data_roll(avg_all_rows=avg_all_rows)
 
         return data[0]/self.averages, data[1]/self.averages
