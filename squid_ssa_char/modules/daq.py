@@ -61,6 +61,7 @@ class Daq:
         for i in fb.shape[0]:
             for j in fb.shape[1]:
                 nsamp_roll = -fb[i, j, :].argmin()
+                print("i:{}  j:{}  Roll:{}".format(i, j, nsamp_roll))
                 fb[i, j, :] = np.roll(fb[i, j, :], nsamp_roll)
                 err[i, j, :] = np.roll(err[i, j, :], nsamp_roll)
 
