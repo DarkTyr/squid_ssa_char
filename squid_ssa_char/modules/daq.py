@@ -58,8 +58,8 @@ class Daq:
         fb = np.array(data[:, :, :, 1])
         err = np.array(data[:, :, :, 0])
         #Determine how far to roll for each element in the 2D array of time streams
-        for i in fb.shape[0]:
-            for j in fb.shape[1]:
+        for i in range(fb.shape[0]):
+            for j in range(fb.shape[1]):
                 nsamp_roll = -fb[i, j, :].argmin()
                 print("i:{}  j:{}  Roll:{}".format(i, j, nsamp_roll))
                 fb[i, j, :] = np.roll(fb[i, j, :], nsamp_roll)
