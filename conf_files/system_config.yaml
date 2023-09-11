@@ -78,32 +78,47 @@ crate:
     name: "DFBx2_Clock"
     type: "CLK"
     slot: 0
-    fpga_addr: 1
-    dsp_addr: 0
+    fpga_addr: 0
+    dsp_addr: 1
+    adc_vin_range: 1.0
+    adc_n_bits: 14
+    input_gain: 1
   card1:
     name: "DFBx2 0"
     type: "DFBx2"
     slot: 2
-    fpga_addr: 3
-    dsp_addr: 2
+    fpga_addr: 2
+    dsp_addr: 3
+    adc_vin_range: 1.0
+    adc_n_bits: 14
+    input_gain: 1
   card2:
     name: "DFBx2 1"
     type: "DFBx2"
-    slot: 2
-    fpga_addr: 3
-    dsp_addr: 2
+    slot: 3
+    fpga_addr: 4
+    dsp_addr: 5
+    adc_vin_range: 1.0
+    adc_n_bits: 14
+    input_gain: 1
   card3:
     name: "DFBx2 2"
     type: "DFBx2"
-    slot: 2
-    fpga_addr: 3
-    dsp_addr: 2
+    slot: 4
+    fpga_addr: 6
+    dsp_addr: 7
+    adc_vin_range: 1.0
+    adc_n_bits: 14
+    input_gain: 1
   card4:
     name: "DFBx2 0"
     type: "DFBx2"
-    slot: 2
-    fpga_addr: 3
-    dsp_addr: 2
+    slot: 5
+    fpga_addr: 8
+    dsp_addr: 9
+    adc_vin_range: 1.0
+    adc_n_bits: 14
+    input_gain: 1
 
 
 # Column specific settings that apply to all tests being ran
