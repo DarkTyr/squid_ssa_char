@@ -35,7 +35,7 @@ class SSA:
         
         self.ncol = 8 #placeholder for number of columns
         self.data = np.zeros(self.ncol)
-        for i in range(len(self.ncol)):
+        for i in range(self.ncol):
             self.data[i] = ssa_data_class.SSA_Data_Class()
         
         today = time.localtime()
@@ -43,6 +43,9 @@ class SSA:
         
         self.serialport = named_serial.Serial(port='rack', shared=True)
         self.tower = towerchannel.TowerChannel(cardaddr=0, column=0, serialport="tower")
+
+        #for now variables until happy with configs
+        self.num_steps = 256
         
         return
     
@@ -111,7 +114,7 @@ class SSA:
     
 
     
-    #
+    #TODO what the heck is this and can we disect it and put into calc_ics and ramp2voltage?
     def sq1_bias_sweeper(self):
         start_time = time.time()
         step_time= 0
@@ -120,8 +123,28 @@ class SSA:
         return
     
     #takes bias sweep results, picks off Icmin when peaks occur, picks vmod and icmax when modulation amplitude is max
-    def calculate_ics():
-        return
+    def calculate_ics(self):
+        for col in range(self.ncol):
+            have_icmin = False
+            for sweep_point in range(self.num_steps):
+                if (have_icmin == False) and (sweep_point != 0):
+                    #TODO update this situation - use sigma dependence
+                    #TODO why cant it see dac_ic_min?
+                    #TODO update to be our data - row_...mod is the abs of the diff btwn min(err) and max(err) at sweep_point
+                    if self.row_sweep_average_mod[col] >= 2*self.baselines_range[col]:
+                        self.data[col].dac_ic_min = self.row_sweep_tower_values[sweep_point]
+                        
+                        have_icmin = True
+                
+                #TODO why cant it see dac_ic_max
+                #TODO get row_sweep_tower_values to align with our current setup
+                if have_icmin == True:
+                    self.data[col].dac_ic_max = self.row_sweep_tower_values[np.argmax(self.row_sweep_average_mod[col])]
+
+                else:
+                    self.data[col].dac_ic_min = int(2**16 -1)
+                    self.data[col].dac_ic_max = 0
+
     
     # send triangle down fb to get baselines, sweep bias, pick off icmin, icmax and vmod, get mfb
     def phase1():
@@ -134,8 +157,6 @@ class SSA:
     #saves data results
     def save_npz():
         return
-
-    #TODO: what to do about chip IDs?
 
     
 
