@@ -132,5 +132,12 @@ if (__name__ == '__main__'):
     if(args.interactive):
         IPython.embed()
 
+    sys_num_col = len(sys_config['col_map'])
+
     # first check the number of columns list and verify it is valid
-    num_columns = len(test_config['test_globals']['column'])
+    test_num_columns = len(test_config['test_globals']['column'])
+    # TODO: check that there are 8 or less numbers
+    # TODO: Check the elements for numbers greater than 7
+    # TODO: check that the number of elements in the col_map is the same or more
+
+    
