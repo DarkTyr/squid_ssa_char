@@ -48,18 +48,40 @@ class Daq:
 
         return fb, err
 
-    def take_data_roll(self):
+    def take_data_roll(self, avg_all_rows=False):
         # 
         # The assumption of for this method is that there is a triangle on the FB data channel
         # this method will then roll the error data to the next zero value in the FB.
-        # it will pu tthe roll value from the first column and use that for the rest of the
+        # it will put the roll value from the first column and use that for the rest of the
         # columns  
         data = self.c.getNewData(minimumNumPoints=self.pointsPerSlice, exactNumPoints=True)
         fb = np.array(data[:, :, :, 1])
         err = np.array(data[:, :, :, 0])
-        nsamp_roll = -fb[0, :].argmin()
-        fb = np.roll(fb, nsamp_roll)
-        err = np.roll(err, nsamp_roll)
+        #Determine how far to roll for each element in the 2D array of time streams
+        for i in range(fb.shape[0]):
+            for j in range(fb.shape[1]):
+                nsamp_roll = -fb[i, j, :].argmin()
+                print("i:{}  j:{}  Roll:{}".format(i, j, nsamp_roll))
+                fb[i, j, :] = np.roll(fb[i, j, :], nsamp_roll)
+                err[i, j, :] = np.roll(err[i, j, :], nsamp_roll)
 
-        return fb, err
+        # If the average all rows has been passed in, return the average over all of the rows
+        if(avg_all_rows):
+            return np.average(fb, axis=1), np.average(err, axis=1)
+        else:
+            return fb, err
+        
+    #
+    #
+    #
+    def take_average_data_roll(self, avg_all_rows=False):
 
+        if(self.averages >= 1):
+            data = self.take_average_data_roll(avg_all_rows=avg_all_rows)
+        else:
+            avg_cnt = self.averages - 1
+            data = self.take_average_data_roll(avg_all_rows=avg_all_rows)
+            for i in avg_cnt:
+                data += self.take_average_data_roll(avg_all_rows=avg_all_rows)
+
+        return data[0]/self.averages, data[1]/self.averages
