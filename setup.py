@@ -14,7 +14,7 @@ setup(
     include_package_data=True,
     keywords='SQUID',
     name='SQUID_SSA_Char',
-    packages=['SQUID_SSA_Char'],
+    packages=['squid_ssa_char'],
     test_suite='tests',
     url='https://github.com/DarkTyr/squid_ssa_char',
     version='0.0.0',
