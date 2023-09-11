@@ -47,3 +47,19 @@ class Daq:
         err = data[:, :, :, 0]
 
         return fb, err
+
+    def take_average_data(self):
+        # 
+        # The assumption of for this method is that there is a triangle on the FB data channel
+        # this method will then roll the error data to the next zero value in the FB.
+        # it will pu tthe roll value from the first column and use that for the rest of the
+        # columns  
+        data = self.c.getNewData(minimumNumPoints=self.pointsPerSlice, exactNumPoints=True)
+        fb = np.array(data[:, :, :, 1])
+        err = np.array(data[:, :, :, 0])
+        nsamp_roll = -fb[0, :].argmin()
+        fb = np.roll(fb, nsamp_roll)
+        err = np.roll(err, nsamp_roll)
+
+        return fb, err
+
