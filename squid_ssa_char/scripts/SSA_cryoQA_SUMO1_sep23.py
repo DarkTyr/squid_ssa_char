@@ -34,7 +34,9 @@ class SSA:
         self.number_rows = 4
         
         self.ncol = 8 #placeholder for number of columns
-        self.data = self.ncol*[ssa_data_class.SSA_Data_Class()]
+        self.data = np.zeros(self.ncol)
+        for i in range(len(self.ncol)):
+            self.data[i] = ssa_data_class.SSA_Data_Class()
         
         today = time.localtime()
         self.date = str(today.tm_year) + '_' + str(today.tm_mon) + '_' + str(today.tm_mday)
