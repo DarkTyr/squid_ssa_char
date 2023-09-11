@@ -8,14 +8,18 @@
 #################################################################################
 
 
-#global imports
+# System Level Imports
 import sys
-import named_serial
 import numpy as np
 import pandas as pd
 import time
-from statsmodels.nonparametric.smoothers_lowess import lowess
+
+# Installed Package Imports
+import named_serial # Can be sourced from multiple repos at NIST
+#from statsmodels.nonparametric.smoothers_lowess import lowess
 from scipy.signal import butter, lfilter, freqz
+
+# Local Imports
 
 # TODO: local imports (to come)
 
