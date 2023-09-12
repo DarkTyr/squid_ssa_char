@@ -29,13 +29,18 @@ from squid_ssa_char.modules import towerchannel
 
 class SSA:
     #initializes class - WHAT STAY WHAT GO?
-    def __init__(self):
+    def __init__(self, sys_conf, test_conf):
+        # Configuration Dictionaries loaded from External Config Files
+        self.sys_conf = sys_conf
+        self.test_conf = test_conf
         self.verbosity = 0
-        self.save_all_data_flag = False
-        self.number_rows = 4
+        self.save_all_data_flag = False  # TODO: Should this be in the config?
         
-        self.ncol = 8 #placeholder for number of columns
-        self.data = np.zeros(self.ncol)
+        self.number_rows = test_conf['test_globals']['n_rows']
+        self.sel_col = test_conf['test_globals']['columns'] # Array of the selected columns
+        self.ncol = len(test_conf['test_globals']['columns'])   # length of the selectred columns
+        
+        self.data = self.ncol*[ssa_data_class.SSA_Data_Class()]
         for i in range(self.ncol):
             self.data[i] = ssa_data_class.SSA_Data_Class()
         
@@ -44,16 +49,12 @@ class SSA:
         
         self.serialport = named_serial.Serial(port='rack', shared=True)
         self.tower = towerchannel.TowerChannel(cardaddr=0, column=0, serialport="tower")
-        self.daq = daq.Daq()
+        self.daq = daq.Daq() # Defaults are fine, will reassign later
 
         #for now variables until happy with configs
-        self.num_steps = 256
+        self.num_steps = self.test_conf['test_globals']['phase0_0']['bias_sweep_npoints']
         self.icmin_pickoff = 4
-        
-        # Configuration Dictionaries loaded from External Config Files
-        # TODO: Should we pass these in at instantiation, nothing is usable without them...
-        self.sys_conf = {}
-        self.test_conf = {}
+
         return
     
     def tower_set_dacVoltage(self, channel, dac_value):
@@ -214,7 +215,7 @@ if (__name__ == '__main__'):
                         action='store_true')
     args = parser.parse_args()
 
-    conf_parse = load_conf_yaml.Load_Conf_YAML(args.config_file_path, args.sys_file_path, args.verbositiy)
+    conf_parse = load_conf_yaml.Load_Conf_YAML(args.config_file_path, args.sys_file_path, args.verbosity)
     sys_conf = conf_parse.read_system_config()
     test_conf = conf_parse.read_test_config()
 
