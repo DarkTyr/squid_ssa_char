@@ -40,6 +40,7 @@ else:
     SSA_TEST_CONFIG_NAME = 'ssa_test_config.yaml'
     # Last place to look for the system_config.yaml
     SYSTEM_CONFIG_YAML = '/etc/system_config.yaml'
+    LOCAL_MODULE_CONFIG_PATH = '/../conf_files/'
 
 class Load_Conf_YAML:
     # Text before INIT
