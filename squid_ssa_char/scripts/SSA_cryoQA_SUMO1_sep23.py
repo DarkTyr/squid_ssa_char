@@ -146,14 +146,17 @@ class SSA:
 
     
     # send triangle down fb to get baselines, sweep bias, pick off icmin, icmax and vmod, get mfb
-    def phase1():
-        return
+    def phase1(self):
+        self.zero_everything()
+        self.get_baselines()
+        #TODO here is where the ramp2voltage vs sq1biassweeper choice gottta be made
+        self.calculate_ics()
 
     #send triangle down input to get min
     def phase2():
         return
        
-    #saves data results
+    #saves data results - john currently has this as part of one of the modules 
     def save_npz():
         return
 
