@@ -37,8 +37,8 @@ class SSA:
         self.sel_col = test_conf['test_globals']['columns'] # Array of the selected columns
         self.ncol = len(test_conf['test_globals']['columns'])   # length of the selectred columns
         
-        self.data = self.ncol*[ssa_data_class.SSA_Data_Class()] #TODO why is this called here then again in the loop? Doesnt this make ncol of the same class reference
-        for i in range(self.ncol):                                  #then re-assigns them to different class calls in the loop?
+        self.data = self.ncol*[ssa_data_class.SSA_Data_Class()] #TODO try np.zeros with a dytpe
+        for i in range(self.ncol):
             self.data[i] = ssa_data_class.SSA_Data_Class()
         
         today = time.localtime()
