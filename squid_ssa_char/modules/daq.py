@@ -75,7 +75,7 @@ class Daq:
     #
     def take_average_data_roll(self, avg_all_rows=False):
 
-        if(self.averages >= 1):
+        if(self.averages <= 1):
             data = self.take_data_roll(avg_all_rows=avg_all_rows)
         else:
             avg_cnt = self.averages - 1
