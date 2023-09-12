@@ -1,5 +1,5 @@
 import sys
-import bluebox
+from instruments import bluebox
 
 
 class TowerChannel:
