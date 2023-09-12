@@ -13,6 +13,7 @@
 # September 2023
 #
 #################################################################################
+# TODO: CRITICAL Check functionality on Linux!
 
 # System Level imports
 import os
@@ -37,9 +38,9 @@ SSA_TEST_CONFIG_NAME = 'ssa_test_config.yaml'
 
 if(sys.platform == 'win32'):
     SYSTEM_CONFIG_NAME = 'system_config.yaml'
-    SYSTEM_CONFIG_YAML = '/etc/system_config.yaml'
+    SYSTEM_CONFIG_YAML = '\\etc\\system_config.yaml'
     SSA_TEST_CONFIG_NAME = 'ssa_test_config.yaml'
-    LOCAL_MODULE_CONFIG_PATH = '/conf_files/'
+    LOCAL_MODULE_CONFIG_PATH = '\\..\\conf_files\\'
 else:
     SYSTEM_CONFIG_NAME = 'system_config.yaml'
     SSA_TEST_CONFIG_NAME = 'ssa_test_config.yaml'
@@ -74,33 +75,34 @@ if (__name__ == '__main__'):
                         action='store_true')
     args = parser.parse_args()
 
-    sys_file_path = args.sys_file_path  
-    if(sys_file_path == None):
+
+    # Perform precedence on the system config path and check that the file is present with glob
+    # 1. passed in with -s flag
+    # 2. Local directory
+    # 3. System directory (think /etc/ on linux)
+    # 4. installed module directory default config, most likely wont work with the system
+    if(args.sys_file_path  == None):
         # Look in the directory where the script was called from
         sys_file_path = glob.glob(SYSTEM_CONFIG_NAME)
-    if(sys_file_path == []):
-        # if nothing in local directory, look in some system folder
-        sys_file_path = glob.glob(SYSTEM_CONFIG_YAML)
-    if(sys_file_path == []):
-        sys_file_path = glob.glob(script_path + LOCAL_MODULE_CONFIG_PATH + SYSTEM_CONFIG_NAME)
-    if(type(sys_file_path) == list):
-        sys_file_path = sys_file_path[0]
+        if(sys_file_path == []):
+            # if nothing in local directory, look in some system folder
+            sys_file_path = glob.glob(SYSTEM_CONFIG_YAML)
+            if(sys_file_path == []):
+                sys_file_path = glob.glob(script_path + LOCAL_MODULE_CONFIG_PATH + SYSTEM_CONFIG_NAME)
+    else:
+        sys_file_path = glob.glob(args.sys_file_path)
 
-    config_file_path = args.config_file_path
+    # pass the config_file_path to the glob function and see if it is there, if None, load from CWD
+    # 1. passed in with -s flag
+    # 2. Local directory
     if(args.config_file_path == None):
         # Look in the directory where the script was called from
-        config_file_path = glob.glob(SSA_TEST_CONFIG_NAME)[0]
-
-
-    print('_____Arguments_____')
-    print('System Config File path: ' + sys_file_path[0]) #glob returns a list
-    print('SSA test Config File Path: ' + str(args.config_file_path))
-    print('Verbosity level: ' + str(args.verbosity))
-    print('Interactive Flag: '+str(args.interactive))
-    print('script location: ' + str(os.getcwd()))
+        config_file_path = glob.glob(SSA_TEST_CONFIG_NAME)
+    else:
+        config_file_path = glob.glob(args.config_file_path)
 
     # Check that the config file paths are valid. If not, there is no point
-    # in continuing
+    # in continuing so raise an exception
     if(sys_file_path == None):
         raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),
                                 SYSTEM_CONFIG_NAME)
@@ -111,8 +113,23 @@ if (__name__ == '__main__'):
         raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),
                                 SSA_TEST_CONFIG_NAME)
     if(config_file_path == []):
-        raise FileNotFoundError('SSA Test Config File path not given')
+        raise FileNotFoundError('SSA Test Config File path not given, no file found in Current Working Directory')
+    
+    # Pull the paths out of the lists glob returned
+    if(type(sys_file_path) == list and len(sys_file_path) > 0):
+        sys_file_path = sys_file_path[0]
+    if(type(config_file_path) == list and len(config_file_path) > 0):
+        config_file_path = config_file_path[0]
 
+    print('_______Arguments_______')
+    print('Current Working Directory: ' + cwd)
+    print('  System Config File path: ' + sys_file_path) #glob returns a list
+    print('SSA test Config File Path: ' + str(args.config_file_path))
+    print('          Verbosity level: ' + str(args.verbosity))
+    print('         Interactive Flag: ' + str(args.interactive))
+    print('          script location: ' + str(os.getcwd()))
+
+    
     #####################################
     # Here we go, let us load up the yaml
     with open(sys_file_path, 'r') as file:
