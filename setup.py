@@ -9,7 +9,7 @@ setup(
     author_email='johnathon.gard@colorado.edu',
     python_requires='>=3.5',
     description='SQUID Series Array Testing Script',
-    install_requires=['numpy', 'matplotlib', 'tqdm', 'pyserial', 'yaml'],
+    install_requires=['numpy', 'matplotlib', 'tqdm', 'pyserial', 'pyyaml'],
     license='MIT license',
     include_package_data=True,
     keywords='SQUID',
