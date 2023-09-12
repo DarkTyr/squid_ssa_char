@@ -50,7 +50,7 @@ class SSA:
     
     #TODO this is close but how I am referenecing set_value isnt quite right - how to account for channel number?
     def tower_set_dacVoltage(self, channel, dac_value):
-        towerchannel.TowerChannel.set_value(dac_value)
+        self.tower.set_value(dac_value)
     
     # runs dac voltage from set start value, often 0, to set end value
     #TODO account for channel? currently part of towerSetVoltage call but TowerSetVoltage and TowerChannel not set up to include channel?
