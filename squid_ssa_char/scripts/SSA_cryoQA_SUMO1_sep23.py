@@ -48,10 +48,12 @@ class SSA:
         
         return
     
-    def tower_set_dacVoltage():
-        return
+    #TODO this is close but how I am referenecing set_value isnt quite right - how to account for channel number?
+    def tower_set_dacVoltage(self, channel, dac_value):
+        towerchannel.TowerChannel.set_value(dac_value)
     
     # runs dac voltage from set start value, often 0, to set end value
+    #TODO account for channel? currently part of towerSetVoltage call but TowerSetVoltage and TowerChannel not set up to include channel?
     def ramp_to_voltage(self, channel, to_dac_value, from_dac_value=0, slew_rate=8, report=True):
         if report:
             print(('Ramp chanel ', channel, ' from ', from_dac_value, +  ' to ', to_dac_value))
@@ -85,6 +87,7 @@ class SSA:
         self.tower_set_dacVoltage(channel, bias)
     
     #resets all values to zero or default
+    #TODO also need to align this with TowerSetVolgtage - how to handle channel assignment
     def zero_everything(self):
         for i in range(8):
             self.tower_set_dacVoltage(i, 0)
@@ -106,7 +109,7 @@ class SSA:
         self.baselines_average = np.average(err, 1)
         self.baselines_SNR = self.baselines_average / self.baselines_std
 
-        # TODO: print out for outlires - CHECK value for baseline and decide if we want it at all
+        # TODO: print out for outliers - CHECK value for baseline and decide if we want it at all
         for col in range(len(self.baselines_std)):
             if self.baselines_std[col] > 20:
                 print('The standard deviation for col: ' + str(col) + ' is high: ' + str(self.baselines_std[col]))
@@ -146,6 +149,11 @@ class SSA:
 
     
     # send triangle down fb to get baselines, sweep bias, pick off icmin, icmax and vmod, get mfb
+    #TODO Thoughts:
+        #Sq1BiasSweeper in orig setsup the time remaining/status printout, takes in data from take_avg_data, rolls it, calculates row_sweep_avg
+            #_max, _min and _mod (range) these are used in calc_ics. Do that here instead or do in own version of biasSweeper?
+        #Also, do we want the print out at all?
+        #Do we want to do Mfb here (orig 2_0) then only habe one phase for triangle on FB and one for triangle on IN or do two phases for FB?
     def phase1(self):
         self.zero_everything()
         self.get_baselines()
@@ -156,7 +164,7 @@ class SSA:
     def phase2():
         return
        
-    #saves data results - john currently has this as part of one of the modules 
+    #saves data results - john currently has this as part of the dataclass module  
     def save_npz():
         return
 
