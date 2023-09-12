@@ -30,6 +30,7 @@ from squid_ssa_char.modules import towerchannel
 class SSA:
     #initializes class - WHAT STAY WHAT GO?
     def __init__(self):
+        self.verbosity = 0
         self.save_all_data_flag = False
         self.number_rows = 4
         
@@ -61,6 +62,10 @@ class SSA:
         tower_card_ref = self.sys_conf['tower'][tower_map['tower_card']]
         self.tower.bluebox.address = tower_card_ref['addr']
         self.tower.bluebox.channel = tower_map['tower_col_n']
+        if(self.verbosity > 2):
+            print('    tower_set_dacVoltage(channel={}, dac_value={})'.format(channel, dac_value))
+            print('        self.tower.bluebox.address = {}'.format(self.tower.bluebox.address))
+            print('        self.tower.bluebox.channel = {}'.format(self.tower.bluebox.channel))
         # Now use the class to send the data to the tower
         self.tower.set_value(dac_value)
     
@@ -216,4 +221,5 @@ if (__name__ == '__main__'):
     test = SSA()
     test.test_conf = test_conf
     test.sys_conf = sys_conf
+    test.verbosity = args.verbosity
 
