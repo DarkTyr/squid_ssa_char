@@ -52,7 +52,8 @@ class SSA:
         self.daq = daq.Daq() # Defaults are fine, will reassign later
 
         #for now variables until happy with configs
-        self.num_steps = self.test_conf['test_globals']['phase0_0']['bias_sweep_npoints']
+        # TODO: Should pull these from the config when the test phase is called now
+        self.num_steps = self.test_conf['phase0_0']['bias_sweep_npoints']
         self.icmin_pickoff = 4
 
         return
