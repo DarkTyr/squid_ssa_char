@@ -26,6 +26,7 @@ phase0_0:
   bias_sweep_npoints: 256
   n_avg: 4  # number of averages beyond n_rows (Which get averaged across per column)
   bias_change_wait_ms: 100
+  icmin_pickoff: 4 # Scaling factor for Ic_min detection
   crate:
   # You may want to change the triangle paraemeters based on resistor values
     tri_steps: 12

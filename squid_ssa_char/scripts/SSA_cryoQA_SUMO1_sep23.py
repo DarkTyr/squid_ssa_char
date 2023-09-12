@@ -25,7 +25,9 @@ import named_serial # Can be sourced from multiple repos at NIST
 from squid_ssa_char.modules import load_conf_yaml, ssa_data_class, daq, towerchannel
 
 class SSA:
+    '''
     #initializes class - WHAT STAY WHAT GO?
+    '''
     def __init__(self, sys_conf, test_conf):
         # Configuration Dictionaries loaded from External Config Files
         self.sys_conf = sys_conf
@@ -37,9 +39,9 @@ class SSA:
         self.sel_col = test_conf['test_globals']['columns'] # Array of the selected columns
         self.ncol = len(test_conf['test_globals']['columns'])   # length of the selectred columns
         
-        self.data = self.ncol*[ssa_data_class.SSA_Data_Class()] #TODO try np.zeros with a dytpe
+        self.data = []
         for i in range(self.ncol):
-            self.data[i] = ssa_data_class.SSA_Data_Class()
+            self.data.append(ssa_data_class.SSA_Data_Class())
         
         today = time.localtime()
         self.date = str(today.tm_year) + '_' + str(today.tm_mon) + '_' + str(today.tm_mday)
@@ -50,10 +52,6 @@ class SSA:
 
         #for now variables until happy with configs
         # TODO: Should pull these from the config when the test phase is called now
-        self.num_steps = self.test_conf['phase0_0']['bias_sweep_npoints']
-        self.icmin_pickoff = 4
-
-        return
 
     #connects to the tower and sets the dac voltage bias for each channel  
     def tower_set_dacVoltage(self, channel, dac_value):
@@ -72,8 +70,8 @@ class SSA:
     # runs dac voltage from set start value, often 0, to set end value
     #TODO account for channel? currently part of towerSetVoltage call but TowerSetVoltage and TowerChannel not set up to include channel?
     def ramp_to_voltage(self, channel, to_dac_value, from_dac_value=0, slew_rate=8, report=True):
-        if report:
-            print(('Ramp chanel ', channel, ' from ', from_dac_value, +  ' to ', to_dac_value))
+        if self.verbosity > 0:
+            print('ramp_to_voltage: Channel={}, from={}, to={}'.format(channel, from_dac_value, to_dac_value))
 
         bias = from_dac_value
 
@@ -129,16 +127,6 @@ class SSA:
             if self.baselines_std[col] > 20:
                 print('The standard deviation for col: ' + str(col) + ' is high: ' + str(self.baselines_std[col]))
     
-
-    
-    #TODO what the heck is this and can we disect it and put into calc_ics and ramp2voltage?
-    def sq1_bias_sweeper(self):
-        start_time = time.time()
-        step_time= 0
-        print('Sarting row sweep of :/t' + str(self.number_steps) + ' steps\n')
-        print()
-        return
-    
     #takes bias sweep results, picks off Icmin when peaks occur, picks vmod and icmax when modulation amplitude is max
     def calculate_ics(self):
         for col in range(self.ncol):
@@ -167,7 +155,11 @@ class SSA:
             #_max, _min and _mod (range) these are used in calc_ics. Do that here instead or do in own version of biasSweeper?
         #Also, do we want the print out at all?
         #Do we want to do Mfb here (orig 2_0) then only habe one phase for triangle on FB and one for triangle on IN or do two phases for FB?
-    def phase1(self):
+    def phase0_0(self):
+        '''
+        Sweep SQUID SSA Bias and extract ADC_min, ADC_max, and ADC_modulation depth
+        The units will be left in ADC units reported by DASTARD
+        '''
         self.zero_everything()
         self.get_baselines()
 
@@ -176,8 +168,10 @@ class SSA:
         #TODO here is where the ramp2voltage vs sq1biassweeper choice gottta be made
         self.calculate_ics()
 
+    def phase0_1(self):
+        return
     #send triangle down input to get min
-    def phase2():
+    def phase1_0():
         return
        
     #saves data results - john currently has this as part of the dataclass module  
