@@ -41,6 +41,7 @@ class SSA:
         
         self.serialport = named_serial.Serial(port='rack', shared=True)
         self.tower = towerchannel.TowerChannel(cardaddr=0, column=0, serialport="tower")
+        self.daq = daq.Daq()
 
         #for now variables until happy with configs
         self.num_steps = 256
@@ -102,8 +103,6 @@ class SSA:
             self.ramp_to_voltage(i, bias, report=False)
         
         fb,err = self.daq.take_average_data()
-        fb = np.mean(fb, 1)
-        err = np.mean(err, 1)
         self.baselines_std = np.std(err, 1)
         self.baselines_range = np.max(err, 1) - np.min(err, 1)
         self.baselines_average = np.average(err, 1)
@@ -157,6 +156,9 @@ class SSA:
     def phase1(self):
         self.zero_everything()
         self.get_baselines()
+
+        fb,err = self.daq.take_average_data_roll()
+        
         #TODO here is where the ramp2voltage vs sq1biassweeper choice gottta be made
         self.calculate_ics()
 
