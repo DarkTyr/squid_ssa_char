@@ -14,7 +14,7 @@ import numpy as np
 import pandas as pd
 import time
 
-# Installed Package Imports
+# Installedd Package Imports
 import named_serial # Can be sourced from multiple repos at NIST
 #from statsmodels.nonparametric.smoothers_lowess import lowess
 from scipy.signal import butter, lfilter, freqz
@@ -23,8 +23,6 @@ from scipy.signal import butter, lfilter, freqz
 from squid_ssa_char.modules import ssa_data_class
 from squid_ssa_char.modules import daq
 from squid_ssa_char.modules import towerchannel
-
-# TODO: local imports (to come)
 
 
 class SSA:
@@ -46,6 +44,7 @@ class SSA:
 
         #for now variables until happy with configs
         self.num_steps = 256
+        self.icmin_pickoff = 4
         
         return
     
@@ -131,7 +130,7 @@ class SSA:
                     #TODO update this situation - use sigma dependence
                     #TODO why cant it see dac_ic_min?
                     #TODO update to be our data - row_...mod is the abs of the diff btwn min(err) and max(err) at sweep_point
-                    if self.row_sweep_average_mod[col] >= 2*self.baselines_range[col]:
+                    if self.row_sweep_average_mod[col] >= self.icmin_pickoff*self.baselines_range[col]:
                         self.data[col].dac_ic_min = self.row_sweep_tower_values[sweep_point]
                         
                         have_icmin = True
