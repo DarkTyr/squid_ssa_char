@@ -50,25 +50,24 @@ class SSA:
         self.tower = towerchannel.TowerChannel(cardaddr=0, column=0, serialport="tower")
         self.daq = daq.Daq() # Defaults are fine, will reassign later
 
-        #for now variables until happy with configs
-        # TODO: Should pull these from the config when the test phase is called now
+        # TODO: should we perform book keeping here automatically or have a method to call?
 
     #connects to the tower and sets the dac voltage bias for each channel  
-    def tower_set_dacVoltage(self, channel, dac_value):
+    def set_sa_bias_voltage(self, channel, dac_value):
         # reach in and assign the proper channel to the class
         tower_map = self.sys_conf['col_map']['col'+str(channel)]['SA_Bias']
         tower_card_ref = self.sys_conf['tower'][tower_map['tower_card']]
         self.tower.bluebox.address = tower_card_ref['addr']
         self.tower.bluebox.channel = tower_map['tower_col_n']
         if(self.verbosity > 2):
-            print('    tower_set_dacVoltage(channel={}, dac_value={})'.format(channel, dac_value))
+            print('    set_sa_bias_voltage(channel={}, dac_value={})'.format(channel, dac_value))
             print('        self.tower.bluebox.address = {}'.format(self.tower.bluebox.address))
             print('        self.tower.bluebox.channel = {}'.format(self.tower.bluebox.channel))
         # Now use the class to send the data to the tower
         self.tower.set_value(dac_value)
     
     # runs dac voltage from set start value, often 0, to set end value
-    #TODO account for channel? currently part of towerSetVoltage call but TowerSetVoltage and TowerChannel not set up to include channel?
+    # TODO: This ramps a single col to a set point, better to loop all col for each change in value?
     def ramp_to_voltage(self, channel, to_dac_value, from_dac_value=0, slew_rate=8, report=True):
         if self.verbosity > 0:
             print('ramp_to_voltage: Channel={}, from={}, to={}'.format(channel, from_dac_value, to_dac_value))
@@ -91,21 +90,21 @@ class SSA:
         if up:
             while (bias + dac_step) < to_dac_value:
                 bias = bias + dac_step
-                self.tower_set_dacVoltage(channel, bias)
+                self.set_sa_bias_voltage(channel, bias)
             
         if down:
             while (bias + dac_step) > to_dac_value:
                 bias = bias + dac_step
-                self.tower_set_dacVoltage(channel, bias)
+                self.set_sa_bias_voltage(channel, bias)
         
         bias = to_dac_value
-        self.tower_set_dacVoltage(channel, bias)
+        self.set_sa_bias_voltage(channel, bias)
     
     #resets all values to zero or default
-    #TODO also need to align this with TowerSetVolgtage - how to handle channel assignment
+    # TODO: Should we set all col to zero or only the columns we are working with?
     def zero_everything(self):
         for i in range(8):
-            self.tower_set_dacVoltage(i, 0)
+            self.set_sa_bias_voltage(i, 0)
     
     #name of user
     def set_qa_name(self, qa_name):
@@ -148,7 +147,12 @@ class SSA:
                     self.data[col].dac_ic_min = int(2**16 -1)
                     self.data[col].dac_ic_max = 0
 
-    
+    def bookingkeeping(self):
+        '''This will copy values from the config files to the SSA data structures'''
+        for idx in range(self.ncol):
+            self.data[idx].qa_name = self.test_conf['info']['user']
+            self.data[idx].chip_id = self.test_conf['info']['chip_id'][idx]
+
     # send triangle down fb to get baselines, sweep bias, pick off icmin, icmax and vmod, get mfb
     #TODO Thoughts:
         #Sq1BiasSweeper in orig setsup the time remaining/status printout, takes in data from take_avg_data, rolls it, calculates row_sweep_avg
@@ -163,7 +167,18 @@ class SSA:
         self.zero_everything()
         self.get_baselines()
 
-        fb,err = self.daq.take_average_data_roll()
+        # gather variables from configs
+        phase_conf = test_conf['phase0_0']
+        sa_bias_sweep_val = np.linspace(phase_conf['bias_sweep_start'], 
+                                        phase_conf['bias_sweep_end'], 
+                                        phase_conf['bias_sweep_npoints']) # start, stop, num
+        
+        for i in self.data:
+            i.dac_sweep_array = sa_bias_sweep_val
+            i.sa_bias_start = phase_conf['bias_sweep_start']
+            i.sa_bias_stop = phase_conf['bias_sweep_end']
+
+        fb, err = self.daq.take_average_data_roll()
         
         #TODO here is where the ramp2voltage vs sq1biassweeper choice gottta be made
         self.calculate_ics()

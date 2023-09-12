@@ -18,6 +18,7 @@ class SSA_Data_Class:
         self.chip_id = ''       # CHIP  ID
         self.qa_name = ''       #Name of the Person performing the test
         self.system_name = ''   # Name fo the system the test was performed on
+        self.file_name = ''     # Name of the file if/when saved
         self.dac_n_bits = 14    # Number of of bits for the DAC : TODO: Needed?
         self.dac_vref = 2.5     # TODO: needed?
         
