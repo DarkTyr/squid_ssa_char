@@ -9,21 +9,23 @@
 
 
 # System Level Imports
-import sys
+# import sys
+import argparse
+import textwrap
 import numpy as np
-import pandas as pd
+# import pandas as pd
 import time
 
-# Installedd Package Imports
+# Installed Package Imports
 import named_serial # Can be sourced from multiple repos at NIST
 #from statsmodels.nonparametric.smoothers_lowess import lowess
-from scipy.signal import butter, lfilter, freqz
+# from scipy.signal import butter, lfilter, freqz
 
 # Local Imports
+from squid_ssa_char.modules import load_conf_yaml
 from squid_ssa_char.modules import ssa_data_class
 from squid_ssa_char.modules import daq
 from squid_ssa_char.modules import towerchannel
-
 
 class SSA:
     #initializes class - WHAT STAY WHAT GO?
@@ -47,10 +49,19 @@ class SSA:
         self.num_steps = 256
         self.icmin_pickoff = 4
         
+        # Configuration Dictionaries loaded from External Config Files
+        # TODO: Should we pass these in at instantiation, nothing is usable without them...
+        self.sys_conf = {}
+        self.test_conf = {}
         return
     
-    #TODO this is close but how I am referenecing set_value isnt quite right - how to account for channel number?
     def tower_set_dacVoltage(self, channel, dac_value):
+        # reach in and assign the proper channel to the class
+        tower_map = self.sys_conf['col_map']['col'+str(channel)]['SA_Bias']
+        tower_card_ref = self.sys_conf['tower'][tower_map['tower_card']]
+        self.tower.bluebox.address = tower_card_ref['addr']
+        self.tower.bluebox.channel = tower_map['tower_col_n']
+        # Now use the class to send the data to the tower
         self.tower.set_value(dac_value)
     
     # runs dac voltage from set start value, often 0, to set end value
@@ -172,6 +183,37 @@ class SSA:
 
     
 
+HELP_TEXT = '''\
+This is the main SQUID Series Array Testing and Quality Assurance Data Script
 
 
+Currently a work in progress
+'''
+if (__name__ == '__main__'):
+    # Setup the flag and argument parser for the script
+    parser = argparse.ArgumentParser(
+        prog='config_check',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=textwrap.dedent(HELP_TEXT))
     
+    parser.add_argument('-s', '--sys_file_path', 
+                        help='path to the system_config file')
+    parser.add_argument('-c', '--config_file_path', 
+                        help='path to config file')
+    parser.add_argument('-v', '--verbosity', 
+                        help='Set terminal debugging verbositiy',
+                        action='count',
+                        default=0)
+    parser.add_argument('-i', '--interactive', 
+                        help='Drop into Interactive mode after setting up classes',
+                        action='store_true')
+    args = parser.parse_args()
+
+    conf_parse = load_conf_yaml.Load_Conf_YAML(args.config_file_path, args.sys_file_path, args.verbositiy)
+    sys_conf = conf_parse.read_system_config()
+    test_conf = conf_parse.read_test_config()
+
+    test = SSA()
+    test.test_conf = test_conf
+    test.sys_conf = sys_conf
+
