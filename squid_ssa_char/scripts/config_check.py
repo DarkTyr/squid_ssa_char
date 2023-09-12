@@ -123,7 +123,7 @@ if (__name__ == '__main__'):
 
     print('_______Arguments_______')
     print('Current Working Directory: ' + cwd)
-    print('  System Config File path: ' + sys_file_path) #glob returns a list
+    print('  System Config File path: ' + sys_file_path)
     print('SSA test Config File Path: ' + str(args.config_file_path))
     print('          Verbosity level: ' + str(args.verbosity))
     print('         Interactive Flag: ' + str(args.interactive))
