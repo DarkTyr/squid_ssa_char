@@ -14,7 +14,7 @@ info:
 
 test_globals:
   # Which columns to run these tests on?
-  column: [0,1,2,3,4,5,6,7]  # Supported columns 0 thru 7 or a sub set
+  columns: [0,1,2,3,4,5,6,7]  # Supported columns 0 thru 7 or a sub set
   # System configurations parameter, may be needed when we send LSync value
   n_rows: 4  # Can't change without effecting DASTARD/Server
 
@@ -23,7 +23,7 @@ phase0_0:
   bias_sweep_type: linear # linear / binary_search / triangle
   bias_sweep_start: 0
   bias_sweep_end: 30000
-  bias_sweep_npoints: 900
+  bias_sweep_npoints: 256
   n_avg: 4  # number of averages beyond n_rows (Which get averaged across per column)
   bias_change_wait_ms: 100
   crate:
