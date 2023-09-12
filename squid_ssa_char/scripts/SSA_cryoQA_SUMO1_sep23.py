@@ -219,8 +219,6 @@ if (__name__ == '__main__'):
     sys_conf = conf_parse.read_system_config()
     test_conf = conf_parse.read_test_config()
 
-    test = SSA()
-    test.test_conf = test_conf
-    test.sys_conf = sys_conf
+    test = SSA(sys_conf, test_conf)
     test.verbosity = args.verbosity
 
