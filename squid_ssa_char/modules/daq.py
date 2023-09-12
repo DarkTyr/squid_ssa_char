@@ -77,10 +77,11 @@ class Daq:
 
         if(self.averages <= 1):
             data = self.take_data_roll(avg_all_rows=avg_all_rows)
+            return data
         else:
             avg_cnt = self.averages - 1
             data = self.take_data_roll(avg_all_rows=avg_all_rows)
             for i in range(avg_cnt):
-                data += self.take_data_roll(avg_all_rows=avg_all_rows)
+                data = np.add(self.take_data_roll(avg_all_rows=avg_all_rows), (data))
 
-        return data[0]/self.averages, data[1]/self.averages
+            return data[0]/self.averages, data[1]/self.averages
