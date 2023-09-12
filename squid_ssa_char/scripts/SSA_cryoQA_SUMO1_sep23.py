@@ -22,10 +22,7 @@ import named_serial # Can be sourced from multiple repos at NIST
 # from scipy.signal import butter, lfilter, freqz
 
 # Local Imports
-from squid_ssa_char.modules import load_conf_yaml
-from squid_ssa_char.modules import ssa_data_class
-from squid_ssa_char.modules import daq
-from squid_ssa_char.modules import towerchannel
+from squid_ssa_char.modules import load_conf_yaml, ssa_data_class, daq, towerchannel
 
 class SSA:
     #initializes class - WHAT STAY WHAT GO?
@@ -34,14 +31,14 @@ class SSA:
         self.sys_conf = sys_conf
         self.test_conf = test_conf
         self.verbosity = 0
-        self.save_all_data_flag = False  # TODO: Should this be in the config?
+        self.save_all_data_flag = False  # TODO: Should this be in the config? - Erin says yes, this is a leftover from day1
         
         self.number_rows = test_conf['test_globals']['n_rows']
         self.sel_col = test_conf['test_globals']['columns'] # Array of the selected columns
         self.ncol = len(test_conf['test_globals']['columns'])   # length of the selectred columns
         
-        self.data = self.ncol*[ssa_data_class.SSA_Data_Class()]
-        for i in range(self.ncol):
+        self.data = self.ncol*[ssa_data_class.SSA_Data_Class()] #TODO why is this called here then again in the loop? Doesnt this make ncol of the same class reference
+        for i in range(self.ncol):                                  #then re-assigns them to different class calls in the loop?
             self.data[i] = ssa_data_class.SSA_Data_Class()
         
         today = time.localtime()
@@ -57,7 +54,8 @@ class SSA:
         self.icmin_pickoff = 4
 
         return
-    
+
+    #connects to the tower and sets the dac voltage bias for each channel  
     def tower_set_dacVoltage(self, channel, dac_value):
         # reach in and assign the proper channel to the class
         tower_map = self.sys_conf['col_map']['col'+str(channel)]['SA_Bias']
@@ -147,15 +145,13 @@ class SSA:
             have_icmin = False
             for sweep_point in range(self.num_steps):
                 if (have_icmin == False) and (sweep_point != 0):
-                    #TODO update this situation - use sigma dependence
-                    #TODO why cant it see dac_ic_min?
+                    #TODO update this situation - use sigma dependence? or rms?
                     #TODO update to be our data - row_...mod is the abs of the diff btwn min(err) and max(err) at sweep_point
                     if self.row_sweep_average_mod[col] >= self.icmin_pickoff*self.baselines_range[col]:
                         self.data[col].dac_ic_min = self.row_sweep_tower_values[sweep_point]
                         
                         have_icmin = True
                 
-                #TODO why cant it see dac_ic_max
                 #TODO get row_sweep_tower_values to align with our current setup
                 if have_icmin == True:
                     self.data[col].dac_ic_max = self.row_sweep_tower_values[np.argmax(self.row_sweep_average_mod[col])]
