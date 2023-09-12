@@ -80,7 +80,7 @@ class Daq:
         else:
             avg_cnt = self.averages - 1
             data = self.take_data_roll(avg_all_rows=avg_all_rows)
-            for i in avg_cnt:
+            for i in range(avg_cnt):
                 data += self.take_data_roll(avg_all_rows=avg_all_rows)
 
         return data[0]/self.averages, data[1]/self.averages
