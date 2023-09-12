@@ -63,7 +63,6 @@ class Load_Conf_YAML:
         print('  System Config File path: ' + self.sys_file_path)
         print('SSA test Config File Path: ' + self.config_file_path )
         print('          Verbosity level: ' + str(self.verbosity))
-        print('          script location: ' + self.cwd)
 
     def check_system_conf_path(self):
         if(self.system_config_path_arg  == None):
@@ -94,7 +93,7 @@ class Load_Conf_YAML:
         # pass the config_file_path to the glob function and see if it is there, if None, load from CWD
         # 1. passed in with -s flag
         # 2. Local directory
-        if(self.test_config_path_arg == None):
+        if((self.test_config_path_arg == '') or (self.test_config_path_arg == None)):
             # Look in the directory where the script was called from
             self.config_file_path = glob.glob(SSA_TEST_CONFIG_NAME)
         else:
@@ -105,6 +104,7 @@ class Load_Conf_YAML:
                                     SSA_TEST_CONFIG_NAME)
         if(self.config_file_path == []):
             raise FileNotFoundError('SSA Test Config File path not given, no file found in Current Working Directory')
+        
         # Pull the paths out of the lists glob returned
         if(type(self.config_file_path) == list and len(self.config_file_path) > 0):
             self.config_file_path = self.config_file_path[0]
