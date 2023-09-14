@@ -20,6 +20,7 @@ class TowerChannel:
         self.grey = "808080"
         self.white = "FFFFFF"
 
+        self.verbosity = 0
         self.address = cardaddr
         self.column = column
         self.serialport = serialport
@@ -32,5 +33,6 @@ class TowerChannel:
                                        shared=True)
 
     def set_value(self, dac_value):
-        print(("towerchannel sending %g to addr %g, chn %g"%(dac_value, self.address, self.column)))
+        if(self.verbosity > 3):
+            print(("towerchannel.set_value() %g to addr %g, chn %g"%(dac_value, self.bluebox.address, self.bluebox.channel)))
         self.bluebox.setVoltDACUnits(dac_value)
