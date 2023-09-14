@@ -153,7 +153,7 @@ class SSA:
         '''This will copy values from the config files to the SSA data structures'''
         for idx in range(self.ncol):
             self.data[idx].qa_name = self.test_conf['info']['user']
-            self.data[idx].chip_id = self.test_conf['info']['chip_id'][idx]
+            self.data[idx].chip_id = self.test_conf['info']['chip_ids'][idx]
 
     # send triangle down fb to get baselines, sweep bias, pick off icmin, icmax and vmod, get mfb
     #TODO Thoughts:
