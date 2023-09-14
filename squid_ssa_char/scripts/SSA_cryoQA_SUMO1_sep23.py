@@ -192,7 +192,7 @@ class SSA:
             i.phase0_0_vmod_sab = np.zeros(phase_conf['bias_sweep_npoints'])
 
         previous_bias = phase_conf['bias_sweep_start']
-        for sweep_point in tqdm(range(phase_conf['bias_sweep_npoints'])):
+        for sweep_point in tqdm.tqdm(range(phase_conf['bias_sweep_npoints'])):
             
             for col in self.sel_col:
                 self.ramp_to_voltage(col, sa_bias_sweep_val[sweep_point], previous_bias)         
