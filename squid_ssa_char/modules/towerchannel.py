@@ -35,4 +35,4 @@ class TowerChannel:
     def set_value(self, dac_value):
         if(self.verbosity > 3):
             print(("towerchannel.set_value() %g to addr %g, chn %g"%(dac_value, self.bluebox.address, self.bluebox.channel)))
-        self.bluebox.setVoltDACUnits(dac_value)
+        self.bluebox.setVoltDACUnits(int(dac_value))
