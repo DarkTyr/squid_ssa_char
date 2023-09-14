@@ -101,7 +101,6 @@ class SSA:
         self.set_sa_bias_voltage(channel, bias)
     
     #resets all values to zero or default
-    # TODO: Should we set all col to zero or only the columns we are working with?
     def zero_everything(self):
         for i in self.sel_col:
             self.set_sa_bias_voltage(i, 0)
@@ -139,7 +138,7 @@ class SSA:
                 if (have_icmin == False) and (sweep_point != 0):
                     #TODO update this situation - use sigma dependence? or rms?
                     #TODO update to be our data - row_...mod is the abs of the diff btwn min(err) and max(err) at sweep_point
-                    if self.data[col].phase0_0_mod_sab[sweep_point] >= self.test_conf['phase0_0']['icmin_pickoff']*self.data[col].bi:
+                    if self.data[col].phase0_0_mod_sab[sweep_point] >= self.test_conf['phase0_0']['icmin_pickoff']*self.data[col].phase0_0_vmod_sab[sweep_point]:
                         self.data[col].dac_ic_min = self.row_sweep_tower_values[sweep_point]
                         
                         have_icmin = True
