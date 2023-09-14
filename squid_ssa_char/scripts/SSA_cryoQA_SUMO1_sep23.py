@@ -180,7 +180,7 @@ class SSA:
         #used to set up proper data structure size
         npts_data = (2**phase_conf['crate']['tri_steps'])*(phase_conf['crate']['tri_step_size'])*(2**phase_conf['crate']['tri_dwell'])
         self.daq.pointsPerSlice = npts_data
-
+        self.daq.averages = phase_conf['n_avg']
         #initiates data storage arrays through data class
         for i in self.data:
             i.dac_sweep_array = sa_bias_sweep_val
