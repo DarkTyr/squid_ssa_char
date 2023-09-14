@@ -130,8 +130,8 @@ class SSA:
         #     if self.baselines_std[col] > 20:
         #         print('The standard deviation for col: ' + str(col) + ' is high: ' + str(self.baselines_std[col]))
     
-    #takes bias sweep results, picks off Icmin when peaks occur, picks vmod and icmax when modulation amplitude is max
     def calculate_ics(self):
+        '''takes bias sweep results, picks off Icmin when peaks occur, picks vmod and icmax when modulation amplitude is max'''
         for col in self.sel_col:
             have_icmin = False
             for sweep_point in range(self.test_conf['phase0_0']['bias_sweep_npoints']):
@@ -168,20 +168,21 @@ class SSA:
         Sweep SQUID SSA Bias and extract ADC_min, ADC_max, and ADC_modulation depth
         The units will be left in ADC units reported by DASTARD
         '''
-        self.zero_everything()
-        self.get_baselines()
-
         # gather variables from configs
         phase_conf = self.test_conf['phase0_0']
         sa_bias_sweep_val = np.linspace(phase_conf['bias_sweep_start'], 
                                         phase_conf['bias_sweep_end'], 
-                                        phase_conf['bias_sweep_npoints']) # start, stop, num
+                                        phase_conf['bias_sweep_npoints'],
+                                        dtype=np.int32) # start, stop, num
         
-        #used to set up proper data structure size
+        #used to set up proper data structure size, calculate the number of points in the full triangle response
         npts_data = (2**phase_conf['crate']['tri_steps'])*(phase_conf['crate']['tri_step_size'])*(2**phase_conf['crate']['tri_dwell'])
+
+        # Set the DAQ to appropriate values 
         self.daq.pointsPerSlice = npts_data
         self.daq.averages = phase_conf['n_avg']
-        #initiates data storage arrays through data class
+
+        #initiates data storage arrays through data classes
         for i in self.data:
             i.dac_sweep_array = sa_bias_sweep_val
             i.sa_bias_start = phase_conf['bias_sweep_start']
@@ -191,25 +192,39 @@ class SSA:
             i.phase0_0_vmod_min = np.zeros(phase_conf['bias_sweep_npoints'])
             i.phase0_0_vmod_sab = np.zeros(phase_conf['bias_sweep_npoints'])
 
+        # Zero all of the columns and then grab the baseline data
+        self.zero_everything()
+        self.get_baselines()
+
+        # Assign the starting point for the bias sweep (same from config and sa_bias_sweep_val)
+        # This will then be used as the previous value for the ramp_to_voltage call
         previous_bias = phase_conf['bias_sweep_start']
+
+        # Main outter for loop wrapped with tqdm class to display a progress bar and estimated time
         for sweep_point in tqdm.tqdm(range(phase_conf['bias_sweep_npoints'])):
             
+            # Go thru the columns and ramp the voltage to the desired value form the previous value
             for col in self.sel_col:
                 self.ramp_to_voltage(col, sa_bias_sweep_val[sweep_point], previous_bias)         
 
+            # Sleep to let system transient settle out before taking data
             time.sleep(phase_conf['bias_change_wait_ms'] / 1000.0)
 
-            fb, err = self.daq.take_average_data_roll(avg_all_rows=True)
+            # Take data that has been rolled and then averaged accross all of the rows
+            _, err = self.daq.take_average_data_roll(avg_all_rows=True)
             
+            # Move the gathered data to appropriate arrays and calculate min, max, values
             for col in self.sel_col:
                 self.data[col].phase0_0_vphis[sweep_point] = err[self.sel_col[col]]
                 self.data[col].phase0_0_vmod_max[sweep_point] = np.max(err[self.sel_col[col]])
                 self.data[col].phase0_0_vmod_min[sweep_point] = np.min(err[self.sel_col[col]])
                 self.data[col].phase0_0_vmod_sab[sweep_point] = np.abs(self.data[col].phase0_0_vmod_max[sweep_point] - self.data[col].phase0_0_vmod_min[sweep_point])
             
+            # the current sweep bias value now becomes the previous value
             previous_bias = sa_bias_sweep_val[sweep_point]
-        #TODO here is where the ramp2voltage vs sq1biassweeper choice gottta be made
-       # self.calculate_ics()
+
+        # Calc ics will eventually be called here when ready.
+        # self.calculate_ics()
 
     def phase0_1(self):
         return
