@@ -205,7 +205,7 @@ class SSA:
                 self.data[col].phase0_0_vphis[sweep_point] = err[self.sel_col[col]]
                 self.data[col].phase0_0_vmod_max[sweep_point] = np.max(err[self.sel_col[col]])
                 self.data[col].phase0_0_vmod_min[sweep_point] = np.min(err[self.sel_col[col]])
-                self.data[col].phase0_0_mod_sab[sweep_point] = np.abs(self.data[col].phase0_0_max[sweep_point] - self.data[col].phase0_0_min[sweep_point])
+                self.data[col].phase0_0_mod_sab[sweep_point] = np.abs(self.data[col].phase0_0_vmod_max[sweep_point] - self.data[col].phase0_0_vmod_min[sweep_point])
             
             previous_bias = sa_bias_sweep_val[sweep_point]
         #TODO here is where the ramp2voltage vs sq1biassweeper choice gottta be made
