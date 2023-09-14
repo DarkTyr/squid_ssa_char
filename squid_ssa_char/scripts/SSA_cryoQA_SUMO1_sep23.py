@@ -67,7 +67,7 @@ class SSA:
     
     # runs dac voltage from set start value, often 0, to set end value
     # TODO: This ramps a single col to a set point, better to loop all col for each change in value?
-    def ramp_to_voltage(self, channel, to_dac_value, from_dac_value=0, slew_rate=8, report=True):
+    def ramp_to_voltage(self, channel, to_dac_value, from_dac_value=0, slew_rate=8):
         if self.verbosity > 0:
             print('ramp_to_voltage: Channel={}, from={}, to={}'.format(channel, from_dac_value, to_dac_value))
 
@@ -102,7 +102,7 @@ class SSA:
     #resets all values to zero or default
     # TODO: Should we set all col to zero or only the columns we are working with?
     def zero_everything(self):
-        for i in range(self.sel_col):
+        for i in self.sel_col:
             self.set_sa_bias_voltage(i, 0)
     
     #name of user
@@ -111,8 +111,8 @@ class SSA:
    
     # determines background noise level, assumes no rows active to start
     def get_baselines(self, bias=0, averages=10):
-        for i in range(self.sel_col):
-            self.ramp_to_voltage(i, bias, report=False)
+        for i in self.sel_col:
+            self.ramp_to_voltage(i, bias)
         
         fb, err = self.daq.take_average_data()
         
@@ -130,13 +130,13 @@ class SSA:
     
     #takes bias sweep results, picks off Icmin when peaks occur, picks vmod and icmax when modulation amplitude is max
     def calculate_ics(self):
-        for col in range(self.sel_col):
+        for col in self.sel_col:
             have_icmin = False
             for sweep_point in range(self.test_conf['phase0_0']['bias_sweep_npoints']):
                 if (have_icmin == False) and (sweep_point != 0):
                     #TODO update this situation - use sigma dependence? or rms?
                     #TODO update to be our data - row_...mod is the abs of the diff btwn min(err) and max(err) at sweep_point
-                    if self.data[col].phase0_0_mod_sab[sweep_point] >= self.test_conf['phase0_0']['icmin_pickoff']*self.baselines_range[col]:
+                    if self.data[col].phase0_0_mod_sab[sweep_point] >= self.test_conf['phase0_0']['icmin_pickoff']*self.data[col].bi:
                         self.data[col].dac_ic_min = self.row_sweep_tower_values[sweep_point]
                         
                         have_icmin = True
@@ -149,7 +149,7 @@ class SSA:
                     self.data[col].dac_ic_min = int(2**16 -1)
                     self.data[col].dac_ic_max = 0
 
-    def bookingkeeping(self):
+    def bookkeeping(self):
         '''This will copy values from the config files to the SSA data structures'''
         for idx in range(self.ncol):
             self.data[idx].qa_name = self.test_conf['info']['user']
@@ -177,7 +177,8 @@ class SSA:
         
         #used to set up proper data structure size
         npts_data = (2**phase_conf['crate']['tri_steps'])*(2**phase_conf['crate']['tri_step_size'])*(2**phase_conf['crate']['tri_dwell'])
-        
+        self.daq.pointsPerSlice = npts_data
+
         #initiates data storage arrays through data class
         for i in self.data:
             i.dac_sweep_array = sa_bias_sweep_val
@@ -188,19 +189,21 @@ class SSA:
             i.phase0_0_vmod_min = np.zeros(phase_conf['bias_sweep_npoints'])
             i.phase0_0_vmod_sab = np.zeros(phase_conf['bias_sweep_npoints'])
 
+        previous_bias = phase_conf['bias_sweep_start']
         for sweep_point in range(phase_conf['bias_sweep_npoints']):
-
-            for col in range(self.sel_col):
-                self.ramp_to_voltage(col, sa_bias_sweep_val[-1], sa_bias_sweep_val[0], report=False)         
+            
+            for col in self.sel_col:
+                self.ramp_to_voltage(col, sa_bias_sweep_val[sweep_point], previous_bias)         
         
             fb, err = self.daq.take_average_data_roll()
             
-            for col in range(self.sel_col):
+            for col in self.sel_col:
                 self.data[col].phase0_0_vphis[sweep_point] = err[self.sel_col[col]]
                 self.data[col].phase0_0_vmod_max[sweep_point] = np.max(err[self.sel_col[col]])
                 self.data[col].phase0_0_vmod_min[sweep_point] = np.min(err[self.sel_col[col]])
-                self.data[col].phase0_0_mod_sab[sweep_point] = np.abs(self.data[col].phase0_0_max[sweep_point]-self.data[col].phase0_0_min[sweep_point])
+                self.data[col].phase0_0_mod_sab[sweep_point] = np.abs(self.data[col].phase0_0_max[sweep_point] - self.data[col].phase0_0_min[sweep_point])
             
+            previous_bias = sa_bias_sweep_val[sweep_point]
         #TODO here is where the ramp2voltage vs sq1biassweeper choice gottta be made
        # self.calculate_ics()
 
