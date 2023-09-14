@@ -114,6 +114,8 @@ class SSA:
         for i in self.sel_col:
             self.ramp_to_voltage(i, bias)
         
+        time.sleep(self.test_conf['test_globals']['bias_change_wait_ms'])
+
         fb, err = self.daq.take_average_data()
         
         for col in range(self.ncol):
@@ -194,7 +196,9 @@ class SSA:
             
             for col in self.sel_col:
                 self.ramp_to_voltage(col, sa_bias_sweep_val[sweep_point], previous_bias)         
-        
+
+            time.sleep(phase_conf['bias_change_wait_ms'])
+
             fb, err = self.daq.take_average_data_roll()
             
             for col in self.sel_col:

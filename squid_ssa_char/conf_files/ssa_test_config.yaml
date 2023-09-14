@@ -17,6 +17,7 @@ test_globals:
   columns: [0,1,2,3,4,5,6,7]  # Supported columns 0 thru 7 or a sub set
   # System configurations parameter, may be needed when we send LSync value
   n_rows: 4  # Can't change without effecting DASTARD/Server
+  bias_change_wait_ms: 250
 
 # Sweep SSA bias while sweeping feedback with triangle
 phase0_0:
