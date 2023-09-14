@@ -110,7 +110,7 @@ class SSA:
         self.qa_name = qa_name    
    
     # determines background noise level, assumes no rows active to start
-    def get_baselines(self, bias=0, averages=10):
+    def get_baselines(self, bias=0):
         for i in self.sel_col:
             self.ramp_to_voltage(i, bias)
         
@@ -178,7 +178,7 @@ class SSA:
                                         phase_conf['bias_sweep_npoints']) # start, stop, num
         
         #used to set up proper data structure size
-        npts_data = (2**phase_conf['crate']['tri_steps'])*(2**phase_conf['crate']['tri_step_size'])*(2**phase_conf['crate']['tri_dwell'])
+        npts_data = (2**phase_conf['crate']['tri_steps'])*(phase_conf['crate']['tri_step_size'])*(2**phase_conf['crate']['tri_dwell'])
         self.daq.pointsPerSlice = npts_data
 
         #initiates data storage arrays through data class
@@ -186,7 +186,7 @@ class SSA:
             i.dac_sweep_array = sa_bias_sweep_val
             i.sa_bias_start = phase_conf['bias_sweep_start']
             i.sa_bias_stop = phase_conf['bias_sweep_end']
-            i.phase0_0_vphis = np.zeros((phase_conf['bias_sweep_npoints'],npts_data))
+            i.phase0_0_vphis = np.zeros((phase_conf['bias_sweep_npoints'], npts_data))
             i.phase0_0_vmod_max = np.zeros(phase_conf['bias_sweep_npoints'])
             i.phase0_0_vmod_min = np.zeros(phase_conf['bias_sweep_npoints'])
             i.phase0_0_vmod_sab = np.zeros(phase_conf['bias_sweep_npoints'])
@@ -199,7 +199,7 @@ class SSA:
 
             time.sleep(phase_conf['bias_change_wait_ms'] / 1000.0)
 
-            fb, err = self.daq.take_average_data_roll()
+            fb, err = self.daq.take_average_data_roll(avg_all_rows=True)
             
             for col in self.sel_col:
                 self.data[col].phase0_0_vphis[sweep_point] = err[self.sel_col[col]]
