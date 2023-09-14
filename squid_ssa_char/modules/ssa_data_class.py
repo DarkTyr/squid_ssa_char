@@ -32,16 +32,16 @@ class SSA_Data_Class:
         self.baselines_range = np.array([])
         self.baselines_average = np.array([])
         self.baselines_SNR = np.array([])
-        self.phase0_vmod_sab = np.array([]) # SSA V Modulation depth vs
-        self.phase0_vmod_min = np.array([]) # Store min value of the modulation in adc units
-        self.phase0_vmod_max = np.array([]) # Store max value of the modulation in adc units
-        self.phase0_vphis = []  # Place to store the VPhi for every bias value for testing 
+        self.phase0_0_vmod_sab = np.array([]) # SSA V Modulation depth vs
+        self.phase0_0_vmod_min = np.array([]) # Store min value of the modulation in adc units
+        self.phase0_0_vmod_max = np.array([]) # Store max value of the modulation in adc units
+        self.phase0_0_vphis = np.array([])  # Place to store the VPhi for every bias value for testing 
         
         # Phase0_1 Bias to Ic_Max while sweeping Feed Back and save V_Phi
-        self.phase0_icmax_vphi = np.array([])
+        self.phase0_0_icmax_vphi = np.array([])
         
         # Phase1_0 Bias to Ic_Max while sweeping Input and save V_Phi
-        self.phase1_icmax_vphi = np.array([])
+        self.phase1_0_icmax_vphi = np.array([])
         
 
 

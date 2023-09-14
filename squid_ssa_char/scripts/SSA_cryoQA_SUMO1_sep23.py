@@ -49,7 +49,6 @@ class SSA:
         self.serialport = named_serial.Serial(port='rack', shared=True)
         self.tower = towerchannel.TowerChannel(cardaddr=0, column=0, serialport="tower")
         self.daq = daq.Daq() # Defaults are fine, will reassign later
-
         # TODO: should we perform book keeping here automatically or have a method to call?
 
     #connects to the tower and sets the dac voltage bias for each channel  
@@ -103,7 +102,7 @@ class SSA:
     #resets all values to zero or default
     # TODO: Should we set all col to zero or only the columns we are working with?
     def zero_everything(self):
-        for i in range(8):
+        for i in range(self.sel_col):
             self.set_sa_bias_voltage(i, 0)
     
     #name of user
@@ -112,7 +111,7 @@ class SSA:
    
     # determines background noise level, assumes no rows active to start
     def get_baselines(self, bias=0, averages=10):
-        for i in range(8):
+        for i in range(self.sel_col):
             self.ramp_to_voltage(i, bias, report=False)
         
         fb,err = self.daq.take_average_data()
@@ -128,13 +127,13 @@ class SSA:
     
     #takes bias sweep results, picks off Icmin when peaks occur, picks vmod and icmax when modulation amplitude is max
     def calculate_ics(self):
-        for col in range(self.ncol):
+        for col in range(self.sel_col):
             have_icmin = False
             for sweep_point in range(self.num_steps):
                 if (have_icmin == False) and (sweep_point != 0):
                     #TODO update this situation - use sigma dependence? or rms?
                     #TODO update to be our data - row_...mod is the abs of the diff btwn min(err) and max(err) at sweep_point
-                    if self.row_sweep_average_mod[col] >= self.icmin_pickoff*self.baselines_range[col]:
+                    if self.row_sweep_average_mod[col] >= self.test_conf['phase0_0']['icmin_pickoff']*self.baselines_range[col]:
                         self.data[col].dac_ic_min = self.row_sweep_tower_values[sweep_point]
                         
                         have_icmin = True
@@ -168,7 +167,7 @@ class SSA:
         self.get_baselines()
 
         # gather variables from configs
-        phase_conf = test_conf['phase0_0']
+        phase_conf = self.test_conf['phase0_0']
         sa_bias_sweep_val = np.linspace(phase_conf['bias_sweep_start'], 
                                         phase_conf['bias_sweep_end'], 
                                         phase_conf['bias_sweep_npoints']) # start, stop, num
@@ -178,7 +177,17 @@ class SSA:
             i.sa_bias_start = phase_conf['bias_sweep_start']
             i.sa_bias_stop = phase_conf['bias_sweep_end']
 
+
+        for col in range(self.sel_col):
+            self.ramp_to_voltage(col, sa_bias_sweep_val[-1], sa_bias_sweep_val[0], report=False)         
+        
         fb, err = self.daq.take_average_data_roll()
+        for col in range(self.ncol):
+            np.append(self.data[col].phase0_vphis, err[self.sel_col[col]], 1)
+            self.data[col]
+        self.row_sweep_max[:,phase_conf['bias_sweep_npoints']] = np.max(err[0,self.ncol])
+        self.row_sweep_min[:phase_conf['bias_sweep_npoints']] = np.min(err[:,self.ncol])
+        self.row_sweep_mod[:,phase_conf['bias_sweep_npoints']] = np.abs()
         
         #TODO here is where the ramp2voltage vs sq1biassweeper choice gottta be made
         self.calculate_ics()
