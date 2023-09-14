@@ -18,6 +18,7 @@ import time
 
 # Installed Package Imports
 import named_serial # Can be sourced from multiple repos at NIST
+import tqdm
 #from statsmodels.nonparametric.smoothers_lowess import lowess
 # from scipy.signal import butter, lfilter, freqz
 
@@ -114,7 +115,7 @@ class SSA:
         for i in self.sel_col:
             self.ramp_to_voltage(i, bias)
         
-        time.sleep(self.test_conf['test_globals']['bias_change_wait_ms'])
+        time.sleep(self.test_conf['test_globals']['bias_change_wait_ms'] / 1000.0)
 
         fb, err = self.daq.take_average_data()
         
@@ -192,12 +193,12 @@ class SSA:
             i.phase0_0_vmod_sab = np.zeros(phase_conf['bias_sweep_npoints'])
 
         previous_bias = phase_conf['bias_sweep_start']
-        for sweep_point in range(phase_conf['bias_sweep_npoints']):
+        for sweep_point in tqdm(range(phase_conf['bias_sweep_npoints'])):
             
             for col in self.sel_col:
                 self.ramp_to_voltage(col, sa_bias_sweep_val[sweep_point], previous_bias)         
 
-            time.sleep(phase_conf['bias_change_wait_ms'])
+            time.sleep(phase_conf['bias_change_wait_ms'] / 1000.0)
 
             fb, err = self.daq.take_average_data_roll()
             
