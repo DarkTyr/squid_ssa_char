@@ -230,6 +230,13 @@ class SSA:
        #gather variables from config
         phase_conf = self.test_conf['phase0_1']
 
+        #used to set up proper data structure size, calculate the number of points in the full triangle response
+        npts_data = (2**phase_conf['crate']['tri_steps'])*(phase_conf['crate']['tri_step_size'])*(2**phase_conf['crate']['tri_dwell'])
+
+        # Set the DAQ to appropriate values 
+        self.daq.pointsPerSlice = npts_data
+        self.daq.averages = phase_conf['n_avg']
+
         # Zero all the columns
         self.zero_everything()
 
@@ -238,9 +245,9 @@ class SSA:
             self.ramp_to_voltage(col, self.data[col].dac_ic_max)
         
         # Sleep to let system transient settle out before taking data
-        time.slep(phase_conf['bias_change_wait_ms'] / 1000.0)
+        time.sleep(phase_conf['bias_change_wait_ms'] / 1000.0)
 
-        #Take data that has been rolld then averaged across all rows
+        #Take data that has been rolled then averaged across all rows
         fb, err = self.daq.take_average_data_roll(avg_all_rows=True)
         
         #store gathered data for processing
@@ -249,10 +256,34 @@ class SSA:
 
     
 
-    #send triangle down input to get min
-    def phase1_0():
-
+    #send triangle down input to get min then store the vphis
+    def phase1_0(self):
+        #gather variables from config
         phase_conf = self.test_conf['phase1_0']
+
+        #used to set up proper data structure size, calculate the number of points in the full triangle response
+        npts_data = (2**phase_conf['crate']['tri_steps'])*(phase_conf['crate']['tri_step_size'])*(2**phase_conf['crate']['tri_dwell'])
+
+        # Set the DAQ to appropriate values 
+        self.daq.pointsPerSlice = npts_data
+        self.daq.averages = phase_conf['n_avg']
+
+        #zero all the columns
+        self.zero_everything()
+
+        #loop throught the columns and ramp up to the icmax dac voltage
+        for col in self.sel_col:
+            self.ramp_to_voltage(col, self.data[col].dac_ic_max)
+        
+        #sleep to let system transient settle out before taking data
+        time.sleep(phase_conf['bias_change_wait_ms'] / 1000.0)
+
+        #take data that has been rolled then averaged across all rows
+        fb, err = self.daq.take_average_data_roll(avg_all_rows=True)
+
+        #store gathered data for processing
+        for col in self.sel_col:
+            self.data[col].phase1_0_icmax_vphi = err[self.sel_col[col]]
        
     #saves data results - john currently has this as part of the dataclass module  
     def save_npz():

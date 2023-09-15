@@ -44,7 +44,7 @@ phase0_1:
   crate:
   # You may want to change the triangle paraemeters based on resistor values
     tri_steps: 12
-    tri_step: 1
+    tri_step_size: 1
     tri_dwell: 0
     lsync: 256
     tri_output: FB  # We want the triangle on the FB
@@ -58,7 +58,7 @@ phase1_0:
   crate:
   # You may want to change the triangle paraemeters based on resistor values
     tri_steps: 9
-    tri_step: 1
+    tri_step_size: 1
     tri_dwell: 0
     lsync: 256
     tri_output: IN  # We want the triangle on the FB
