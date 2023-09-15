@@ -3,14 +3,14 @@ info:
   system: "SUMO1"
   wafer_type: "13AX"
   chip_ids:
-    - "w00_c00_r00"
-    - "w00_c00_r01"
-    - "w00_c00_r02"
-    - "w00_c00_r03"
-    - "w00_c01_r00"
-    - "w00_c02_r04"
-    - "w00_c05_r06"
-    - "w00_c22_r00"
+    - "w00_r00_c00"
+    - "w00_r00_c01"
+    - "w00_r00_c02"
+    - "w00_r00_c03"
+    - "w00_r01_c00"
+    - "w00_r02_c04"
+    - "w00_r05_c06"
+    - "w00_r22_c00"
 
 test_globals:
   # Which columns to run these tests on?
