@@ -50,7 +50,7 @@ class SSA:
             self.data.append(ssa_data_class.SSA_Data_Class())
         
         today = time.localtime()
-        self.data = '{0:04d}_'.format(today.tm_year) + \
+        self.date = '{0:04d}_'.format(today.tm_year) + \
                     '{0:02d}_'.format(today.tm_mon) + \
                     '{0:02d}_'.format(today.tm_mday) + \
                     '{0:02d}'.format(today.tm_hour) + \
