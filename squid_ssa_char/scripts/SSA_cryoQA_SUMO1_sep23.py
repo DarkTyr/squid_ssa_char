@@ -67,7 +67,6 @@ class SSA:
         self.tower.set_value(dac_value)
     
     # runs dac voltage from set start value, often 0, to set end value
-    # TODO: This ramps a single col to a set point, better to loop all col for each change in value?
     def ramp_to_voltage(self, channel, to_dac_value, from_dac_value=0, slew_rate=8):
         if self.verbosity > 0:
             print('ramp_to_voltage: Channel={}, from={}, to={}'.format(channel, from_dac_value, to_dac_value))
@@ -162,12 +161,7 @@ class SSA:
             self.data[idx].qa_name = self.test_conf['info']['user']
             self.data[idx].chip_id = self.test_conf['info']['chip_ids'][idx]
 
-    # send triangle down fb to get baselines, sweep bias, pick off icmin, icmax and vmod, get mfb
-    #TODO Thoughts:
-        #Sq1BiasSweeper in orig setsup the time remaining/status printout, takes in data from take_avg_data, rolls it, calculates row_sweep_avg
-            #_max, _min and _mod (range) these are used in calc_ics. Do that here instead or do in own version of biasSweeper?
-        #Also, do we want the print out at all?
-        #Do we want to do Mfb here (orig 2_0) then only habe one phase for triangle on FB and one for triangle on IN or do two phases for FB?
+    # send triangle down fb to get baselines, sweep bias, pick off icmin, icmax and vmod
     def phase0_0(self):
         '''
         Sweep SQUID SSA Bias and extract ADC_min, ADC_max, and ADC_modulation depth
@@ -231,11 +225,34 @@ class SSA:
         # Calc ics will eventually be called here when ready.
         # self.calculate_ics()
 
+   #work to get Mfb. ramp to icmax dac voltage then store the vphis
     def phase0_1(self):
-        return
+       #gather variables from config
+        phase_conf = self.test_conf['phase0_1']
+
+        # Zero all the columns
+        self.zero_everything()
+
+        # Loop through the columns and ramp up to the icmax dac voltage
+        for col in self.sel_col:
+            self.ramp_to_voltage(col, self.data[col].dac_ic_max)
+        
+        # Sleep to let system transient settle out before taking data
+        time.slep(phase_conf['bias_change_wait_ms'] / 1000.0)
+
+        #Take data that has been rolld then averaged across all rows
+        fb, err = self.daq.take_average_data_roll(avg_all_rows=True)
+        
+        #store gathered data for processing
+        for col in self.sel_col:
+            self.data[col].phase0_1_icmax_vphi = err[self.sel_col[col[]]]
+
+    
+
     #send triangle down input to get min
     def phase1_0():
-        return
+
+        phase_conf = self.test_conf['phase1_0']
        
     #saves data results - john currently has this as part of the dataclass module  
     def save_npz():
