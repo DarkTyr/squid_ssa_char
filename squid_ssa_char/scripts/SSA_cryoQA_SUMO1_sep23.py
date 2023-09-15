@@ -1,7 +1,8 @@
 #################################################################################
 #
 # Written by: Johnathon Gard, Erin Maloney
-# Purpose: SSA screening script,
+# Purpose: SSA screening script. Data is stored for later processing. Only 
+# Icmax and Icmin are picked off all other values will be found in processing.
 #
 # September 2023
 #
@@ -30,6 +31,10 @@ class SSA:
     #initializes class - WHAT STAY WHAT GO?
     '''
     def __init__(self, sys_conf, test_conf):
+        '''
+        Initializes the SSA class
+        '''
+    
         # Configuration Dictionaries loaded from External Config Files
         self.sys_conf = sys_conf
         self.test_conf = test_conf
@@ -45,7 +50,11 @@ class SSA:
             self.data.append(ssa_data_class.SSA_Data_Class())
         
         today = time.localtime()
-        self.date = str(today.tm_year) + '_' + str(today.tm_mon) + '_' + str(today.tm_mday)
+        self.data = '{0:04d}_'.format(today.tm_year) + \
+                    '{0:02d}_'.format(today.tm_mon) + \
+                    '{0:02d}_'.format(today.tm_mday) + \
+                    '{0:02d}'.format(today.tm_hour) + \
+                    '{0:02d}'.format(today.tm_min)
         
         self.serialport = named_serial.Serial(port='rack', shared=True)
         self.tower = towerchannel.TowerChannel(cardaddr=0, column=0, serialport="tower")
@@ -54,6 +63,9 @@ class SSA:
 
     #connects to the tower and sets the dac voltage bias for each channel  
     def set_sa_bias_voltage(self, channel, dac_value):
+        '''
+        Connects to the tower then sets the DAC voltage bias. Needs the desired channel and DAC value passed to it.
+        '''
         # reach in and assign the proper channel to the class
         tower_map = self.sys_conf['col_map']['col'+str(channel)]['SA_Bias']
         tower_card_ref = self.sys_conf['tower'][tower_map['tower_card']]
@@ -68,6 +80,12 @@ class SSA:
     
     # runs dac voltage from set start value, often 0, to set end value
     def ramp_to_voltage(self, channel, to_dac_value, from_dac_value=0, slew_rate=8):
+        '''
+        Ramps the DAC voltage from some start value, which has a defult of 0, to some end value. Needs the desired channel
+        and the ending DAC value passed in. The starting DAC value and the slew rate can also be passed but have defaults 
+        set (DAC start value = 0 and slew rate = 8)
+        '''
+        
         if self.verbosity > 0:
             print('ramp_to_voltage: Channel={}, from={}, to={}'.format(channel, from_dac_value, to_dac_value))
 
@@ -101,15 +119,27 @@ class SSA:
     
     #resets all values to zero or default
     def zero_everything(self):
+        '''
+        Sets the DAC bias voltage to 0 for all columns
+        '''
         for i in self.sel_col:
             self.set_sa_bias_voltage(i, 0)
     
     #name of user
     def set_qa_name(self, qa_name):
+        '''
+        Pass in the initials of the person running the QA system
+        '''
         self.qa_name = qa_name    
    
     # determines background noise level, assumes no rows active to start
     def get_baselines(self, bias=0):
+        '''
+        Ramps the voltage to 0, unless some other value is passed, then stores the data at the desired DAC bias.
+        The std, range, average, and signal-to-noise ratio are all calculated and stored for each column at the set DAC bias.
+        This is done at bias = 0 to get the background/baseline levels for better accuracy later.
+        '''
+        
         for i in self.sel_col:
             self.ramp_to_voltage(i, bias)
         
@@ -160,6 +190,9 @@ class SSA:
         for idx in range(self.ncol):
             self.data[idx].qa_name = self.test_conf['info']['user']
             self.data[idx].chip_id = self.test_conf['info']['chip_ids'][idx]
+            self.data[idx].channel_num = self.test_conf['test_globals']['columns'][idx]
+            self.data[idx].file_name = self.test_conf['info']['chip_ids'][idx] + '_' + \
+                self.date + '_{0:02}'.format(self.test_conf['test_globals']['columns'][idx])
 
     # send triangle down fb to get baselines, sweep bias, pick off icmin, icmax and vmod
     def phase0_0(self):
@@ -227,6 +260,10 @@ class SSA:
 
    #work to get Mfb. ramp to icmax dac voltage then store the vphis
     def phase0_1(self):
+        '''
+        Sweep SQUID SSA Bias and extract ADC_min, ADC_max, and ADC_modulation depth
+        The units will be left in ADC units reported by DASTARD
+        '''
        #gather variables from config
         phase_conf = self.test_conf['phase0_1']
 
