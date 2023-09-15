@@ -208,7 +208,7 @@ class SSA:
                                         dtype=np.int32) # start, stop, num
         
         #used to set up proper data structure size, calculate the number of points in the full triangle response
-        npts_data = (2**phase_conf['crate']['tri_steps'])*(phase_conf['crate']['tri_step_size'])*(2**phase_conf['crate']['tri_dwell'])
+        npts_data = (2**phase_conf['crate']['tri_steps'])*(2**phase_conf['crate']['tri_dwell'])
 
         # Set the DAQ to appropriate values 
         self.daq.pointsPerSlice = npts_data
@@ -268,7 +268,7 @@ class SSA:
         phase_conf = self.test_conf['phase0_1']
 
         #used to set up proper data structure size, calculate the number of points in the full triangle response
-        npts_data = (2**phase_conf['crate']['tri_steps'])*(phase_conf['crate']['tri_step_size'])*(2**phase_conf['crate']['tri_dwell'])
+        npts_data = (2**phase_conf['crate']['tri_steps'])*(2**phase_conf['crate']['tri_dwell'])
 
         # Set the DAQ to appropriate values 
         self.daq.pointsPerSlice = npts_data
@@ -299,7 +299,7 @@ class SSA:
         phase_conf = self.test_conf['phase1_0']
 
         #used to set up proper data structure size, calculate the number of points in the full triangle response
-        npts_data = (2**phase_conf['crate']['tri_steps'])*(phase_conf['crate']['tri_step_size'])*(2**phase_conf['crate']['tri_dwell'])
+        npts_data = (2**phase_conf['crate']['tri_steps'])*(2**phase_conf['crate']['tri_dwell'])
 
         # Set the DAQ to appropriate values 
         self.daq.pointsPerSlice = npts_data
