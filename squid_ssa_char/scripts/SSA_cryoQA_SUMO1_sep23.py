@@ -40,8 +40,8 @@ class SSA:
         self.sel_col = test_conf['test_globals']['columns'] # Array of the selected columns
         self.ncol = len(test_conf['test_globals']['columns'])   # length of the selectred columns
         
-        self.data = []
-        for i in range(self.ncol):
+        self.data = [ssa_data_class.SSA_Data_Class()]
+        for i in range(self.ncol - 1):
             self.data.append(ssa_data_class.SSA_Data_Class())
         
         today = time.localtime()
@@ -123,6 +123,7 @@ class SSA:
             self.data[col].baselines_range = np.max(err[self.sel_col[col]]) - np.min(err[self.sel_col[col]])
             self.data[col].baselines_average = np.average(err[self.sel_col[col]])
             self.data[col].baselines_SNR = self.data[col].baselines_average/self.data[col].baselines_std
+            self.data[col].baselines_trace = err[self.sel_col[col]]
         
 
         # TODO: print out for outliers - CHECK value for baseline and decide if we want it at all
@@ -132,24 +133,28 @@ class SSA:
     
     def calculate_ics(self):
         '''takes bias sweep results, picks off Icmin when peaks occur, picks vmod and icmax when modulation amplitude is max'''
-        for col in self.sel_col:
-            have_icmin = False
-            for sweep_point in range(self.test_conf['phase0_0']['bias_sweep_npoints']):
-                if (have_icmin == False) and (sweep_point != 0):
-                    #TODO update this situation - use sigma dependence? or rms?
-                    #TODO update to be our data - row_...mod is the abs of the diff btwn min(err) and max(err) at sweep_point
-                    if self.data[col].phase0_0_mod_sab[sweep_point] >= self.test_conf['phase0_0']['icmin_pickoff']*self.data[col].phase0_0_vmod_sab[sweep_point]:
-                        self.data[col].dac_ic_min = self.row_sweep_tower_values[sweep_point]
-                        
-                        have_icmin = True
-                
-                #TODO get row_sweep_tower_values to align with our current setup
-                if have_icmin == True:
-                    self.data[col].dac_ic_max = self.row_sweep_tower_values[np.argmax(self.row_sweep_average_mod[col])]
+        for col in self.data:
+            # For finding Ic_min take the std of the traces at each bias point
+            vphi_std = np.std(col.phase0_0_vphis, axis=1)
 
-                else:
-                    self.data[col].dac_ic_min = int(2**16 -1)
-                    self.data[col].dac_ic_max = 0
+            # find all of the indexs less than n times the std, and take the greatest index
+            icmin_idx = np.where(vphi_std < col.baselines_std * self.test_conf['phase0_0']['icmin_pickoff'])[-1][-1]
+            
+            # If the found index is the last point in the sweep array, we really didn't find the Ic_min
+            # so set it to the max DAC value the system can have
+            if (icmin_idx == (len(col.dac_sweep_array) - 1)):
+                col.dac_ic_min = 2**16 - 1
+            else:
+                col.dac_ic_min = col.dac_sweep_array[icmin_idx]
+
+            
+            # Determine Ic_max based on Vmod depths
+            icmax_idx = col.phase0_0_vmod_sab.argmax()
+            
+            if (icmax_idx == (len(col.dac_sweep_array) - 1)):
+                col.dac_ic_max = 0
+            else:
+                col.dac_ic_max = col.dac_sweep_array[icmax_idx]
 
     def bookkeeping(self):
         '''This will copy values from the config files to the SSA data structures'''
