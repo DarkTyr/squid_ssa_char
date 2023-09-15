@@ -289,7 +289,7 @@ class SSA:
         
         #store gathered data for processing
         for col in self.sel_col:
-            self.data[col].phase0_1_icmax_vphi = err[self.sel_col[col[]]]
+            self.data[col].phase0_1_icmax_vphi = err[self.sel_col[col]]
 
     
 
