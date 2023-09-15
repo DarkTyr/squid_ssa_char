@@ -59,7 +59,7 @@ class SSA:
         self.serialport = named_serial.Serial(port='rack', shared=True)
         self.tower = towerchannel.TowerChannel(cardaddr=0, column=0, serialport="tower")
         self.daq = daq.Daq() # Defaults are fine, will reassign later
-        # TODO: should we perform book keeping here automatically or have a method to call?
+        self.bookkeeping()
 
     #connects to the tower and sets the dac voltage bias for each channel  
     def set_sa_bias_voltage(self, channel, dac_value):
@@ -192,7 +192,7 @@ class SSA:
             self.data[idx].chip_id = self.test_conf['info']['chip_ids'][idx]
             self.data[idx].channel_num = self.test_conf['test_globals']['columns'][idx]
             self.data[idx].file_name = self.test_conf['info']['chip_ids'][idx] + '_' + \
-                self.date + '_{0:02}'.format(self.test_conf['test_globals']['columns'][idx])
+                self.date + '_chan{0:02}'.format(self.test_conf['test_globals']['columns'][idx])
 
     # send triangle down fb to get baselines, sweep bias, pick off icmin, icmax and vmod
     def phase0_0(self):
@@ -255,8 +255,8 @@ class SSA:
             # the current sweep bias value now becomes the previous value
             previous_bias = sa_bias_sweep_val[sweep_point]
 
-        # Calc ics will eventually be called here when ready.
-        # self.calculate_ics()
+        # Calc ics for the next two phases to use
+        self.calculate_ics()
 
    #work to get Mfb. ramp to icmax dac voltage then store the vphis
     def phase0_1(self):
@@ -323,10 +323,13 @@ class SSA:
             self.data[col].phase1_0_icmax_vphi = err[self.sel_col[col]]
        
     #saves data results - john currently has this as part of the dataclass module  
-    def save_npz():
-        return
+    def save_data(self):
+        '''
+        Save the data classes which contain the data with the assigned names from bookkeeping()
+        '''
+        for i in self.data:
+            i.save()
 
-    
 
 HELP_TEXT = '''\
 This is the main SQUID Series Array Testing and Quality Assurance Data Script
