@@ -328,7 +328,7 @@ class SSA:
         Save the data classes which contain the data with the assigned names from bookkeeping()
         '''
         for i in self.data:
-            i.save()
+            i.save(self.save_all_data_flag)
 
 
 HELP_TEXT = '''\
