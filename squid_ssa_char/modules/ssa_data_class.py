@@ -11,6 +11,7 @@
 
 
 import numpy as np
+import pickle
 
 class SSA_Data_Class:
     def __init__(self):
@@ -44,16 +45,22 @@ class SSA_Data_Class:
         # Phase1_0 Bias to Ic_Max while sweeping Input and save V_Phi
         self.phase1_0_icmax_vphi = np.array([])
         
-
-
-    def save_npz(self, save_all=False):
+    def save(self, save_all=False):
         '''
-        Method to save the data to NPZ
+        Method to save the data class to a pickle, if save_all is false, the bias sweep vphis
+        will be cleared out and then the data class saved using pickle
         '''
-        return
+        with open(self.file_name + '.pickle', 'wb') as f:
+            # If save all is false, clear out the stored sweep of vphis form the data class
+            if(save_all == False):
+                self.phase0_0_vphis = np.array([])
+            # Dump the class to the pickle file type
+            pickle.dump(self, f, -1)  # -1 means use the latest encoding version of pickle
     
-    def load_npz(self):
+    @classmethod
+    def load(cls, filename):
         '''
         Method to load the data from an NPZ for use by other programs
         '''
-        return
+        with open(filename, 'rb') as f:
+            return pickle.load(f)
