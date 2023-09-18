@@ -56,3 +56,17 @@ factor_dev_V = Clientref * Client_scale / (Clientfs * Pamp_gain)    #convert Mat
 def calculate_Ms():
     return
 
+
+#Thoughts:
+    #create two outputs - one that has some plots for external use, one with all plots for internal use
+    #include xl table in the output doc - all one thing?
+        #con with this is xl is all 8 chips ususlly - could do just one table line? 
+            #could also stick with the printout xl we put together for each module on top of this so its in 
+            #multiple places
+    #how do plots? could create a function that takes x,y then returns a line plot then add things to 
+    # each plot made by the call?
+        #not sure how that would work in practice - probably wont reduce code length the way I think
+    #How do we want to order the plots?
+    #Do we want to always create both documents or make them both optional? Kinda like a flag thing
+    
+
