@@ -9,21 +9,29 @@
 #
 #################################################################################
 
-
+#all imports from original - lets see what we end up using!
+import argparse
+import Ipython
+import glob
+import os
+from scipy.signal import butter, lfilter
+import matplotlib
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
 import numpy as np
 import time
+from squid_ssa_char.modules import load_conf_yaml, ssa_data_class, daq, towerchannel
 
-
-#for date/time stamps on reports 
+#for date/time stamps on reports, now goes out to minutes but has no formatting so 9am will be 9 not 09
 today = time.localtime()
+now = str(today.tm_year) + '_' + str(today.tm_mon) + '_' + str(today.tm_mday) + '_' + str(today.tm_hour) + '_' + str(today.tm_min)
 
 #constants for calculations/unit conversions
 #TODO: not sure how many of these are needed at all let alone wanted here vs in some config
 phi0 = 2.06783383e-15   #magnetic flux quantum
 scale_L = 1.0e18        #1/(pH*uA)
 scale_uA = 1.0e6        #scale to microamps
-Pamp_gain = 96.0        #Tower preamp card gain
+Pamp_gain = 96.0        #Tower preamp card gain TODO: this is part of the sys config?
 #tower bias DACs
 Towerfs = 2.0**16 - 1   #DAC units
 Towerref = 2.5          #Volts
@@ -35,7 +43,7 @@ DACref = 1.0            #Volts
 Clientfs = 2.0**12 -1   #DAC units
 Clientref = 1.0         #Volts
 Client_scale = 1.0e3
-#TODO: 99% sure these are in the daq config - adjust accordingly
+#TODO: 99% sure these are in the system config - adjust accordingly
 R_sa_fb = 5100.0
 R_sa_in = 2000.0
 R_sa_bias = 10000.0
@@ -68,5 +76,5 @@ def calculate_Ms():
         #not sure how that would work in practice - probably wont reduce code length the way I think
     #How do we want to order the plots?
     #Do we want to always create both documents or make them both optional? Kinda like a flag thing
-    
+
 
