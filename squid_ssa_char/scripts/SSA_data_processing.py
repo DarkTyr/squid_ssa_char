@@ -62,6 +62,22 @@ factor_dev_V = Clientref * Client_scale / (Clientfs * Pamp_gain)    #convert Mat
 #this includes converting from ADC values
 #TODO: do unit conversions in here too or nah?
 def calculate_Ms():
+    #TODO: do I reference the columns the same way as in data capture?
+    for col in columns:
+        #TODO: the idea is you find the places where the derivative's sign changes, store those indexes, then find the
+        #spacing between peaks 2 and 4 (two tops skips a bottom) then convert that range to proper units bc rn in ADC units
+        #TODO: this is a giant mess - need to reference the data properly, initialize storage variables, then actually convert units.
+        mfb_zeros = np.where(np.diff(np.signbit()))         #heres where we reference phase0_1_icmax_vphi
+        min_zeros = np.where(np.diff(np.signbit()))         #here reference phase1_0_icmax_vphi
+        if len(mfb_zeros) >= 4:
+            mfb_data[col,0] = phase0_1_icmax_vphi[col]      #TODO: reference this correctly
+            mfb_peak_centers_idx = int(np.average(mfb_zeros[2:4]))
+            mfb_data[col,1] = phase0_1_icmax_vphi[col,mfb_peak_centers_idx]
+
+        if len(min_zeros) >= 4:
+            min_data[col,0] = phase1_0_icmax_vphi[col]      #TODO: reference this correctly
+            min_peak_centers_idx = int(np.average(min_zeros[2:4]))
+            min_data[col,1] = phase1_0_icmax_vphi[col,min_peak_centers_idx]         
     return
 
 
