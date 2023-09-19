@@ -279,7 +279,7 @@ class SSA:
 
         # Loop through the columns and ramp up to the icmax dac voltage
         for col in range(self.ncol):
-            self.ramp_to_voltage(col, self.data[col].dac_ic_max)
+            self.ramp_to_voltage(self.sel_col[col], self.data[col].dac_ic_max)
         
         # Sleep to let system transient settle out before taking data
         time.sleep(phase_conf['bias_change_wait_ms'] / 1000.0)
@@ -314,7 +314,7 @@ class SSA:
 
         #loop throught the columns and ramp up to the icmax dac voltage
         for col in range(self.ncol):
-            self.ramp_to_voltage(col, self.data[col].dac_ic_max)
+            self.ramp_to_voltage(self.sel_col[col], self.data[col].dac_ic_max)
         
         #sleep to let system transient settle out before taking data
         time.sleep(phase_conf['bias_change_wait_ms'] / 1000.0)
