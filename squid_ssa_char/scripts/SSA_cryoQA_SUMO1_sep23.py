@@ -193,6 +193,8 @@ class SSA:
             self.data[idx].channel_num = self.test_conf['test_globals']['columns'][idx]
             self.data[idx].file_name = self.test_conf['info']['chip_ids'][idx] + '_' + \
                 self.date + '_chan{0:02}'.format(self.test_conf['test_globals']['columns'][idx])
+            #TODO: figure out how to access the test conf dictionary since its already been read in
+            self.data[idx].test_conf_name = ''
 
     # send triangle down fb to get baselines, sweep bias, pick off icmin, icmax and vmod
     def phase0_0(self):

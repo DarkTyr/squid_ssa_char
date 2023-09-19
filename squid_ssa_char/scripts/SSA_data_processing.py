@@ -29,7 +29,7 @@ now = '{0:04d}_'.format(today.tm_year) + '{0:02d}_'.format(today.tm_mon) + '{0:0
 
 #constants for calculations/unit conversions
 #TODO: not sure how many of these are needed at all let alone wanted here vs in some config
-phi0 = 2.06783383e-15   #magnetic flux quantum
+phi0 = 2.06783383e-15   #magnetic flux quantum (H*A)
 scale_L = 1.0e18        #1/(pH*uA)
 scale_uA = 1.0e6        #scale to microamps
 Pamp_gain = 96.0        #Tower preamp card gain TODO: this is part of the sys config?
@@ -64,7 +64,7 @@ factor_dev_V = Clientref * Client_scale / (Clientfs * Pamp_gain)    #convert Mat
 #first calculate the needed values for demarkation in the plots
 #this includes converting from ADC values
 #TODO: do unit conversions in here too or nah?
-def calculate_Ms(m_data, triangle_data):
+def calculate_Ms(m_data, triangle_data, scale_factor):
     m_average = np.average(m_data)
     #TODO: do I reference the columns the same way as in data capture?
         #TODO: the idea is you find the places where the derivative's sign changes, store those indexes, then find the
@@ -78,6 +78,7 @@ def calculate_Ms(m_data, triangle_data):
         delta1 = triangle_data[m_zeros[3]] - triangle_data[m_zeros[1]]
 
     M = phi0 / delta0 * factor_sa_fb * scale_L   
+    M = phi0 / delta0 * scale_factor  
     return M
 
 

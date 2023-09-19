@@ -23,6 +23,7 @@ class SSA_Data_Class:
         self.dac_n_bits = 14    # Number of of bits for the DAC : TODO: Needed?
         self.dac_vref = 2.5     # TODO: needed?
         self.channel_num = 0
+        self.test_conf_name = ''
         
         # Phase0 SA Bias Sweep Data While Sweeping Feedback
         self.dac_sweep_array = np.array([]) # Store the SA Bias DAC values we will sweep
