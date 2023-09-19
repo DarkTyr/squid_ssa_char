@@ -290,6 +290,7 @@ class SSA:
         #store gathered data for processing
         for col in range(self.ncol):
             self.data[col].phase0_1_icmax_vphi = err[self.sel_col[col]]
+            self.data[col].phase0_1_triangle = fb[self.sel_col[col]]
 
     
 
@@ -325,6 +326,7 @@ class SSA:
         #store gathered data for processing
         for col in range(self.ncol):
             self.data[col].phase1_0_icmax_vphi = err[self.sel_col[col]]
+            self.data[col].phase1_0_triangle = fb[self.sel_col[col]]
        
     #saves data results - john currently has this as part of the dataclass module  
     def save_data(self):

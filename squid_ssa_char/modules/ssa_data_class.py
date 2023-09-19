@@ -42,9 +42,11 @@ class SSA_Data_Class:
         
         # Phase0_1 Bias to Ic_Max while sweeping Feed Back and save V_Phi
         self.phase0_1_icmax_vphi = np.array([])
+        self.phase0_1_triangle = np.array([])
         
         # Phase1_0 Bias to Ic_Max while sweeping Input and save V_Phi
         self.phase1_0_icmax_vphi = np.array([])
+        self.phase1_0_triangle = np.array([])
         
     def save(self, save_all=False):
         '''
