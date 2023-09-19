@@ -22,9 +22,10 @@ import numpy as np
 import time
 from squid_ssa_char.modules import load_conf_yaml, ssa_data_class, daq, towerchannel
 
-#for date/time stamps on reports, now goes out to minutes but has no formatting so 9am will be 9 not 09
+#for date/time stamps on reports, now goes out to minutes 
 today = time.localtime()
-now = str(today.tm_year) + '_' + str(today.tm_mon) + '_' + str(today.tm_mday) + '_' + str(today.tm_hour) + '_' + str(today.tm_min)
+now = '{0:04d}_'.format(today.tm_year) + '{0:02d}_'.format(today.tm_mon) + '{0:02d}_'.format(today.tm_mday) + \
+    '{0:02d}'.format(today.tm_hour) + '{0:02d}'.format(today.tm_min)
 
 #constants for calculations/unit conversions
 #TODO: not sure how many of these are needed at all let alone wanted here vs in some config
