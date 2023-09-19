@@ -246,7 +246,7 @@ class SSA:
             _, err = self.daq.take_average_data_roll(avg_all_rows=True)
             
             # Move the gathered data to appropriate arrays and calculate min, max, values
-            for col in self.sel_col:
+            for col in self.ncol:
                 self.data[col].phase0_0_vphis[sweep_point] = err[self.sel_col[col]]
                 self.data[col].phase0_0_vmod_max[sweep_point] = np.max(err[self.sel_col[col]])
                 self.data[col].phase0_0_vmod_min[sweep_point] = np.min(err[self.sel_col[col]])
@@ -288,7 +288,7 @@ class SSA:
         fb, err = self.daq.take_average_data_roll(avg_all_rows=True)
         
         #store gathered data for processing
-        for col in self.sel_col:
+        for col in self.ncol:
             self.data[col].phase0_1_icmax_vphi = err[self.sel_col[col]]
 
     
@@ -323,7 +323,7 @@ class SSA:
         fb, err = self.daq.take_average_data_roll(avg_all_rows=True)
 
         #store gathered data for processing
-        for col in self.sel_col:
+        for col in self.ncol:
             self.data[col].phase1_0_icmax_vphi = err[self.sel_col[col]]
        
     #saves data results - john currently has this as part of the dataclass module  
