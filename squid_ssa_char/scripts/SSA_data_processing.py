@@ -77,7 +77,10 @@ def calculate_Ms():
         if len(min_zeros) >= 4:
             min_data[col,0] = phase1_0_icmax_vphi[col]      #TODO: reference this correctly
             min_peak_centers_idx = int(np.average(min_zeros[2:4]))
-            min_data[col,1] = phase1_0_icmax_vphi[col,min_peak_centers_idx]         
+            min_data[col,1] = phase1_0_icmax_vphi[col,min_peak_centers_idx]      
+
+    Mfb = phi0 / ((mfb_data[:,1]-mfb_data[:,0])*factor_sa_fb)*scale_L   
+    Min = phi0 / ((min_data[:,1]-min_data[:,0])*factor_sa_in)*scale_L       
     return
 
 
