@@ -64,18 +64,15 @@ factor_dev_V = Clientref * Client_scale / (Clientfs * Pamp_gain)    #convert Mat
 #first calculate the needed values for demarkation in the plots
 #this includes converting from ADC values
 #TODO: do unit conversions in here too or nah?
-def calculate_Ms():
-    mfb_data = np.array()
-    min_data = np.array()
+def calculate_Ms(m_data):
     #TODO: do I reference the columns the same way as in data capture?
     for col in columns:
         #TODO: the idea is you find the places where the derivative's sign changes, store those indexes, then find the
         #spacing between peaks 2 and 4 (two tops skips a bottom) then convert that range to proper units bc rn in ADC units
         #Do we need to shift this somehow? Or will this find the peaks as is?
         #TODO: this is a giant mess - need to reference the data properly, initialize storage variables, then actually convert units.
-        mfb_zeros = np.where(np.diff(np.signbit(phase0_1_icmax_vphi[col])))[0]         #heres where we reference phase0_1_icmax_vphi
-        min_zeros = np.where(np.diff(np.signbit()))[0]         #here reference phase1_0_icmax_vphi
-        if len(mfb_zeros) >= 4:
+        m_zeros = np.where(np.diff(np.signbit(m_data)))[0]         #heres where we reference phase0_1_icmax_vphi
+        if len(m_zeros) >= 4:
             mfb_data[col,0] = phase0_1_icmax_vphi[col]      #TODO: reference this correctly
             mfb_peak_centers_idx = int(np.average(mfb_zeros[2:4]))
             mfb_data[col,1] = phase0_1_icmax_vphi[col,mfb_peak_centers_idx]
@@ -122,3 +119,7 @@ if __name__ == '__main__':
     for i in range(len(fnames) - 1):
         data.append(ssa_data_class.SSA_Data_Class(fnames[i + 1]))
 
+
+    for i in data:
+        i.M_in = calculate_Ms(i.phase1_0_icmax_vphi)
+        i.M_fb = calculate_Ms(i.phase0_1_icmax_vphi)        
