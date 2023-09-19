@@ -64,27 +64,21 @@ factor_dev_V = Clientref * Client_scale / (Clientfs * Pamp_gain)    #convert Mat
 #first calculate the needed values for demarkation in the plots
 #this includes converting from ADC values
 #TODO: do unit conversions in here too or nah?
-def calculate_Ms(m_data):
+def calculate_Ms(m_data, triangle_data):
+    m_average = np.average(m_data)
     #TODO: do I reference the columns the same way as in data capture?
-    for col in columns:
         #TODO: the idea is you find the places where the derivative's sign changes, store those indexes, then find the
         #spacing between peaks 2 and 4 (two tops skips a bottom) then convert that range to proper units bc rn in ADC units
         #Do we need to shift this somehow? Or will this find the peaks as is?
         #TODO: this is a giant mess - need to reference the data properly, initialize storage variables, then actually convert units.
-        m_zeros = np.where(np.diff(np.signbit(m_data)))[0]         #heres where we reference phase0_1_icmax_vphi
-        if len(m_zeros) >= 4:
-            mfb_data[col,0] = phase0_1_icmax_vphi[col]      #TODO: reference this correctly
-            mfb_peak_centers_idx = int(np.average(mfb_zeros[2:4]))
-            mfb_data[col,1] = phase0_1_icmax_vphi[col,mfb_peak_centers_idx]
+    m_zeros = np.where(np.diff(np.signbit(m_data - m_average)))[0]         #heres where we reference phase0_1_icmax_vphi
+    if len(m_zeros) >= 4:
+        # We could do a calculation to find the peaks (average between the first two zeros, and the second pair of zeros)
+        delta0 = triangle_data[m_zeros[2]] - triangle_data[m_zeros[0]]
+        delta1 = triangle_data[m_zeros[3]] - triangle_data[m_zeros[1]]
 
-        if len(min_zeros) >= 4:
-            min_data[col,0] = phase1_0_icmax_vphi[col]      #TODO: reference this correctly
-            min_peak_centers_idx = int(np.average(min_zeros[2:4]))
-            min_data[col,1] = phase1_0_icmax_vphi[col,min_peak_centers_idx]      
-
-    Mfb = phi0 / ((mfb_data[:,1]-mfb_data[:,0])*factor_sa_fb)*scale_L   
-    Min = phi0 / ((min_data[:,1]-min_data[:,0])*factor_sa_in)*scale_L       
-    return
+    M = phi0 / delta0 * factor_sa_fb * scale_L   
+    return M
 
 
 #Thoughts:
