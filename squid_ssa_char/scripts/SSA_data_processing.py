@@ -59,17 +59,22 @@ factor_dev_I = Towerref * scale_uA / (Towerfs * R_sa_total)         #convert SAF
 factor_dev_V = Clientref * Client_scale / (Clientfs * Pamp_gain)    #convert Matter client ADC to device voltage [mV]
 
 
+
+
 #first calculate the needed values for demarkation in the plots
 #this includes converting from ADC values
 #TODO: do unit conversions in here too or nah?
 def calculate_Ms():
+    mfb_data = np.array()
+    min_data = np.array()
     #TODO: do I reference the columns the same way as in data capture?
     for col in columns:
         #TODO: the idea is you find the places where the derivative's sign changes, store those indexes, then find the
         #spacing between peaks 2 and 4 (two tops skips a bottom) then convert that range to proper units bc rn in ADC units
+        #Do we need to shift this somehow? Or will this find the peaks as is?
         #TODO: this is a giant mess - need to reference the data properly, initialize storage variables, then actually convert units.
-        mfb_zeros = np.where(np.diff(np.signbit()))         #heres where we reference phase0_1_icmax_vphi
-        min_zeros = np.where(np.diff(np.signbit()))         #here reference phase1_0_icmax_vphi
+        mfb_zeros = np.where(np.diff(np.signbit(phase0_1_icmax_vphi[col])))[0]         #heres where we reference phase0_1_icmax_vphi
+        min_zeros = np.where(np.diff(np.signbit()))[0]         #here reference phase1_0_icmax_vphi
         if len(mfb_zeros) >= 4:
             mfb_data[col,0] = phase0_1_icmax_vphi[col]      #TODO: reference this correctly
             mfb_peak_centers_idx = int(np.average(mfb_zeros[2:4]))
@@ -97,4 +102,23 @@ def calculate_Ms():
     #How do we want to order the plots?
     #Do we want to always create both documents or make them both optional? Kinda like a flag thing
 
+    #TODO: talk with John about loading in the files, the file path, and properly referencing data
+        #what do the argparse thingy do in original (first long thing), do we need it?
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Take data from QA_DAQ, scale it, plot it and generate a PDF report'
+                                     'for each device specified in list of files')
+    parser.add_argument('list_of_files',
+                        type=str,
+                        help='A list of paths to some files that will be parsed and plotted')
+    
+    args = parser.parse_args()
+
+    fnames = glob.glob(str(args.list_of_files))
+    fnames.sort()
+
+    data = [ssa_data_class.SSA_Data_Class(fnames[0])]
+    for i in range(len(fnames) - 1):
+        data.append(ssa_data_class.SSA_Data_Class(fnames[i + 1]))
 
