@@ -374,14 +374,14 @@ class SSA:
         for i in self.data:
             i.save(self.save_all_data_flag)
 
-
 HELP_TEXT = '''\
 This is the main SQUID Series Array Testing and Quality Assurance Data Script
 
 
 Currently a work in progress
 '''
-if (__name__ == '__main__'):
+
+def main():
     # Setup the flag and argument parser for the script
     parser = argparse.ArgumentParser(
         prog='config_check',
@@ -403,3 +403,7 @@ if (__name__ == '__main__'):
 
     test = SSA(args.sys_file_path, args.config_file_path, args.verbosity)
 
+
+if (__name__ == '__main__'):
+    main()
+    
