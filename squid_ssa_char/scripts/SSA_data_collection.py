@@ -30,20 +30,22 @@ class SSA:
     '''
     #initializes class
     '''
-    def __init__(self, sys_conf, test_conf):
+    def __init__(self, system_config_path, test_config_path, verbosity):
         '''
         Initializes the SSA class
         '''
-    
         # Configuration Dictionaries loaded from External Config Files
-        self.sys_conf = sys_conf
-        self.test_conf = test_conf
-        self.verbosity = 0
+        self._system_config_path = system_config_path
+        self._test_config_path = test_config_path
+        self._conf_parser = load_conf_yaml.Load_Conf_YAML(test_config_path, system_config_path, verbosity)
+        self.sys_conf = self._conf_parser.read_system_config()
+        self.test_conf = self._conf_parser.read_test_config()
+        self.verbosity = verbosity
         self.save_all_data_flag = False  # TODO: Should this be in the config? - Erin says yes, this is a leftover from day1
         
-        self.number_rows = test_conf['test_globals']['n_rows']
-        self.sel_col = test_conf['test_globals']['columns'] # Array of the selected columns
-        self.ncol = len(test_conf['test_globals']['columns'])   # length of the selectred columns
+        self.number_rows = self.test_conf['test_globals']['n_rows']
+        self.sel_col = self.test_conf['test_globals']['columns'] # Array of the selected columns
+        self.ncol = len(self.test_conf['test_globals']['columns'])   # length of the selectred columns
         
         self.data = [ssa_data_class.SSA_Data_Class()]
         for i in range(self.ncol - 1):
@@ -186,7 +188,9 @@ class SSA:
                 col.dac_ic_max = col.dac_sweep_array[icmax_idx]
 
     def bookkeeping(self):
-        '''This will copy values from the config files to the SSA data structures'''
+        '''This will copy values from the config files to the SSA data structures. These values will be used to either 
+        identify the devices, convert units to base units (uA and mV) and so forth.
+        '''
         for idx in range(self.ncol):
             self.data[idx].qa_name = self.test_conf['info']['user']
             self.data[idx].chip_id = self.test_conf['info']['chip_ids'][idx]
@@ -194,7 +198,9 @@ class SSA:
             self.data[idx].file_name = self.test_conf['info']['chip_ids'][idx] + '_' + \
                 self.date + '_chan{0:02}'.format(self.test_conf['test_globals']['columns'][idx])
             #TODO: figure out how to access the test conf dictionary since its already been read in
-            self.data[idx].test_conf_name = ''
+            self.data[idx].test_conf_path = self._test_config_path
+            self.data[idx].system_conf_path = self._system_config_path
+            
 
     # send triangle down fb to get baselines, sweep bias, pick off icmin, icmax and vmod
     def phase0_0(self):
@@ -365,10 +371,5 @@ if (__name__ == '__main__'):
                         action='store_true')
     args = parser.parse_args()
 
-    conf_parse = load_conf_yaml.Load_Conf_YAML(args.config_file_path, args.sys_file_path, args.verbosity)
-    sys_conf = conf_parse.read_system_config()
-    test_conf = conf_parse.read_test_config()
-
-    test = SSA(sys_conf, test_conf)
-    test.verbosity = args.verbosity
+    test = SSA(args.sys_file_path, args.config_file_path, args.verbosity)
 
