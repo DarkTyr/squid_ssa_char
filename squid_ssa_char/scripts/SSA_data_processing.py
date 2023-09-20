@@ -28,11 +28,11 @@ now = '{0:04d}_'.format(today.tm_year) + '{0:02d}_'.format(today.tm_mon) + '{0:0
     '{0:02d}'.format(today.tm_hour) + '{0:02d}'.format(today.tm_min)
 
 #constants for calculations/unit conversions
-#TODO: not sure how many of these are needed at all let alone wanted here vs in some config
 phi0 = 2.06783383e-15   #magnetic flux quantum (H*A)
 scale_L = 1.0e18        #1/(pH*uA)
 scale_uA = 1.0e6        #scale to microamps
-Pamp_gain = 96.0        #Tower preamp card gain TODO: this is part of the sys config?
+#TODO: ideally all constants below this are part of either the class or a config
+Pamp_gain = 96.0        #Tower preamp card gain 
 #tower bias DACs
 Towerfs = 2.0**16 - 1   #DAC units
 Towerref = 2.5          #Volts
@@ -44,7 +44,7 @@ DACref = 1.0            #Volts
 Clientfs = 2.0**12 -1   #DAC units
 Clientref = 1.0         #Volts
 Client_scale = 1.0e3
-#TODO: 99% sure these are in the system config - adjust accordingly
+#resistors
 R_sa_fb = 5100.0
 R_sa_in = 2000.0
 R_sa_bias = 10000.0
@@ -59,26 +59,21 @@ factor_dev_I = Towerref * scale_uA / (Towerfs * R_sa_total)         #convert SAF
 factor_dev_V = Clientref * Client_scale / (Clientfs * Pamp_gain)    #convert Matter client ADC to device voltage [mV]
 
 
-
-
 #first calculate the needed values for demarkation in the plots
 #this includes converting from ADC values
 #TODO: do unit conversions in here too or nah?
 def calculate_Ms(m_data, triangle_data, scale_factor):
-    m_average = np.average(m_data)
-    #TODO: do I reference the columns the same way as in data capture?
-        #TODO: the idea is you find the places where the derivative's sign changes, store those indexes, then find the
-        #spacing between peaks 2 and 4 (two tops skips a bottom) then convert that range to proper units bc rn in ADC units
-        #Do we need to shift this somehow? Or will this find the peaks as is?
-        #TODO: this is a giant mess - need to reference the data properly, initialize storage variables, then actually convert units.
-    m_zeros = np.where(np.diff(np.signbit(m_data - m_average)))[0]         #heres where we reference phase0_1_icmax_vphi
+    m_average = np.average(m_data)                                          #shift amount
+    m_zeros = np.where(np.diff(np.signbit(m_data - m_average)))[0]          #stores indexes where the now shifted vphi crosses 0
     if len(m_zeros) >= 4:
         # We could do a calculation to find the peaks (average between the first two zeros, and the second pair of zeros)
-        delta0 = triangle_data[m_zeros[2]] - triangle_data[m_zeros[0]]
+        #currently this picks M off the shifted 0s so still accurate but will be visually different
+        delta0 = triangle_data[m_zeros[2]] - triangle_data[m_zeros[0]]      # ADC value for M - the spacing between one full waveform of zeros
         delta1 = triangle_data[m_zeros[3]] - triangle_data[m_zeros[1]]
 
-    M = phi0 / delta0 * factor_sa_fb * scale_L   
-    M = phi0 / delta0 * scale_factor  
+    #TODO: how to handle scaling factor?
+    M = phi0 / delta0 * factor_sa_fb * scale_L      #aligns with original order of calculations
+    M = phi0 / delta0 * scale_factor                #this combines all scaling - to be used if we put these values in the class  
     return M
 
 
@@ -98,18 +93,32 @@ def calculate_Ms(m_data, triangle_data, scale_factor):
         #what do the argparse thingy do in original (first long thing), do we need it?
 
 
+#TODO: update help aspect to parser arguments
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Take data from QA_DAQ, scale it, plot it and generate a PDF report'
                                      'for each device specified in list of files')
     parser.add_argument('list_of_files',
                         type=str,
                         help='A list of paths to some files that will be parsed and plotted')
+    parser.add_argument('-f',
+                        dest='full_report',
+                        action='store_true',
+                        help='Makes plots summarizing the device measurements. Includes all plots our internal people requested to see')
+    parser.add_argument('-r',
+                        dest='pdf_report',
+                        action='store_true',
+                        help='Makes a pdf report for each chip including the selected plots generated in this script ')
+    parser.add_argument('-e',
+                        dest='external_reports',
+                        action='store_true',
+                        help='Creates only the plots we need to go with our deliverables')
     
     args = parser.parse_args()
 
     fnames = glob.glob(str(args.list_of_files))
     fnames.sort()
 
+    #TODO: need to actualy load in the data
     data = [ssa_data_class.SSA_Data_Class(fnames[0])]
     for i in range(len(fnames) - 1):
         data.append(ssa_data_class.SSA_Data_Class(fnames[i + 1]))
@@ -117,4 +126,5 @@ if __name__ == '__main__':
 
     for i in data:
         i.M_in = calculate_Ms(i.phase1_0_icmax_vphi)
-        i.M_fb = calculate_Ms(i.phase0_1_icmax_vphi)        
+        i.M_fb = calculate_Ms(i.phase0_1_icmax_vphi)
+       
