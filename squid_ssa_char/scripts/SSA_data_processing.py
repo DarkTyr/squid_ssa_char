@@ -31,7 +31,7 @@ now = '{0:04d}_'.format(today.tm_year) + '{0:02d}_'.format(today.tm_mon) + '{0:0
 phi0 = 2.06783383e-15   #magnetic flux quantum (H*A)
 scale_L = 1.0e18        #1/(pH*uA)
 scale_uA = 1.0e6        #scale to microamps
-#TODO: ideally all constants below this are part of either the class or a config
+#TODO: remove constants and factors below this, for now there here as reminders
 Pamp_gain = 96.0        #Tower preamp card gain 
 #tower bias DACs
 Towerfs = 2.0**16 - 1   #DAC units
@@ -82,14 +82,10 @@ def calculate_Ms(m_data, triangle_data, scale_factor):
         #con with this is xl is all 8 chips ususlly - could do just one table line? 
             #could also stick with the printout xl we put together for each module on top of this so its in 
             #multiple places
-    #how do plots? could create a function that takes x,y then returns a line plot then add things to 
-    # each plot made by the call?
-        #not sure how that would work in practice - probably wont reduce code length the way I think
-    #How do we want to order the plots?
     #Do we want to always create both documents or make them both optional? Kinda like a flag thing
 
-    #TODO: talk with John about loading in the files, the file path, and properly referencing data
-        #what do the argparse thingy do in original (first long thing), do we need it?
+    #TODO: talk with John about file path for final report storage
+
 
 
 #TODO: update help aspect to parser arguments
@@ -126,6 +122,49 @@ if __name__ == '__main__':
     for i in data:
         Mfb_scale_factor = ((i.sys.daq_dac_vref * scale_uA) / ((2**(i.sys.daq_dac_nbits) - 1) * i.sys.fb_bias_r)) * i.sys.daq_dac_gain
         Min_scale_factor = ((i.sys.in_dac_vref * scale_uA) / ((2**(i.sys.daq_dac_nbits) - 1) * i.sys.in_bias_r)) * i.sys.daq_dac_gain
-        i.M_in = calculate_Ms(i.phase1_0_icmax_vphi, i.phase1_0_triangle Min_scale_factor)
+        i.M_in = calculate_Ms(i.phase1_0_icmax_vphi, i.phase1_0_triangle, Min_scale_factor)
         i.M_fb = calculate_Ms(i.phase0_1_icmax_vphi, i.phase0_1_triangle, Mfb_scale_factor)
-        
+
+
+
+    #plot order:
+    #        **note that most of this is off the white board drawing in Erins office - so names might be wierd
+    #               TODO: figure out how these names relate to actual data variables LOL
+    # 
+    # Figure 1: mod depth [mV] vs SA bias [uA]
+    #     data product: phase0_0_vmod_sab
+    # 
+    # Figure 2: V_ssa [mV] vs Icmin and Icmax [uA]
+    #           data product: phase0_0_vmod_min and phase0_0_vmod_max
+    # 
+    # Figure 3: dVssa/dIsab vs Isab [uA]
+    #   also two curves at max and min?
+    #           data product: this needs to be calculated bc derivative?
+    #
+    #          ** -- start of analysis at max mod depth -- **
+    # Figure 4: Vssa [mV] vs Iin [uA]
+    #       data product: phase1_0_icmax_vphi
+    #       mark Min on this plot
+    #
+    # Figure 5: Vssa [mV] vs Ifab [uA]
+    #       data product = phase0_1_icmax_vphi
+    #       mark Mfb on this plot
+    #
+    # Figure 6: dV/dIin vs Vssa
+    #           transimpedance
+    #           data product: this needs to be calculated bc derivative?
+    #
+    # Figure 7: dV/dIin vs Ifbx
+    #           also transimpedance?
+    #           data product: this needs to be calculated bc derivative?
+    #
+    # Figure 8: dV/dIsab vs Vssa
+    #           dynamic resistance
+    #           data product: this needs to be calculated bc derivative?
+    #
+    # Figure 9: dV/dIsab vs Ifbx
+    #           also dynamic resisance?
+    #           data product: this needs to be calculated bc derivative?
+    #
+    #
+    #
