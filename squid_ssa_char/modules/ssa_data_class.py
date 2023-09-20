@@ -13,6 +13,33 @@
 import numpy as np
 import pickle
 
+class System:
+    def __init__(self):
+        # System Information required to do proper unit conversions
+        self.channel_num = 0    # Column number for the DAQ 
+        # SSA Pre-Amp specs
+        self.amp_gain = 0
+        self.amp_dac_nbits = 0
+        self.amp_dac_vref = 0
+        self.amp_bias_r = 0
+        # SSA FB Bias Card Specs
+        self.fb_dac_nbits = 0
+        self.fb_dac_vref = 0       
+        self.fb_bias_r = 0
+        # SSA IN Bias Card Specs
+        self.in_dac_nbits = 0
+        self.in_dac_vref = 0       
+        self.in_bias_r = 0
+        ## DAQ Information
+        # ADC Input Informations
+        self.daq_adc_nbits = 0
+        self.daq_adc_vrange = 1
+        self.daq_adc_gain = 1
+        # DAC Output Information
+        self.daq_dac_nbits = 0
+        self.daq_dac_vref = 1
+        self.daq_dac_gain = 1
+
 class SSA_Data_Class:
     def __init__(self):
         # Testing Information storage
@@ -20,10 +47,10 @@ class SSA_Data_Class:
         self.qa_name = ''       #Name of the Person performing the test
         self.system_name = ''   # Name fo the system the test was performed on
         self.file_name = ''     # Name of the file if/when saved
-        self.dac_n_bits = 14    # Number of of bits for the DAC : TODO: Needed?
-        self.dac_vref = 2.5     # TODO: needed?
-        self.channel_num = 0
-        self.test_conf_name = ''
+        self.test_conf_name = ''    # holder for the test_conf file name
+        self.system_conf_name = ''  # holder for the system_conf file name
+        # System Information required to do proper unit conversions
+        self.sys = System()
         
         # Phase0 SA Bias Sweep Data While Sweeping Feedback
         self.dac_sweep_array = np.array([]) # Store the SA Bias DAC values we will sweep

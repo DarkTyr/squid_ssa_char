@@ -84,6 +84,9 @@ crate:
     adc_vin_range: 1.0
     adc_n_bits: 14
     input_gain: 1
+    dac_vout_range: 1.0
+    dac_n_bits: 14
+    dac_gain: 1.0
   card1:
     name: "DFBx2 0"
     type: "DFBx2"
@@ -93,6 +96,9 @@ crate:
     adc_vin_range: 1.0
     adc_n_bits: 14
     input_gain: 1
+    dac_vout_range: 1.0
+    dac_n_bits: 14
+    dac_gain: 1.0
   card2:
     name: "DFBx2 1"
     type: "DFBx2"
@@ -102,6 +108,9 @@ crate:
     adc_vin_range: 1.0
     adc_n_bits: 14
     input_gain: 1
+    dac_vout_range: 1.0
+    dac_n_bits: 14
+    dac_gain: 1.0
   card3:
     name: "DFBx2 2"
     type: "DFBx2"
@@ -111,6 +120,9 @@ crate:
     adc_vin_range: 1.0
     adc_n_bits: 14
     input_gain: 1
+    dac_vout_range: 1.0
+    dac_n_bits: 14
+    dac_gain: 1.0
   card4:
     name: "DFBx2 0"
     type: "DFBx2"
@@ -120,6 +132,9 @@ crate:
     adc_vin_range: 1.0
     adc_n_bits: 14
     input_gain: 1
+    dac_vout_range: 1.0
+    dac_n_bits: 14
+    dac_gain: 1.0
 # end crate
 
 col_map:
