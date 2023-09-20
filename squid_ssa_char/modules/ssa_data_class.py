@@ -22,13 +22,16 @@ class System:
         self.amp_dac_nbits = 0
         self.amp_dac_vref = 0
         self.amp_bias_r = 0
+        self.amp_dac_gain = 1
         # SSA FB Bias Card Specs
         self.fb_dac_nbits = 0
-        self.fb_dac_vref = 0       
+        self.fb_dac_vref = 0
+        self.fb_dac_gain = 1
         self.fb_bias_r = 0
         # SSA IN Bias Card Specs
         self.in_dac_nbits = 0
-        self.in_dac_vref = 0       
+        self.in_dac_vref = 0
+        self.fb_dac_gain = 1
         self.in_bias_r = 0
         ## DAQ Information
         # ADC Input Informations

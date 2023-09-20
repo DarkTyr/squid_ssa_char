@@ -192,15 +192,45 @@ class SSA:
         identify the devices, convert units to base units (uA and mV) and so forth.
         '''
         for idx in range(self.ncol):
+            chan_num = int(self.test_conf['test_globals']['columns'][idx])
             self.data[idx].qa_name = self.test_conf['info']['user']
             self.data[idx].chip_id = self.test_conf['info']['chip_ids'][idx]
-            self.data[idx].channel_num = self.test_conf['test_globals']['columns'][idx]
             self.data[idx].file_name = self.test_conf['info']['chip_ids'][idx] + '_' + \
                 self.date + '_chan{0:02}'.format(self.test_conf['test_globals']['columns'][idx])
             #TODO: figure out how to access the test conf dictionary since its already been read in
+            self.data[idx].sys.channel_num = self.test_conf['test_globals']['columns'][idx]
             self.data[idx].test_conf_path = self._test_config_path
             self.data[idx].system_conf_path = self._system_config_path
-            
+            # Make temp vars to hold info about the card mapping
+            sa_bias_card = self.sys_conf['col_map']['col' + chan_num]['SA_Bias']
+            input_card = self.sys_conf['col_map']['col' + chan_num]['SA_Input']
+            feedback_card = self.sys_conf['col_map']['col' + chan_num]['SA_FB']
+            crate_info = self.sys_conf['col_map']['col' + chan_num]['DAQ']
+            # Now that we have the map, let us copy things into the data class
+            #   Pre-Amp with SA Bias DACs
+            self.data[idx].sys.amp_bias_r = self.sys_conf['tower'][sa_bias_card['tower_card']['bias_R'][int(sa_bias_card['tower_col_n'])]]
+            self.data[idx].sys.amp_gain = self.sys_conf['tower'][sa_bias_card['tower_card']['gain_effective'][int(sa_bias_card['tower_col_n'])]]
+            self.data[idx].sys.amp_dac_vref = self.sys_conf['tower'][sa_bias_card['tower_card']['dac_ref_v']]
+            self.data[idx].sys.amp_dac_nbits = self.sys_conf['tower'][sa_bias_card['tower_card']['dac_nbits']]
+            self.data[idx].sys.amp_dac_gain = self.sys_conf['tower'][sa_bias_card['tower_card']['dac_gain']]
+            #   Feedback Tower Bias Card though the DACs are not user here
+            self.data[idx].sys.fb_bias_r = self.sys_conf['tower'][feedback_card['tower_card']['bias_R'][int(feedback_card['tower_col_n'])]]
+            self.data[idx].sys.fb_dac_vref = self.sys_conf['tower'][feedback_card['tower_card']['dac_ref_v']]
+            self.data[idx].sys.fb_dac_nbits = self.sys_conf['tower'][feedback_card['tower_card']['dac_nbits']]
+            self.data[idx].sys.fb_dac_nbits = self.sys_conf['tower'][feedback_card['tower_card']['dac_gain']]
+             #   Feedback Tower Bias Card though the DACs are not user here
+            self.data[idx].sys.in_bias_r = self.sys_conf['tower'][input_card['tower_card']['bias_R'][int(input_card['tower_col_n'])]]
+            self.data[idx].sys.in_dac_vref = self.sys_conf['tower'][input_card['tower_card']['dac_ref_v']]
+            self.data[idx].sys.in_dac_nbits = self.sys_conf['tower'][input_card['tower_card']['dac_nbits']]
+            self.data[idx].sys.in_dac_nbits = self.sys_conf['tower'][input_card['tower_card']['dac_gain']]    
+            #   Crate DAQ Channel ADC
+            self.data[idx].sys.daq_adc_nbits = self.sys_conf['crate'][crate_info['card']]['adc_n_bits']
+            self.data[idx].sys.daq_adc_vrange = self.sys_conf['crate'][crate_info['card']]['adc_vin_range']
+            self.data[idx].sys.daq_adc_gain = self.sys_conf['crate'][crate_info['card']]['input_gain']
+            #   Crate DAQ Channel DAC
+            self.data[idx].sys.daq_dac_nbits = self.sys_conf['crate'][crate_info['card']]['dac_n_bits']
+            self.data[idx].sys.in_dac_vref = self.sys_conf['crate'][crate_info['card']]['dac_vout_range']
+            self.data[idx].sys.daq_dac_gain = self.sys_conf['crate'][crate_info['card']]['dac_gain']
 
     # send triangle down fb to get baselines, sweep bias, pick off icmin, icmax and vmod
     def phase0_0(self):
