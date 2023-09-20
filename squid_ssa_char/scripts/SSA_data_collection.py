@@ -18,6 +18,7 @@ import numpy as np
 import time
 
 # Installed Package Imports
+import IPython
 import named_serial # Can be sourced from multiple repos at NIST
 import tqdm
 #from statsmodels.nonparametric.smoothers_lowess import lowess
@@ -405,6 +406,8 @@ def main():
 
     test = SSA(args.sys_file_path, args.config_file_path, args.verbosity)
 
+    if(args.interactive):
+        IPython.start_ipython(argv=[], user_ns=locals())
 
 if (__name__ == '__main__'):
     main()
