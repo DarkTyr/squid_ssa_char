@@ -58,10 +58,12 @@ class SSA:
                     '{0:02d}'.format(today.tm_hour) + \
                     '{0:02d}'.format(today.tm_min)
         
+        self.bookkeeping()
+
         self.serialport = named_serial.Serial(port='rack', shared=True)
         self.tower = towerchannel.TowerChannel(cardaddr=0, column=0, serialport="tower")
         self.daq = daq.Daq() # Defaults are fine, will reassign later
-        self.bookkeeping()
+        
 
     #connects to the tower and sets the dac voltage bias for each channel  
     def set_sa_bias_voltage(self, channel, dac_value):
@@ -202,10 +204,10 @@ class SSA:
             self.data[idx].test_conf_path = self._test_config_path
             self.data[idx].system_conf_path = self._system_config_path
             # Make temp vars to hold info about the card mapping
-            sa_bias_card = self.sys_conf['col_map']['col' + chan_num]['SA_Bias']
-            input_card = self.sys_conf['col_map']['col' + chan_num]['SA_Input']
-            feedback_card = self.sys_conf['col_map']['col' + chan_num]['SA_FB']
-            crate_info = self.sys_conf['col_map']['col' + chan_num]['DAQ']
+            sa_bias_card = self.sys_conf['col_map']['col' + str(chan_num)]['SA_Bias']
+            input_card = self.sys_conf['col_map']['col' + str(chan_num)]['SA_Input']
+            feedback_card = self.sys_conf['col_map']['col' + str(chan_num)]['SA_FB']
+            crate_info = self.sys_conf['col_map']['col' + str(chan_num)]['DAQ']
             # Now that we have the map, let us copy things into the data class
             #   Pre-Amp with SA Bias DACs
             self.data[idx].sys.amp_bias_r = self.sys_conf['tower'][sa_bias_card['tower_card']['bias_R'][int(sa_bias_card['tower_col_n'])]]
