@@ -119,12 +119,13 @@ if __name__ == '__main__':
     fnames.sort()
 
     #TODO: need to actualy load in the data
-    data = [ssa_data_class.SSA_Data_Class(fnames[0])]
+    data = [ssa_data_class.SSA_Data_Class.load(fnames[0])]
     for i in range(len(fnames) - 1):
-        data.append(ssa_data_class.SSA_Data_Class(fnames[i + 1]))
+        data.append(ssa_data_class.SSA_Data_Class.load(fnames[i + 1]))
 
 
     for i in data:
+        Mfb_scale_factor = 4
         i.M_in = calculate_Ms(i.phase1_0_icmax_vphi)
         i.M_fb = calculate_Ms(i.phase0_1_icmax_vphi)
-       
+        
