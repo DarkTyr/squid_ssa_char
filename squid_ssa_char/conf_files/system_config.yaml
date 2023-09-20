@@ -143,10 +143,10 @@ col_map:
   col0:  # supported Columns 0 thru 7
     name: "col0"
     SA_Bias:
-      tower_card: card0 # Can use either the default card number card0..cardn or the name
+      tower_card: card0 # use card number card0..cardn
       tower_col_n: 0
     SA_FB:
-      tower_card: SSA_FB # nist_diff_bc
+      tower_card: card1 # nist_diff_bc
       tower_col_n: 0
     SA_Input: # Sometimes called SQ1 Bias
       tower_card: card2 # nist_diff_bc
