@@ -11,7 +11,7 @@
 
 #all imports from original - lets see what we end up using!
 import argparse
-import Ipython
+import IPython
 import glob
 import os
 from scipy.signal import butter, lfilter
@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import numpy as np
 import time
-from squid_ssa_char.modules import load_conf_yaml, ssa_data_class, daq, towerchannel
+from squid_ssa_char.modules import ssa_data_class
 
 #for date/time stamps on reports, now goes out to minutes 
 today = time.localtime()
@@ -72,7 +72,6 @@ def calculate_Ms(m_data, triangle_data, scale_factor):
         delta1 = triangle_data[m_zeros[3]] - triangle_data[m_zeros[1]]
 
     #TODO: how to handle scaling factor?
-    M = phi0 / delta0 * factor_sa_fb * scale_L      #aligns with original order of calculations
     M = phi0 / delta0 * scale_factor                #this combines all scaling - to be used if we put these values in the class  
     return M
 
@@ -118,14 +117,15 @@ if __name__ == '__main__':
     fnames = glob.glob(str(args.list_of_files))
     fnames.sort()
 
-    #TODO: need to actualy load in the data
-    data = [ssa_data_class.SSA_Data_Class.load(fnames[0])]
+    #TODO: add .load after SSA_Data_Class
+    data = [ssa_data_class.SSA_Data_Class(fnames[0])]
     for i in range(len(fnames) - 1):
-        data.append(ssa_data_class.SSA_Data_Class.load(fnames[i + 1]))
+        data.append(ssa_data_class.SSA_Data_Class(fnames[i + 1]))
 
 
     for i in data:
-        Mfb_scale_factor = 4
-        i.M_in = calculate_Ms(i.phase1_0_icmax_vphi)
-        i.M_fb = calculate_Ms(i.phase0_1_icmax_vphi)
+        Mfb_scale_factor = ((i.sys.daq_dac_vref * scale_uA) / ((2**(i.sys.daq_dac_nbits) - 1) * i.sys.fb_bias_r)) * i.sys.daq_dac_gain
+        Min_scale_factor = ((i.sys.in_dac_vref * scale_uA) / ((2**(i.sys.daq_dac_nbits) - 1) * i.sys.in_bias_r)) * i.sys.daq_dac_gain
+        i.M_in = calculate_Ms(i.phase1_0_icmax_vphi, i.phase1_0_triangle Min_scale_factor)
+        i.M_fb = calculate_Ms(i.phase0_1_icmax_vphi, i.phase0_1_triangle, Mfb_scale_factor)
         
