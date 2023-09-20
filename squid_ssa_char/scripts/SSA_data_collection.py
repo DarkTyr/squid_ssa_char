@@ -402,10 +402,13 @@ def main():
     parser.add_argument('-i', '--interactive', 
                         help='Drop into Interactive mode after setting up classes',
                         action='store_true')
+    parser.add_argument('-a', '--save_all_data', 
+                        help='Save all the VPhis from the Bias sweep, takes ~17 mB unzipped',
+                        action='store_true')
     args = parser.parse_args()
 
     test = SSA(args.sys_file_path, args.config_file_path, args.verbosity)
-
+    test.save_all_data_flag = args.save_all_data
     if(args.interactive):
         IPython.start_ipython(argv=[], user_ns=locals())
 
