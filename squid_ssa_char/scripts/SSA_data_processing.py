@@ -60,8 +60,7 @@ factor_dev_V = Clientref * Client_scale / (Clientfs * Pamp_gain)    #convert Mat
 
 
 #first calculate the needed values for demarkation in the plots
-#this includes converting from ADC values
-#TODO: do unit conversions in here too or nah?
+#this includes converting from ADC values, returns the M value and the two pickoff points for plot demarkation
 def calculate_Ms(m_data, triangle_data, scale_factor):
     m_average = np.average(m_data)                                          #shift amount
     m_zeros = np.where(np.diff(np.signbit(m_data - m_average)))[0]          #stores indexes where the now shifted vphi crosses 0
@@ -70,10 +69,14 @@ def calculate_Ms(m_data, triangle_data, scale_factor):
         #currently this picks M off the shifted 0s so still accurate but will be visually different
         delta0 = triangle_data[m_zeros[2]] - triangle_data[m_zeros[0]]      # ADC value for M - the spacing between one full waveform of zeros
         delta1 = triangle_data[m_zeros[3]] - triangle_data[m_zeros[1]]
+        m_start = triangle_data[m_zeros[0]]
+        m_end = triangle_data[m_zeros[2]]
 
-    #TODO: how to handle scaling factor?
-    M = phi0 / delta0 * scale_factor                #this combines all scaling - to be used if we put these values in the class  
-    return M
+    #scale the values to current 
+    M = phi0 / delta0 * scale_factor                #this combines all scaling - to be used if we put these values in the class
+    m_start = m_start * scale_factor
+    m_end = m_end * scale_factor  
+    return M, m_start, m_end
 
 
 #Thoughts:
@@ -122,8 +125,8 @@ if __name__ == '__main__':
     for i in data:
         Mfb_scale_factor = ((i.sys.daq_dac_vref * scale_uA) / ((2**(i.sys.daq_dac_nbits) - 1) * i.sys.fb_bias_r)) * i.sys.daq_dac_gain
         Min_scale_factor = ((i.sys.in_dac_vref * scale_uA) / ((2**(i.sys.daq_dac_nbits) - 1) * i.sys.in_bias_r)) * i.sys.daq_dac_gain
-        i.M_in = calculate_Ms(i.phase1_0_icmax_vphi, i.phase1_0_triangle, Min_scale_factor)
-        i.M_fb = calculate_Ms(i.phase0_1_icmax_vphi, i.phase0_1_triangle, Mfb_scale_factor)
+        i.M_in, i.Min_start, i.Min_end = calculate_Ms(i.phase1_0_icmax_vphi, i.phase1_0_triangle, Min_scale_factor)
+        i.M_fb, i.Mfb_start, i.Mfb_end = calculate_Ms(i.phase0_1_icmax_vphi, i.phase0_1_triangle, Mfb_scale_factor)
         i.factor_adc_mV = ((i.sys.daq_adc_vrange) / (2**i.sys.daq_adc_nbits - 1) / (i.sys.daq_adc_gain) / (i.sys.amp_gain)) * 1000
         i.sab_dac_factor = ((i.sys.amp_dac_vref * scale_uA) / ((2**(i.sys.amp_dac_nbits) - 1) * i.sys.amp_bias_r)) * i.sys.amp_dac_gain
 
@@ -163,10 +166,39 @@ if __name__ == '__main__':
         # plot 4: Vssa [mV] vs Iin [uA]
         #       data product: phase1_0_icmax_vphi vs phase1_0_triangle
         #       mark Min on this plot
-        #
+        fig2, (ax3, ax4) = plt.subplots(2,1)
+        fig2.suptitle('Figure 2: device ' + i.chip_id, fontsize=14, fontweight='bold')
+        ax3.plot((i.phase1_0_triangle * Min_scale_factor), (i.phase1_0_icmax_vphi * i.factor_adc_mV))
+        ax3.set_title('Device Voltage vs Input Current at at I$_{cmax}$')
+        ax3.set_ylabel('Device Voltage [mV]')
+        ax3.set_xlabel('SAIN Current [$\mu$A]')
+        ax3.axvline(x=i.Min_end, ymin=0, ymax=1)
+        ax3.axvline(x=i.Min_start, ymin=0, ymax=1)
+
+        #TODO: derivative of ax3 plot 
+        ax4.plot()
+        ax4.set_title('')
+        ax4.set_ylabel('')
+        ax4.set_xlabel('')
+        
         # plot 5: Vssa [mV] vs Ifab [uA]
         #       data product = phase0_1_icmax_vphi vs phase0_1_triangle
         #       mark Mfb on this plot
+        fig3, (ax5, ax6) = plt.subplots(2,1)
+        fig3.suptitle('Figure 3: device ' + i.chip_id, fontsize=14, fontweight='bold')
+        ax5.plot((i.phase0_1_triangle * Mfb_scale_factor), (i.phase0_1_icmax_vphi * i.factor_adc_mV))
+        ax5.set_title('Device Voltage vs Feedback Current at I$_{cmax}$')
+        ax5.set_ylabel('Device Voltage [mV]')
+        ax5.set_xlabel('SAFB Current [$\mu$A]')
+        ax5.axvline(x=i.Mfb_end, ymin=0, ymax=1)
+        ax5.axvline(x=i.Mfb_start, ymin=0, ymax=1)
+        #TODO: make the horizontal line between the two verticals, axhline uses grid coordinates so is HARD
+
+        #TODO: derivative of ax5 plot 
+        ax6.plot()
+        ax6.set_title('')
+        ax6.set_ylabel('')
+        ax6.set_xlabel('')
         #
         # plot 6: dV/dIin vs Vssa
         #           transimpedance
