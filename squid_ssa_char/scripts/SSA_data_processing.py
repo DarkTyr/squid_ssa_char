@@ -124,64 +124,65 @@ if __name__ == '__main__':
         Min_scale_factor = ((i.sys.in_dac_vref * scale_uA) / ((2**(i.sys.daq_dac_nbits) - 1) * i.sys.in_bias_r)) * i.sys.daq_dac_gain
         i.M_in = calculate_Ms(i.phase1_0_icmax_vphi, i.phase1_0_triangle, Min_scale_factor)
         i.M_fb = calculate_Ms(i.phase0_1_icmax_vphi, i.phase0_1_triangle, Mfb_scale_factor)
-        i.factor_adc_V = ((i.sys.daq_adc_vrange) / (2**i.sys.daq_adc_nbits - 1) / (i.sys.daq_adc_gain) / (i.sys.amp_gain))
-        #TODO: get this from John
-        i.factor_dac_I = 0
+        i.factor_adc_mV = ((i.sys.daq_adc_vrange) / (2**i.sys.daq_adc_nbits - 1) / (i.sys.daq_adc_gain) / (i.sys.amp_gain)) * 1000
+        i.sab_dac_factor = ((i.sys.amp_dac_vref * scale_uA) / ((2**(i.sys.amp_dac_nbits) - 1) * i.sys.amp_bias_r)) * i.sys.amp_dac_gain
 
+        #plot order:
+        #        **note that most of this is off the white board drawing in Erins office - so names might be wierd
+        #               TODO: figure out how these names relate to actual data variables LOL
+        # 
+        # plot 1: mod depth [mV] vs SA bias [uA]
+        #     data product: phase0_0_vmod_sab vs dac_sweep_array
+        fig1, (ax1, ax2) = plt.subplots(2,1)
+        fig1.suptitle('Figure 1: device ' + i.chip_id, fontsize=14, fontweight='bold')
+        ax1.plot((i.dac_sweep_array * i.sab_dac_factor), (i.phase0_0_vmod_sab * i.factor_adc_mV))
+        ax1.set_title('Voltage Modulation Depth vs Sa Bias')
+        ax1.set_xlabel('I$_{SAB}$ [$\mu$A]')
+        ax1.set_ylabel('SA Modulation Depth [mV]')
+        ax1.axvline(x = i.dac_ic_min * i.sab_dac_factor, ymin=0, ymax=1, color='b', lw=0.5)
+        ax1.axvline(x = i.dac_ic_max * i.sab_dac_factor, ymin=0, ymax=1, color='b', lw=0.5)
+        ax1.axhline(y = np.max(i.phase0_0_vmod_sab * i.factor_adc_mV), xmin=0, xmax=1, color='b', lw=0.5)
+        #TODO: add text labels to plot1 next to vlines and hlines 
 
-    #plot order:
-    #        **note that most of this is off the white board drawing in Erins office - so names might be wierd
-    #               TODO: figure out how these names relate to actual data variables LOL
-    # 
-    # plot 1: mod depth [mV] vs SA bias [uA]
-    #     data product: phase0_0_vmod_sab vs dac_sweep_array
-    fig1, (ax1, ax2) = plt.subplots(2,1)
-    fig1.suptitle('Figure 1: device ' + data[0].chip_id, fontsize=14, fontweight='bold')
-    ax1.plot((data[0].dac_sweep_array * data[0].factor_dac_I), (data[0].phase0_0_vmod_sab * data[0].factor_adc_V))
-    ax1.set_title('Voltage Modulation Depth vs Sa Bias')
-    ax1.set_xlabel('I$_{SAB}$ [$\mu$A]')
-    ax1.set_ylabel('SA Modulation Depth [mV]')
-    ax1.axvline(x = data[0].dac_ic_min*data[0].factor_dac_I, ymin=0, ymax=1, color='b', lw=0.5)
-    ax1.axvline(x = data[0].dac_ic_max*data[0].factor_dac_I, ymin=0, ymax=1, color='b', lw=0.5)
-    ax1.axhline(y =  , xmin=0, xmax=1, color='b', lw=0.5)
+        # plot 2: V_ssa_min and V_ssa_max [mV] vs SA bias [uA]
+        #           data product: phase0_0_vmod_min and phase0_0_vmod_max both vs dac_sweep_array
+        #TODO: make labels for legend more accurate
+        ax2.plot((i.dac_sweep_array * i.sab_dac_factor), (i.phase0_0_vmod_min * i.factor_adc_mV), label = 'Min')
+        ax2.plot((i.dac_sweep_array * i.sab_dac_factor), (i.phase0_0_vmod_max * i.factor_adc_mV), label = 'Max')
+        ax2.set_title('')
+        ax2.set_ylabel('SSA Voltage [mV]')
+        ax2.set_xlabel('I$_{SAB}$ [$\mu$A]')
+        ax2.legend()
 
-    # plot 2: V_ssa_min and V_ssa_max [mV] vs SA bias [uA]
-    #           data product: phase0_0_vmod_min and phase0_0_vmod_max both vs dac_sweep_array
-    ax2.plot((data[0].dac_sweep_array * data[0].factor_dac_I), (data[0].phase0_0_vmod_min * data[0].factor_adc_V))
-    ax2.plot((data[0].dac_sweep_array * data[0].factor_dac_I), (data[0].phase0_0_vmod_max * data[0].factor_adc_V))
-    ax2.set_title('')
-    ax2.set_ylabel('SSA Voltage [mV]')
-    ax2.set_xlabel('I$_{SAB}$ [$\mu$A]')
-
-    # 
-    # plot 3: dVssa/dIsab vs Isab [uA]
-    #   also two curves at max and min?
-    #           data product: this needs to be calculated bc derivative? (derivative of figure 2)
-    #
-    #          ** -- start of analysis at max mod depth -- **
-    # plot 4: Vssa [mV] vs Iin [uA]
-    #       data product: phase1_0_icmax_vphi vs phase1_0_triangle
-    #       mark Min on this plot
-    #
-    # plot 5: Vssa [mV] vs Ifab [uA]
-    #       data product = phase0_1_icmax_vphi vs phase0_1_triangle
-    #       mark Mfb on this plot
-    #
-    # plot 6: dV/dIin vs Vssa
-    #           transimpedance
-    #           data product: this needs to be calculated bc derivative?
-    #
-    # plot 7: dV/dIin vs Ifbx
-    #           also transimpedance?
-    #           data product: this needs to be calculated bc derivative?
-    #
-    # plot 8: dV/dIsab vs Vssa
-    #           dynamic resistance
-    #           data product: this needs to be calculated bc derivative?
-    #
-    # plot 9: dV/dIsab vs Ifbx
-    #           also dynamic resisance?
-    #           data product: this needs to be calculated bc derivative?
-    #
-    #
-    #
+        # 
+        # plot 3: dVssa/dIsab vs Isab [uA]
+        #   also two curves at max and min?
+        #           data product: this needs to be calculated bc derivative? (derivative of figure 2)
+        #
+        #          ** -- start of analysis at max mod depth -- **
+        # plot 4: Vssa [mV] vs Iin [uA]
+        #       data product: phase1_0_icmax_vphi vs phase1_0_triangle
+        #       mark Min on this plot
+        #
+        # plot 5: Vssa [mV] vs Ifab [uA]
+        #       data product = phase0_1_icmax_vphi vs phase0_1_triangle
+        #       mark Mfb on this plot
+        #
+        # plot 6: dV/dIin vs Vssa
+        #           transimpedance
+        #           data product: this needs to be calculated bc derivative?
+        #
+        # plot 7: dV/dIin vs Ifbx
+        #           also transimpedance?
+        #           data product: this needs to be calculated bc derivative?
+        #
+        # plot 8: dV/dIsab vs Vssa
+        #           dynamic resistance
+        #           data product: this needs to be calculated bc derivative?
+        #
+        # plot 9: dV/dIsab vs Ifbx
+        #           also dynamic resisance?
+        #           data product: this needs to be calculated bc derivative?
+        #
+        #
+        #
