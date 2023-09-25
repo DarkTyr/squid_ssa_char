@@ -73,7 +73,7 @@ def calculate_Ms(m_data, triangle_data, scale_factor):
         m_end = triangle_data[m_zeros[2]]
 
     #scale the values to current 
-    M = phi0 / delta0 * scale_factor                #this combines all scaling - to be used if we put these values in the class
+    M = (phi0 / (delta0 * scale_factor)) * scale_L                #this combines all scaling - to be used if we put these values in the class
     m_start = m_start * scale_factor
     m_end = m_end * scale_factor  
     return M, m_start, m_end
@@ -172,8 +172,16 @@ if __name__ == '__main__':
         ax3.set_title('Device Voltage vs Input Current at at I$_{cmax}$')
         ax3.set_ylabel('Device Voltage [mV]')
         ax3.set_xlabel('SAIN Current [$\mu$A]')
-        ax3.axvline(x=i.Min_end, ymin=0, ymax=1)
-        ax3.axvline(x=i.Min_start, ymin=0, ymax=1)
+        sain_xlim = int(np.max(i.phase1_0_triangle * Min_scale_factor)) + 1
+        ax3.set_xlim(0, sain_xlim)
+        ax3.set_ylim((np.min(i.phase1_0_icmax_vphi*i.factor_adc_mV))-1, np.max(i.phase1_0_icmax_vphi*i.factor_adc_mV)+1)
+        ax3.axvline(x=i.Min_end, ymin=0, ymax=1, lw=0.5)
+        ax3.axvline(x=i.Min_start, ymin=0, ymax=1, lw=0.5)
+        ax3.axhline(y=np.max(i.phase1_0_icmax_vphi * i.factor_adc_mV)*.75, xmin=(1.0/sain_xlim)*i.Min_start, xmax=(1.0/sain_xlim)*i.Min_end, lw=0.5)
+        ax3.axhline(y=np.min(i.phase1_0_icmax_vphi * i.factor_adc_mV), xmin=0, xmax=1, lw=0.5)
+        ax3.axhline(y=np.max(i.phase1_0_icmax_vphi * i.factor_adc_mV), xmin=0, xmax=1, lw=0.5)
+        ax3.text((i.Min_start+i.Min_end)/2, np.max(i.phase1_0_icmax_vphi * i.factor_adc_mV)*0.75, '$M_{in}$ = %.1f pH' %i.M_in, ha='center', va='center', \
+                 color='black', backgroundcolor='w', fontsize=10)
 
         #TODO: derivative of ax3 plot 
         ax4.plot()
@@ -190,8 +198,16 @@ if __name__ == '__main__':
         ax5.set_title('Device Voltage vs Feedback Current at I$_{cmax}$')
         ax5.set_ylabel('Device Voltage [mV]')
         ax5.set_xlabel('SAFB Current [$\mu$A]')
-        ax5.axvline(x=i.Mfb_end, ymin=0, ymax=1)
-        ax5.axvline(x=i.Mfb_start, ymin=0, ymax=1)
+        safb_xlim = int(np.max(i.phase0_1_triangle * Mfb_scale_factor)) + 1
+        ax5.set_xlim(0, safb_xlim)
+        ax5.set_ylim((np.min(i.phase0_1_icmax_vphi*i.factor_adc_mV))-1, np.max(i.phase0_1_icmax_vphi*i.factor_adc_mV)+1)
+        ax5.axvline(x=i.Mfb_end, ymin=0, ymax=1, lw=0.5)
+        ax5.axvline(x=i.Mfb_start, ymin=0, ymax=1, lw=0.5)
+        ax5.axhline(y=np.max(i.phase0_1_icmax_vphi * i.factor_adc_mV)*.75, xmin=(1.0/safb_xlim)*i.Mfb_start, xmax=(1.0/safb_xlim)*i.Mfb_end, lw=0.5)
+        ax5.axhline(y=np.min(i.phase0_1_icmax_vphi * i.factor_adc_mV), xmin=0, xmax=1, lw=0.5)
+        ax5.axhline(y=np.max(i.phase0_1_icmax_vphi * i.factor_adc_mV), xmin=0, xmax=1, lw=0.5)
+        ax5.text((i.Mfb_start+i.Mfb_end)/2, np.max(i.phase0_1_icmax_vphi * i.factor_adc_mV)*0.75, '$M_{fb}$ = %.1f pH' %i.M_fb, ha='center', va='center', \
+                 color='black', backgroundcolor='w', fontsize=10)
         #TODO: make the horizontal line between the two verticals, axhline uses grid coordinates so is HARD
 
         #TODO: derivative of ax5 plot 
