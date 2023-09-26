@@ -128,7 +128,7 @@ if __name__ == '__main__':
         i.M_in, i.Min_start, i.Min_end = calculate_Ms(i.phase1_0_icmax_vphi, i.phase1_0_triangle, Min_scale_factor)
         i.M_fb, i.Mfb_start, i.Mfb_end = calculate_Ms(i.phase0_1_icmax_vphi, i.phase0_1_triangle, Mfb_scale_factor)
         i.factor_adc_mV = ((i.sys.daq_adc_vrange) / (2**i.sys.daq_adc_nbits - 1) / (i.sys.daq_adc_gain) / (i.sys.amp_gain)) * 1000
-        i.sab_dac_factor = ((i.sys.amp_dac_vref * scale_uA) / ((2**(i.sys.amp_dac_nbits) - 1) * i.sys.amp_bias_r)) * i.sys.amp_dac_gain
+        i.sab_dac_factor = ((i.sys.amp_dac_vref * scale_uA) / ((2**(i.sys.amp_dac_nbits) - 1) * i.sys.amp_bias_r)) / i.sys.amp_dac_gain
 
         #plot order:
         #        **note that most of this is off the white board drawing in Erins office - so names might be wierd
@@ -180,8 +180,16 @@ if __name__ == '__main__':
         ax3.axhline(y=np.max(i.phase1_0_icmax_vphi * i.factor_adc_mV)*.75, xmin=(1.0/sain_xlim)*i.Min_start, xmax=(1.0/sain_xlim)*i.Min_end, lw=0.5)
         ax3.axhline(y=np.min(i.phase1_0_icmax_vphi * i.factor_adc_mV), xmin=0, xmax=1, lw=0.5)
         ax3.axhline(y=np.max(i.phase1_0_icmax_vphi * i.factor_adc_mV), xmin=0, xmax=1, lw=0.5)
-        ax3.text((i.Min_start+i.Min_end)/2, np.max(i.phase1_0_icmax_vphi * i.factor_adc_mV)*0.75, '$M_{in}$ = %.1f pH' %i.M_in, ha='center', va='center', \
-                 color='black', backgroundcolor='w', fontsize=10)
+        ax3.text((i.Min_start+i.Min_end)/2, np.max(i.phase1_0_icmax_vphi * i.factor_adc_mV)*0.75, '$M_{in}$ = %.1f pH' %i.M_in,\
+                 ha='center', va='center', color='black', backgroundcolor='w', fontsize=10)
+        ax3.text(i.Min_end, np.max(i.phase1_0_icmax_vphi * i.factor_adc_mV)*0.5, '%.1f' %i.Min_end, \
+                 ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)
+        ax3.text(i.Min_start, np.max(i.phase1_0_icmax_vphi * i.factor_adc_mV)*0.5, '%.1f' %i.Min_start, \
+                 ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)
+        ax3.text(sain_xlim*0.95, np.max(i.phase1_0_icmax_vphi * i.factor_adc_mV), '%.1f' %np.max(i.phase1_0_icmax_vphi * i.factor_adc_mV), \
+                 ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)
+        ax3.text(sain_xlim*0.95, np.min(i.phase1_0_icmax_vphi * i.factor_adc_mV), '%.1f' %np.min(i.phase1_0_icmax_vphi * i.factor_adc_mV), \
+                 ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)
 
         #TODO: derivative of ax3 plot 
         ax4.plot()
@@ -206,9 +214,16 @@ if __name__ == '__main__':
         ax5.axhline(y=np.max(i.phase0_1_icmax_vphi * i.factor_adc_mV)*.75, xmin=(1.0/safb_xlim)*i.Mfb_start, xmax=(1.0/safb_xlim)*i.Mfb_end, lw=0.5)
         ax5.axhline(y=np.min(i.phase0_1_icmax_vphi * i.factor_adc_mV), xmin=0, xmax=1, lw=0.5)
         ax5.axhline(y=np.max(i.phase0_1_icmax_vphi * i.factor_adc_mV), xmin=0, xmax=1, lw=0.5)
-        ax5.text((i.Mfb_start+i.Mfb_end)/2, np.max(i.phase0_1_icmax_vphi * i.factor_adc_mV)*0.75, '$M_{fb}$ = %.1f pH' %i.M_fb, ha='center', va='center', \
-                 color='black', backgroundcolor='w', fontsize=10)
-        #TODO: make the horizontal line between the two verticals, axhline uses grid coordinates so is HARD
+        ax5.text((i.Mfb_start+i.Mfb_end)/2, np.max(i.phase0_1_icmax_vphi * i.factor_adc_mV)*0.75, '$M_{fb}$ = %.1f pH' %i.M_fb, \
+                 ha='center', va='center', color='black', backgroundcolor='w', fontsize=10)
+        ax5.text(i.Mfb_end, np.max(i.phase0_1_icmax_vphi * i.factor_adc_mV)*0.5, '%.1f' %i.Mfb_end, \
+                 ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)
+        ax5.text(i.Mfb_start, np.max(i.phase0_1_icmax_vphi * i.factor_adc_mV)*0.5, '%.1f' %i.Mfb_start, \
+                 ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)
+        ax5.text(safb_xlim*0.95, np.min(i.phase0_1_icmax_vphi * i.factor_adc_mV), '%.1f' %np.min(i.phase0_1_icmax_vphi * i.factor_adc_mV), \
+                 ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)
+        ax5.text(safb_xlim*0.95, np.max(i.phase0_1_icmax_vphi * i.factor_adc_mV), '%.1f' %np.max(i.phase0_1_icmax_vphi * i.factor_adc_mV), \
+                 ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)
 
         #TODO: derivative of ax5 plot 
         ax6.plot()
