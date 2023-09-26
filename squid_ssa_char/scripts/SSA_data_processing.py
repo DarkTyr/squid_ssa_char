@@ -31,32 +31,32 @@ now = '{0:04d}_'.format(today.tm_year) + '{0:02d}_'.format(today.tm_mon) + '{0:0
 phi0 = 2.06783383e-15   #magnetic flux quantum (H*A)
 scale_L = 1.0e18        #1/(pH*uA)
 scale_uA = 1.0e6        #scale to microamps
-#TODO: remove constants and factors below this, for now there here as reminders
-Pamp_gain = 96.0        #Tower preamp card gain 
-#tower bias DACs
-Towerfs = 2.0**16 - 1   #DAC units
-Towerref = 2.5          #Volts
-#crate bias DACs
-DACfs = 2.0**14 -1      #DAC units
-DACref = 1.0            #Volts
-#client ADCs
-#TODO: likely wrong bc this assumes Matter not dastard
-Clientfs = 2.0**12 -1   #DAC units
-Clientref = 1.0         #Volts
-Client_scale = 1.0e3
-#resistors
-R_sa_fb = 5100.0
-R_sa_in = 2000.0
-R_sa_bias = 10000.0
-R_sa_DAC_out = 6250.0
-R_sa_total = R_sa_bias + R_sa_DAC_out
-#scaling factors - unit conversion
-#TODO: dont think we wanna do it this way but now there here...? Big thoughts to come
-factor_sa_fb = DACref * scale_uA / (DACfs * R_sa_fb)                #converts SAFB DAC to feedback current [uA]
-factor_sa_in = DACref * scale_uA / (DACfs * R_sa_in)                #converts SQ1FB DAC to input current [uA]
-factor_dev_I = Towerref * scale_uA / (Towerfs * R_sa_total)         #convert SAFB DAC to device current [uA]
-#TODO: likely wrong because uses Matter values and were gonna do Dastard
-factor_dev_V = Clientref * Client_scale / (Clientfs * Pamp_gain)    #convert Matter client ADC to device voltage [mV]
+# #TODO: remove constants and factors below this, for now there here as reminders
+# Pamp_gain = 96.0        #Tower preamp card gain 
+# #tower bias DACs
+# Towerfs = 2.0**16 - 1   #DAC units
+# Towerref = 2.5          #Volts
+# #crate bias DACs
+# DACfs = 2.0**14 -1      #DAC units
+# DACref = 1.0            #Volts
+# #client ADCs
+# #TODO: likely wrong bc this assumes Matter not dastard
+# Clientfs = 2.0**12 -1   #DAC units
+# Clientref = 1.0         #Volts
+# Client_scale = 1.0e3
+# #resistors
+# R_sa_fb = 5100.0
+# R_sa_in = 2000.0
+# R_sa_bias = 10000.0
+# R_sa_DAC_out = 6250.0
+# R_sa_total = R_sa_bias + R_sa_DAC_out
+# #scaling factors - unit conversion
+# #TODO: dont think we wanna do it this way but now there here...? Big thoughts to come
+# factor_sa_fb = DACref * scale_uA / (DACfs * R_sa_fb)                #converts SAFB DAC to feedback current [uA]
+# factor_sa_in = DACref * scale_uA / (DACfs * R_sa_in)                #converts SQ1FB DAC to input current [uA]
+# factor_dev_I = Towerref * scale_uA / (Towerfs * R_sa_total)         #convert SAFB DAC to device current [uA]
+# #TODO: likely wrong because uses Matter values and were gonna do Dastard
+# factor_dev_V = Clientref * Client_scale / (Clientfs * Pamp_gain)    #convert Matter client ADC to device voltage [mV]
 
 
 #first calculate the needed values for demarkation in the plots
@@ -78,18 +78,7 @@ def calculate_Ms(m_data, triangle_data, scale_factor):
     m_end = m_end * scale_factor  
     return M, m_start, m_end
 
-
-#Thoughts:
-    #create two outputs - one that has some plots for external use, one with all plots for internal use
-    #include xl table in the output doc - all one thing?
-        #con with this is xl is all 8 chips ususlly - could do just one table line? 
-            #could also stick with the printout xl we put together for each module on top of this so its in 
-            #multiple places
-    #Do we want to always create both documents or make them both optional? Kinda like a flag thing
-
-    #TODO: talk with John about file path for final report storage
-
-
+#TODO: talk with John about file path for final report storage
 
 #TODO: update help aspect to parser arguments
 if __name__ == '__main__':
@@ -145,17 +134,24 @@ if __name__ == '__main__':
         ax1.axvline(x = i.dac_ic_min * i.sab_dac_factor, ymin=0, ymax=1, color='b', lw=0.5)
         ax1.axvline(x = i.dac_ic_max * i.sab_dac_factor, ymin=0, ymax=1, color='b', lw=0.5)
         ax1.axhline(y = np.max(i.phase0_0_vmod_sab * i.factor_adc_mV), xmin=0, xmax=1, color='b', lw=0.5)
-        #TODO: add text labels to plot1 next to vlines and hlines 
+        ax1.text(i.dac_ic_min * i.sab_dac_factor, np.max(i.phase0_0_vmod_sab * i.factor_adc_mV)*0.7, '$I_{cmin}$ \n %.1f uA' %(i.dac_ic_min*i.sab_dac_factor), \
+                 ha='center', va='center', color = 'blue', backgroundcolor='w',fontsize=10)
+        ax1.text(i.dac_ic_max * i.sab_dac_factor, np.max(i.phase0_0_vmod_sab * i.factor_adc_mV)*0.4, '$I_{cmax}$ \n %.1f uA' %(i.dac_ic_max*i.sab_dac_factor), \
+                 ha='center', va='center', color = 'blue', backgroundcolor='w',fontsize=10)
+        ax1.text((i.dac_sweep_array[-1]*i.sab_dac_factor)*.95, np.max(i.phase0_0_vmod_sab*i.factor_adc_mV)*0.97, \
+                 '$V_{mod}$\n %.1f mV' %np.max(i.phase0_0_vmod_sab*i.factor_adc_mV), ha='center', va='center', color='blue', backgroundcolor ='w', fontsize=10)
 
         # plot 2: V_ssa_min and V_ssa_max [mV] vs SA bias [uA]
         #           data product: phase0_0_vmod_min and phase0_0_vmod_max both vs dac_sweep_array
         #TODO: make labels for legend more accurate
-        ax2.plot((i.dac_sweep_array * i.sab_dac_factor), (i.phase0_0_vmod_min * i.factor_adc_mV), label = 'Min')
-        ax2.plot((i.dac_sweep_array * i.sab_dac_factor), (i.phase0_0_vmod_max * i.factor_adc_mV), label = 'Max')
+        ax2.plot((i.dac_sweep_array * i.sab_dac_factor), (i.phase0_0_vmod_min * i.factor_adc_mV), label = '$V_{min}$')
+        ax2.plot((i.dac_sweep_array * i.sab_dac_factor), (i.phase0_0_vmod_max * i.factor_adc_mV), label = '$V_{max}$')
         ax2.set_title('')
         ax2.set_ylabel('SSA Voltage [mV]')
         ax2.set_xlabel('I$_{SAB}$ [$\mu$A]')
         ax2.legend()
+        ax2.text(np.max(i.dac_sweep_array*i.sab_dac_factor)*.95, np.max(i.phase0_0_vmod_min*i.factor_adc_mV)*.65, '$V_{min}$', ha='center', va='center', color='black', backgroundcolor='w',fontsize=10)
+        ax2.text(np.max(i.dac_sweep_array*i.sab_dac_factor)*.8, np.max(i.phase0_0_vmod_max*i.factor_adc_mV)*.9, '$V_{max}$', ha='center', va='center', color='black', backgroundcolor='w',fontsize=10)
 
         # 
         # plot 3: dVssa/dIsab vs Isab [uA]
