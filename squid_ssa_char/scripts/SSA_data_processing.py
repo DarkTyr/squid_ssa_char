@@ -15,12 +15,12 @@ import IPython
 import glob
 import os
 from scipy.signal import butter, lfilter
-import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import numpy as np
 import time
 from squid_ssa_char.modules import ssa_data_class
+from scipy import interpolate
 
 #for date/time stamps on reports, now goes out to minutes 
 today = time.localtime()
@@ -31,33 +31,6 @@ now = '{0:04d}_'.format(today.tm_year) + '{0:02d}_'.format(today.tm_mon) + '{0:0
 phi0 = 2.06783383e-15   #magnetic flux quantum (H*A)
 scale_L = 1.0e18        #1/(pH*uA)
 scale_uA = 1.0e6        #scale to microamps
-# #TODO: remove constants and factors below this, for now there here as reminders
-# Pamp_gain = 96.0        #Tower preamp card gain 
-# #tower bias DACs
-# Towerfs = 2.0**16 - 1   #DAC units
-# Towerref = 2.5          #Volts
-# #crate bias DACs
-# DACfs = 2.0**14 -1      #DAC units
-# DACref = 1.0            #Volts
-# #client ADCs
-# #TODO: likely wrong bc this assumes Matter not dastard
-# Clientfs = 2.0**12 -1   #DAC units
-# Clientref = 1.0         #Volts
-# Client_scale = 1.0e3
-# #resistors
-# R_sa_fb = 5100.0
-# R_sa_in = 2000.0
-# R_sa_bias = 10000.0
-# R_sa_DAC_out = 6250.0
-# R_sa_total = R_sa_bias + R_sa_DAC_out
-# #scaling factors - unit conversion
-# #TODO: dont think we wanna do it this way but now there here...? Big thoughts to come
-# factor_sa_fb = DACref * scale_uA / (DACfs * R_sa_fb)                #converts SAFB DAC to feedback current [uA]
-# factor_sa_in = DACref * scale_uA / (DACfs * R_sa_in)                #converts SQ1FB DAC to input current [uA]
-# factor_dev_I = Towerref * scale_uA / (Towerfs * R_sa_total)         #convert SAFB DAC to device current [uA]
-# #TODO: likely wrong because uses Matter values and were gonna do Dastard
-# factor_dev_V = Clientref * Client_scale / (Clientfs * Pamp_gain)    #convert Matter client ADC to device voltage [mV]
-
 
 #first calculate the needed values for demarkation in the plots
 #this includes converting from ADC values, returns the M value and the two pickoff points for plot demarkation
@@ -112,6 +85,7 @@ if __name__ == '__main__':
 
 
     for i in data:
+        #plotting scaling factors and call of M value calculations
         Mfb_scale_factor = ((i.sys.daq_dac_vref * scale_uA) / ((2**(i.sys.daq_dac_nbits) - 1) * i.sys.fb_bias_r)) * i.sys.daq_dac_gain
         Min_scale_factor = ((i.sys.in_dac_vref * scale_uA) / ((2**(i.sys.daq_dac_nbits) - 1) * i.sys.in_bias_r)) * i.sys.daq_dac_gain
         i.M_in, i.Min_start, i.Min_end = calculate_Ms(i.phase1_0_icmax_vphi, i.phase1_0_triangle, Min_scale_factor)
@@ -119,14 +93,32 @@ if __name__ == '__main__':
         i.factor_adc_mV = ((i.sys.daq_adc_vrange) / (2**i.sys.daq_adc_nbits - 1) / (i.sys.daq_adc_gain) / (i.sys.amp_gain)) * 1000
         i.sab_dac_factor = ((i.sys.amp_dac_vref * scale_uA) / ((2**(i.sys.amp_dac_nbits) - 1) * i.sys.amp_bias_r)) / i.sys.amp_dac_gain
 
-        #plot order:
-        #        **note that most of this is off the white board drawing in Erins office - so names might be wierd
-        #               TODO: figure out how these names relate to actual data variables LOL
-        # 
-        # plot 1: mod depth [mV] vs SA bias [uA]
-        #     data product: phase0_0_vmod_sab vs dac_sweep_array
+        #data smoothing and derivatives. Smoothing done using interpolate splrep and splev derivative with gradient
+        #These are derived then smoothed - we found for phase01 and phase10 data this method reduced noise without eliminating features
+        dVdI_fb = np.gradient(i.phase0_1_icmax_vphi*i.factor_adc_mV, i.phase0_1_triangle*Mfb_scale_factor)
+        dVdI_in = np.gradient(i.phase1_0_icmax_vphi*i.factor_adc_mV, i.phase1_0_triangle*Min_scale_factor)
+        intermediate01 = interpolate.splrep(i.phase0_1_triangle[0:int(0.5*len(i.phase0_1_triangle))], dVdI_fb[0:int(0.5*len(i.phase0_1_triangle))], k=2, s=15)
+        intermediate10 = interpolate.splrep(i.phase1_0_triangle[0:int(0.5*len(i.phase1_0_triangle))], dVdI_in[0:int(0.5*len(i.phase1_0_triangle))], k=2, s=9)
+        dVdI_fb_smooth = interpolate.splev(i.phase0_1_triangle[0:int(0.5*len(i.phase0_1_triangle))], intermediate01, der=0)
+        dVdI_in_smooth = interpolate.splev(i.phase1_0_triangle[0:int(0.5*len(i.phase1_0_triangle))], intermediate10, der=0)
+
+        #these are smoothed then derived - for phase00 data this method reduced noise without eliminating features 
+        intermediate00_max = interpolate.splrep(i.dac_sweep_array, i.phase0_0_vmod_max, k=2, s=9)
+        intermediate00_min = interpolate.splrep(i.dac_sweep_array, i.phase0_0_vmod_min, k=2, s=9)
+        intermediate00_sab = interpolate.splrep(i.dac_sweep_array, i.phase0_0_vmod_sab, k=2, s=9)
+        phase0_0_max_smooth = interpolate.splev(i.dac_sweep_array, intermediate00_max, der=0) 
+        phase0_0_min_smooth = interpolate.splev(i.dac_sweep_array, intermediate00_min, der=0)
+        phase0_0_vphi_smooth = interpolate.splev(i.dac_sweep_array, intermediate00_sab, der=0)
+        dVmodmax_dIsab = np.gradient(phase0_0_max_smooth*i.factor_adc_mV, i.dac_sweep_array*i.sab_dac_factor)
+        dVmodmin_dIsab = np.gradient(phase0_0_min_smooth*i.factor_adc_mV, i.dac_sweep_array*i.sab_dac_factor)
+        dVdI_sab = np.gradient(phase0_0_vphi_smooth*i.factor_adc_mV, i.dac_sweep_array*i.sab_dac_factor)
+        
+        #start of plotting
         fig1, (ax1, ax2) = plt.subplots(2,1)
+        fig1.set_size_inches(7.5, 10, forward=True)
+        fig1.subplots_adjust(hspace=0.35)
         fig1.suptitle('Figure 1: device ' + i.chip_id, fontsize=14, fontweight='bold')
+        # plot 1: mod depth [mV] vs SA bias current [uA]
         ax1.plot((i.dac_sweep_array * i.sab_dac_factor), (i.phase0_0_vmod_sab * i.factor_adc_mV))
         ax1.set_title('Voltage Modulation Depth vs Sa Bias')
         ax1.set_xlabel('I$_{SAB}$ [$\mu$A]')
@@ -134,15 +126,14 @@ if __name__ == '__main__':
         ax1.axvline(x = i.dac_ic_min * i.sab_dac_factor, ymin=0, ymax=1, color='b', lw=0.5)
         ax1.axvline(x = i.dac_ic_max * i.sab_dac_factor, ymin=0, ymax=1, color='b', lw=0.5)
         ax1.axhline(y = np.max(i.phase0_0_vmod_sab * i.factor_adc_mV), xmin=0, xmax=1, color='b', lw=0.5)
-        ax1.text(i.dac_ic_min * i.sab_dac_factor, np.max(i.phase0_0_vmod_sab * i.factor_adc_mV)*0.7, '$I_{cmin}$ \n %.1f uA' %(i.dac_ic_min*i.sab_dac_factor), \
+        ax1.text(i.dac_ic_min * i.sab_dac_factor, np.max(i.phase0_0_vmod_sab * i.factor_adc_mV)*0.7, '$I_{cmin}$ \n %.1f $\mu$A' %(i.dac_ic_min*i.sab_dac_factor), \
                  ha='center', va='center', color = 'blue', backgroundcolor='w',fontsize=10)
-        ax1.text(i.dac_ic_max * i.sab_dac_factor, np.max(i.phase0_0_vmod_sab * i.factor_adc_mV)*0.4, '$I_{cmax}$ \n %.1f uA' %(i.dac_ic_max*i.sab_dac_factor), \
+        ax1.text(i.dac_ic_max * i.sab_dac_factor, np.max(i.phase0_0_vmod_sab * i.factor_adc_mV)*0.4, '$I_{cmax}$ \n %.1f $\mu$A' %(i.dac_ic_max*i.sab_dac_factor), \
                  ha='center', va='center', color = 'blue', backgroundcolor='w',fontsize=10)
         ax1.text((i.dac_sweep_array[-1]*i.sab_dac_factor)*.95, np.max(i.phase0_0_vmod_sab*i.factor_adc_mV)*0.97, \
                  '$V_{mod}$\n %.1f mV' %np.max(i.phase0_0_vmod_sab*i.factor_adc_mV), ha='center', va='center', color='blue', backgroundcolor ='w', fontsize=10)
 
         # plot 2: V_ssa_min and V_ssa_max [mV] vs SA bias [uA]
-        #           data product: phase0_0_vmod_min and phase0_0_vmod_max both vs dac_sweep_array
         #TODO: make labels for legend more accurate
         ax2.plot((i.dac_sweep_array * i.sab_dac_factor), (i.phase0_0_vmod_min * i.factor_adc_mV), label = '$V_{min}$')
         ax2.plot((i.dac_sweep_array * i.sab_dac_factor), (i.phase0_0_vmod_max * i.factor_adc_mV), label = '$V_{max}$')
@@ -153,17 +144,12 @@ if __name__ == '__main__':
         ax2.text(np.max(i.dac_sweep_array*i.sab_dac_factor)*.95, np.max(i.phase0_0_vmod_min*i.factor_adc_mV)*.65, '$V_{min}$', ha='center', va='center', color='black', backgroundcolor='w',fontsize=10)
         ax2.text(np.max(i.dac_sweep_array*i.sab_dac_factor)*.8, np.max(i.phase0_0_vmod_max*i.factor_adc_mV)*.9, '$V_{max}$', ha='center', va='center', color='black', backgroundcolor='w',fontsize=10)
 
-        # 
-        # plot 3: dVssa/dIsab vs Isab [uA]
-        #   also two curves at max and min?
-        #           data product: this needs to be calculated bc derivative? (derivative of figure 2)
-        #
-        #          ** -- start of analysis at max mod depth -- **
-        # plot 4: Vssa [mV] vs Iin [uA]
-        #       data product: phase1_0_icmax_vphi vs phase1_0_triangle
-        #       mark Min on this plot
+
         fig2, (ax3, ax4) = plt.subplots(2,1)
+        fig2.set_size_inches(7.5, 10, forward=True)
+        fig2.subplots_adjust(hspace=0.35)
         fig2.suptitle('Figure 2: device ' + i.chip_id, fontsize=14, fontweight='bold')
+        # plot 3: Vssa [mV] vs Iin [uA], Min marked on this plot
         ax3.plot((i.phase1_0_triangle * Min_scale_factor), (i.phase1_0_icmax_vphi * i.factor_adc_mV))
         ax3.set_title('Device Voltage vs Input Current at at I$_{cmax}$')
         ax3.set_ylabel('Device Voltage [mV]')
@@ -178,25 +164,25 @@ if __name__ == '__main__':
         ax3.axhline(y=np.max(i.phase1_0_icmax_vphi * i.factor_adc_mV), xmin=0, xmax=1, lw=0.5)
         ax3.text((i.Min_start+i.Min_end)/2, np.max(i.phase1_0_icmax_vphi * i.factor_adc_mV)*0.75, '$M_{in}$ = %.1f pH' %i.M_in,\
                  ha='center', va='center', color='black', backgroundcolor='w', fontsize=10)
-        ax3.text(i.Min_end, np.max(i.phase1_0_icmax_vphi * i.factor_adc_mV)*0.5, '%.1f' %i.Min_end, \
+        ax3.text(i.Min_end, np.max(i.phase1_0_icmax_vphi * i.factor_adc_mV)*0.15, '%.1f' %i.Min_end, \
                  ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)
-        ax3.text(i.Min_start, np.max(i.phase1_0_icmax_vphi * i.factor_adc_mV)*0.5, '%.1f' %i.Min_start, \
+        ax3.text(i.Min_start, np.max(i.phase1_0_icmax_vphi * i.factor_adc_mV)*0.15, '%.1f' %i.Min_start, \
                  ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)
         ax3.text(sain_xlim*0.95, np.max(i.phase1_0_icmax_vphi * i.factor_adc_mV), '%.1f' %np.max(i.phase1_0_icmax_vphi * i.factor_adc_mV), \
                  ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)
         ax3.text(sain_xlim*0.95, np.min(i.phase1_0_icmax_vphi * i.factor_adc_mV), '%.1f' %np.min(i.phase1_0_icmax_vphi * i.factor_adc_mV), \
                  ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)
 
-        #TODO: derivative of ax3 plot 
-        ax4.plot()
-        ax4.set_title('')
-        ax4.set_ylabel('')
-        ax4.set_xlabel('')
+        # derivative of Vssa vs Isain 
+        ax4.plot((i.phase1_0_triangle[0:int(0.5*len(i.phase1_0_triangle))])*Min_scale_factor, dVdI_in_smooth)
+        ax4.set_title('SA Input Gain vs SA Input Current at I$_{cmax}$')
+        ax4.set_ylabel('dV$_{dev}$/dI$_{SAIN}$ [$\mu$V/$\mu$A]')
+        ax4.set_xlabel('SAIN Current [$\mu$A]')
         
-        # plot 5: Vssa [mV] vs Ifab [uA]
-        #       data product = phase0_1_icmax_vphi vs phase0_1_triangle
-        #       mark Mfb on this plot
+        # plot 5: Vssa [mV] vs Ifab [uA], Mfb marked on this plot
         fig3, (ax5, ax6) = plt.subplots(2,1)
+        fig3.set_size_inches(7.5, 10, forward=True)
+        fig3.subplots_adjust(hspace=0.35)
         fig3.suptitle('Figure 3: device ' + i.chip_id, fontsize=14, fontweight='bold')
         ax5.plot((i.phase0_1_triangle * Mfb_scale_factor), (i.phase0_1_icmax_vphi * i.factor_adc_mV))
         ax5.set_title('Device Voltage vs Feedback Current at I$_{cmax}$')
@@ -212,36 +198,56 @@ if __name__ == '__main__':
         ax5.axhline(y=np.max(i.phase0_1_icmax_vphi * i.factor_adc_mV), xmin=0, xmax=1, lw=0.5)
         ax5.text((i.Mfb_start+i.Mfb_end)/2, np.max(i.phase0_1_icmax_vphi * i.factor_adc_mV)*0.75, '$M_{fb}$ = %.1f pH' %i.M_fb, \
                  ha='center', va='center', color='black', backgroundcolor='w', fontsize=10)
-        ax5.text(i.Mfb_end, np.max(i.phase0_1_icmax_vphi * i.factor_adc_mV)*0.5, '%.1f' %i.Mfb_end, \
+        ax5.text(i.Mfb_end, np.max(i.phase0_1_icmax_vphi * i.factor_adc_mV)*0.15, '%.1f' %i.Mfb_end, \
                  ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)
-        ax5.text(i.Mfb_start, np.max(i.phase0_1_icmax_vphi * i.factor_adc_mV)*0.5, '%.1f' %i.Mfb_start, \
+        ax5.text(i.Mfb_start, np.max(i.phase0_1_icmax_vphi * i.factor_adc_mV)*0.15, '%.1f' %i.Mfb_start, \
                  ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)
         ax5.text(safb_xlim*0.95, np.min(i.phase0_1_icmax_vphi * i.factor_adc_mV), '%.1f' %np.min(i.phase0_1_icmax_vphi * i.factor_adc_mV), \
                  ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)
         ax5.text(safb_xlim*0.95, np.max(i.phase0_1_icmax_vphi * i.factor_adc_mV), '%.1f' %np.max(i.phase0_1_icmax_vphi * i.factor_adc_mV), \
                  ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)
 
-        #TODO: derivative of ax5 plot 
-        ax6.plot()
-        ax6.set_title('')
-        ax6.set_ylabel('')
-        ax6.set_xlabel('')
+        #derivative of Vssa vs Isafb plot
+        ax6.plot((i.phase0_1_triangle[0:int(0.5*len(i.phase0_1_triangle))])*Mfb_scale_factor, dVdI_fb_smooth)
+        ax6.set_title('Feedback Gain vs Feedback Current at I$_{cmax}$')
+        ax6.set_ylabel('dV$_{dev}$/dI$_{SAFB}$ [mV/$\mu$A]')
+        ax6.set_xlabel('SAFB Current [$\mu$A]')
+
+        fig4, (ax7, ax8) = plt.subplots(2,1)
+        fig4.set_size_inches(7.5, 10, forward=True)
+        fig4.subplots_adjust(hspace=0.35)
+        fig4.suptitle('Figure 4: device ' + i.chip_id, fontsize=14, fontweight='bold')
         #
-        # plot 6: dV/dIin vs Vssa
-        #           transimpedance
-        #           data product: this needs to be calculated bc derivative?
+        # plot 7: dVssa/dIsab vs Isab
+        #TODO: update title and axes labels
+        ax7.plot(i.dac_sweep_array*i.sab_dac_factor, dVmodmax_dIsab, label = 'dV$_{max}$/dI$_{SAB}$')
+        ax7.plot(i.dac_sweep_array*i.sab_dac_factor, dVmodmin_dIsab, label = 'dV$_{min}$/dI$_{SAB}$')
+        ax7.set_title('Not sure What this is called just yet')
+        ax7.set_xlabel('dV$_{SSA}$/dI$_{SAB}$')
+        ax7.set_ylabel('I$_{SAB}$ [$\mu$A]')
+        ax7.legend()
+        # plot 8: dV/dIin vs Vssa
+        #           transimpedance? - TODO: malcolm also wanted this bs Ifbx but I think thats already in ax4? derivative of Vssa vs Iin vs Iin?
+        ax8.plot(i.phase1_0_icmax_vphi[0:int(0.5*len(i.phase1_0_triangle))]*i.factor_adc_mV, dVdI_in_smooth)
+        ax8.set_title('Device Transimpedance vs Device Voltage')
+        ax8.set_xlabel('V$_{SSA}$ input [mV]')
+        ax8.set_ylabel('dV$_{SSA}$/dI$_{in}$ [mV/$\mu$A]')
         #
-        # plot 7: dV/dIin vs Ifbx
-        #           also transimpedance?
-        #           data product: this needs to be calculated bc derivative?
-        #
-        # plot 8: dV/dIsab vs Vssa
-        #           dynamic resistance
-        #           data product: this needs to be calculated bc derivative?
-        #
-        # plot 9: dV/dIsab vs Ifbx
-        #           also dynamic resisance?
-        #           data product: this needs to be calculated bc derivative?
-        #
+        fig5, (ax9, ax10) = plt.subplots(2,1)
+        fig5.set_size_inches(7.5, 10, forward=True)
+        fig5.subplots_adjust(hspace=0.35)
+        fig5.suptitle('*THIS IS WRONG* Figure 5: device ' + i.chip_id, fontsize=14, fontweight='bold')
+        # plot 9: dV/dIsab vs Vssa
+        #           dynamic resistance TODO: update title, check if data products are right (unlikely)
+        ax9.plot(i.phase0_0_vmod_sab*i.factor_adc_mV, dVdI_sab)
+        ax9.set_title('Not sure what this is or if its right YAY')
+        ax9.set_xlabel('V$_{SSA}$ [mV]')
+        ax9.set_ylabel('dV$_{SSA}$/dI$_{SAB}$')
+        # plot 10: dV/dIsab vs Ifbx
+        #           also dynamic resisance? TODO: update title, check if data products are right (unlikely)
+        ax10.plot(i.phase0_1_triangle[0:len(dVdI_sab)]*Mfb_scale_factor, dVdI_sab)
+        ax10.set_title('Same as above my dude')
+        ax10.set_xlabel('I$_{FBX}$')
+        ax10.set_ylabel('dV$_{SSA}$/dI$_{SAB}$')
         #
         #
