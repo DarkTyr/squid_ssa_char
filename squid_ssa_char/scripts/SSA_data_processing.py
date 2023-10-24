@@ -51,7 +51,7 @@ def calculate_Ms(m_data, triangle_data, scale_factor):
     m_end = m_end * scale_factor  
     return M, m_start, m_end
 
-#TODO: talk with John about file path for final report storage
+#TODO: talk with John about file path for final report storage                                           
 
 #TODO: update help aspect to parser arguments
 if __name__ == '__main__':
@@ -99,8 +99,8 @@ if __name__ == '__main__':
         dVdI_in = np.gradient(i.phase1_0_icmax_vphi*i.factor_adc_mV, i.phase1_0_triangle*Min_scale_factor)
         intermediate01 = interpolate.splrep(i.phase0_1_triangle[0:int(0.5*len(i.phase0_1_triangle))], dVdI_fb[0:int(0.5*len(i.phase0_1_triangle))], k=2, s=15)
         intermediate10 = interpolate.splrep(i.phase1_0_triangle[0:int(0.5*len(i.phase1_0_triangle))], dVdI_in[0:int(0.5*len(i.phase1_0_triangle))], k=2, s=9)
-        dVdI_fb_smooth = interpolate.splev(i.phase0_1_triangle[0:int(0.5*len(i.phase0_1_triangle))], intermediate01, der=0)
-        dVdI_in_smooth = interpolate.splev(i.phase1_0_triangle[0:int(0.5*len(i.phase1_0_triangle))], intermediate10, der=0)
+        dVdI_fb_smooth = interpolate.splev(i.phase0_1_triangle[0:int(0.5*len(i.phase0_1_triangle))], intermediate01, der=0)*1000
+        dVdI_in_smooth = interpolate.splev(i.phase1_0_triangle[0:int(0.5*len(i.phase1_0_triangle))], intermediate10, der=0)*1000
 
         #these are smoothed then derived - for phase00 data this method reduced noise without eliminating features 
         intermediate00_max = interpolate.splrep(i.dac_sweep_array, i.phase0_0_vmod_max, k=2, s=9)
@@ -109,9 +109,9 @@ if __name__ == '__main__':
         phase0_0_max_smooth = interpolate.splev(i.dac_sweep_array, intermediate00_max, der=0) 
         phase0_0_min_smooth = interpolate.splev(i.dac_sweep_array, intermediate00_min, der=0)
         phase0_0_vphi_smooth = interpolate.splev(i.dac_sweep_array, intermediate00_sab, der=0)
-        dVmodmax_dIsab = np.gradient(phase0_0_max_smooth*i.factor_adc_mV, i.dac_sweep_array*i.sab_dac_factor)
-        dVmodmin_dIsab = np.gradient(phase0_0_min_smooth*i.factor_adc_mV, i.dac_sweep_array*i.sab_dac_factor)
-        dVdI_sab = np.gradient(phase0_0_vphi_smooth*i.factor_adc_mV, i.dac_sweep_array*i.sab_dac_factor)
+        dVmodmax_dIsab = np.gradient(phase0_0_max_smooth*i.factor_adc_mV*1000, i.dac_sweep_array*i.sab_dac_factor)
+        dVmodmin_dIsab = np.gradient(phase0_0_min_smooth*i.factor_adc_mV*1000, i.dac_sweep_array*i.sab_dac_factor)
+        dVdI_sab = np.gradient(phase0_0_vphi_smooth*i.factor_adc_mV*1000, i.dac_sweep_array*i.sab_dac_factor)
         
         #start of plotting
         fig1, (ax1, ax2) = plt.subplots(2,1)
@@ -178,6 +178,13 @@ if __name__ == '__main__':
         ax4.set_title('SA Input Gain vs SA Input Current at I$_{cmax}$')
         ax4.set_ylabel('dV$_{dev}$/dI$_{SAIN}$ [$\mu$V/$\mu$A]')
         ax4.set_xlabel('SAIN Current [$\mu$A]')
+        ax4.set_xlim(0, sain_xlim)
+        ax4.axhline(y=np.max(dVdI_in_smooth), xmin=0, xmax=1, lw=0.5)
+        ax4.axhline(y=np.min(dVdI_in_smooth), xmin=0, xmax=1, lw=0.5)
+        ax4.text(sain_xlim*0.95, np.min(dVdI_in_smooth), '%.1f' %np.min(dVdI_fb_smooth), \
+                 ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)
+        ax4.text(sain_xlim*0.95, np.max(dVdI_in_smooth), '%.1f' %np.max(dVdI_fb_smooth), \
+                 ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)          
         
         # plot 5: Vssa [mV] vs Ifab [uA], Mfb marked on this plot
         fig3, (ax5, ax6) = plt.subplots(2,1)
@@ -210,20 +217,26 @@ if __name__ == '__main__':
         #derivative of Vssa vs Isafb plot
         ax6.plot((i.phase0_1_triangle[0:int(0.5*len(i.phase0_1_triangle))])*Mfb_scale_factor, dVdI_fb_smooth)
         ax6.set_title('Feedback Gain vs Feedback Current at I$_{cmax}$')
-        ax6.set_ylabel('dV$_{dev}$/dI$_{SAFB}$ [mV/$\mu$A]')
+        ax6.set_ylabel('dV$_{dev}$/dI$_{SAFB}$ [$\mu$V/$\mu$A]')
         ax6.set_xlabel('SAFB Current [$\mu$A]')
+        ax6.set_xlim(0, safb_xlim)
+        ax6.axhline(y=np.max(dVdI_fb_smooth), xmin=0, xmax=1, lw=0.5)
+        ax6.axhline(y=np.min(dVdI_fb_smooth), xmin=0, xmax=1, lw=0.5)
+        ax6.text(safb_xlim*0.95, np.min(dVdI_fb_smooth), '%.1f' %np.min(dVdI_fb_smooth), \
+                 ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)
+        ax6.text(safb_xlim*0.95, np.max(dVdI_fb_smooth), '%.1f' %np.max(dVdI_fb_smooth), \
+                 ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)        
 
         fig4, (ax7, ax8) = plt.subplots(2,1)
         fig4.set_size_inches(7.5, 10, forward=True)
         fig4.subplots_adjust(hspace=0.35)
         fig4.suptitle('Figure 4: device ' + i.chip_id, fontsize=14, fontweight='bold')
-        #
         # plot 7: dVssa/dIsab vs Isab
         #TODO: update title and axes labels
         ax7.plot(i.dac_sweep_array*i.sab_dac_factor, dVmodmax_dIsab, label = 'dV$_{max}$/dI$_{SAB}$')
         ax7.plot(i.dac_sweep_array*i.sab_dac_factor, dVmodmin_dIsab, label = 'dV$_{min}$/dI$_{SAB}$')
         ax7.set_title('Not sure What this is called just yet')
-        ax7.set_xlabel('dV$_{SSA}$/dI$_{SAB}$')
+        ax7.set_xlabel('dV$_{SSA}$/dI$_{SAB}$ [$\mu$V/$\mu$A]')
         ax7.set_ylabel('I$_{SAB}$ [$\mu$A]')
         ax7.legend()
         # plot 8: dV/dIin vs Vssa
@@ -231,7 +244,7 @@ if __name__ == '__main__':
         ax8.plot(i.phase1_0_icmax_vphi[0:int(0.5*len(i.phase1_0_triangle))]*i.factor_adc_mV, dVdI_in_smooth)
         ax8.set_title('Device Transimpedance vs Device Voltage')
         ax8.set_xlabel('V$_{SSA}$ input [mV]')
-        ax8.set_ylabel('dV$_{SSA}$/dI$_{in}$ [mV/$\mu$A]')
+        ax8.set_ylabel('dV$_{SSA}$/dI$_{in}$ [$\mu$V/$\mu$A]')
         #
         fig5, (ax9, ax10) = plt.subplots(2,1)
         fig5.set_size_inches(7.5, 10, forward=True)
