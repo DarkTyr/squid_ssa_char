@@ -236,8 +236,8 @@ if __name__ == '__main__':
         ax7.plot(i.dac_sweep_array*i.sab_dac_factor, dVmodmax_dIsab, label = 'dV$_{max}$/dI$_{SAB}$')
         ax7.plot(i.dac_sweep_array*i.sab_dac_factor, dVmodmin_dIsab, label = 'dV$_{min}$/dI$_{SAB}$')
         ax7.set_title('Not sure What this is called just yet')
-        ax7.set_xlabel('dV$_{SSA}$/dI$_{SAB}$ [$\mu$V/$\mu$A]')
-        ax7.set_ylabel('I$_{SAB}$ [$\mu$A]')
+        ax7.set_ylabel('dV$_{SSA}$/dI$_{SAB}$ [$\mu$V/$\mu$A]')
+        ax7.set_xlabel('I$_{SAB}$ [$\mu$A]')
         ax7.legend()
         # plot 8: dV/dIin vs Vssa
         #           transimpedance? - TODO: malcolm also wanted this bs Ifbx but I think thats already in ax4? derivative of Vssa vs Iin vs Iin?
