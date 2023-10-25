@@ -239,6 +239,18 @@ if __name__ == '__main__':
         ax7.set_ylabel('dV$_{SSA}$/dI$_{SAB}$ [$\mu$V/$\mu$A]')
         ax7.set_xlabel('I$_{SAB}$ [$\mu$A]')
         ax7.legend()
+        asymptote_max = np.mean(dVmodmax_dIsab[-7:-1])
+        asymptote_min = np.mean(dVmodmin_dIsab[-7:-1])
+        baseline = np.mean([np.mean(dVmodmax_dIsab[0:10]), np.mean(dVmodmin_dIsab[0:10])])
+        ax7.axhline(y=asymptote_max, xmin=0, xmax=1, lw=0.5, ls='--', color='k')
+        ax7.axhline(y=asymptote_min, xmin=0, xmax=1, lw=0.5, ls = '--', color='k')
+        ax7.axhline(y=baseline, xmin=0, xmax=1, lw=0.5, ls = '--', color='k')
+        ax7.text(i.dac_sweep_array[-1]*i.sab_dac_factor, dVmodmax_dIsab[-1]*.8, '%.1f' %asymptote_max, \
+                 ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)
+        ax7.text(i.dac_sweep_array[-1]*i.sab_dac_factor, dVmodmin_dIsab[-1]*1.2, '%.1f' %asymptote_min, \
+                 ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)
+        ax7.text(i.dac_sweep_array[-1]*i.sab_dac_factor, baseline*1.2, '%.1f' %baseline, \
+                 ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)          
         # plot 8: dV/dIin vs Vssa
         #           transimpedance? - TODO: malcolm also wanted this bs Ifbx but I think thats already in ax4? derivative of Vssa vs Iin vs Iin?
         ax8.plot(i.phase1_0_icmax_vphi[0:int(0.5*len(i.phase1_0_triangle))]*i.factor_adc_mV, dVdI_in_smooth)
