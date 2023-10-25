@@ -245,11 +245,11 @@ if __name__ == '__main__':
         ax7.axhline(y=asymptote_max, xmin=0, xmax=1, lw=0.5, ls='--', color='k')
         ax7.axhline(y=asymptote_min, xmin=0, xmax=1, lw=0.5, ls = '--', color='k')
         ax7.axhline(y=baseline, xmin=0, xmax=1, lw=0.5, ls = '--', color='k')
-        ax7.text(i.dac_sweep_array[-1]*i.sab_dac_factor, dVmodmax_dIsab[-1]*.8, '%.1f' %asymptote_max, \
+        ax7.text(i.dac_sweep_array[-1]*i.sab_dac_factor, dVmodmax_dIsab[-1]*.8, '%.1f ohms' %asymptote_max, \
                  ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)
-        ax7.text(i.dac_sweep_array[-1]*i.sab_dac_factor, dVmodmin_dIsab[-1]*1.2, '%.1f' %asymptote_min, \
+        ax7.text(i.dac_sweep_array[-1]*i.sab_dac_factor, dVmodmin_dIsab[-1]*1.2, '%.1f ohms' %asymptote_min, \
                  ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)
-        ax7.text(i.dac_sweep_array[-1]*i.sab_dac_factor, baseline*1.2, '%.1f' %baseline, \
+        ax7.text(i.dac_sweep_array[-1]*i.sab_dac_factor, baseline*1.2, '%.1f ohms' %baseline, \
                  ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)          
         # plot 8: dV/dIin vs Vssa
         #           transimpedance? - TODO: malcolm also wanted this bs Ifbx but I think thats already in ax4? derivative of Vssa vs Iin vs Iin?
