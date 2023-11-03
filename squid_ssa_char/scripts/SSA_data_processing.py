@@ -74,9 +74,7 @@ if __name__ == '__main__':
                         help='Creates only the plots we need to go with our deliverables')
     
     args = parser.parse_args()
-
-    fnames = glob.glob(str(args.list_of_files))
-    fnames.sort()
+    
 
     #TODO: add .load after SSA_Data_Class
     data = [ssa_data_class.SSA_Data_Class(fnames[0])]
@@ -113,6 +111,11 @@ if __name__ == '__main__':
         dVmodmin_dIsab = np.gradient(phase0_0_min_smooth*i.factor_adc_mV*1000, i.dac_sweep_array*i.sab_dac_factor)
         dVdI_sab = np.gradient(phase0_0_vphi_smooth*i.factor_adc_mV*1000, i.dac_sweep_array*i.sab_dac_factor)
         
+        if args.pdf_report:
+            report_name = fname_path + '/' + fname + '.pdf'
+            pdf = PdfPages(report_name)
+            print('Generating Report: ', report_name)
+            
         #start of plotting
         fig1, (ax1, ax2) = plt.subplots(2,1)
         fig1.set_size_inches(7.5, 10, forward=True)
@@ -142,7 +145,9 @@ if __name__ == '__main__':
         ax2.set_xlabel('I$_{SAB}$ [$\mu$A]')
         ax2.legend()
         ax2.text(np.max(i.dac_sweep_array*i.sab_dac_factor)*.95, np.max(i.phase0_0_vmod_min*i.factor_adc_mV)*.65, '$V_{min}$', ha='center', va='center', color='black', backgroundcolor='w',fontsize=10)
-        ax2.text(np.max(i.dac_sweep_array*i.sab_dac_factor)*.8, np.max(i.phase0_0_vmod_max*i.factor_adc_mV)*.9, '$V_{max}$', ha='center', va='center', color='black', backgroundcolor='w',fontsize=10)
+        
+        if args.pdf_report:
+            pdf.savefig()
 
 
         fig2, (ax3, ax4) = plt.subplots(2,1)
@@ -184,7 +189,10 @@ if __name__ == '__main__':
         ax4.text(sain_xlim*0.95, np.min(dVdI_in_smooth), '%.1f' %np.min(dVdI_fb_smooth), \
                  ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)
         ax4.text(sain_xlim*0.95, np.max(dVdI_in_smooth), '%.1f' %np.max(dVdI_fb_smooth), \
-                 ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)          
+                 ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)
+
+        if args.pdf_report:
+            pdf.savefig()          
         
         # plot 5: Vssa [mV] vs Ifab [uA], Mfb marked on this plot
         fig3, (ax5, ax6) = plt.subplots(2,1)
@@ -225,7 +233,10 @@ if __name__ == '__main__':
         ax6.text(safb_xlim*0.95, np.min(dVdI_fb_smooth), '%.1f' %np.min(dVdI_fb_smooth), \
                  ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)
         ax6.text(safb_xlim*0.95, np.max(dVdI_fb_smooth), '%.1f' %np.max(dVdI_fb_smooth), \
-                 ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)        
+                 ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)
+
+        if args.pdf_report:
+            pdf.savefig()        
 
         fig4, (ax7, ax8) = plt.subplots(2,1)
         fig4.set_size_inches(7.5, 10, forward=True)
@@ -257,6 +268,9 @@ if __name__ == '__main__':
         ax8.set_title('Device Transimpedance vs Device Voltage')
         ax8.set_xlabel('V$_{SSA}$ input [mV]')
         ax8.set_ylabel('dV$_{SSA}$/dI$_{in}$ [$\mu$V/$\mu$A]')
+
+        if args.pdf_report:
+            pdf.savefig()
         #
         fig5, (ax9, ax10) = plt.subplots(2,1)
         fig5.set_size_inches(7.5, 10, forward=True)
@@ -275,4 +289,6 @@ if __name__ == '__main__':
         ax10.set_xlabel('I$_{FBX}$')
         ax10.set_ylabel('dV$_{SSA}$/dI$_{SAB}$')
         #
+        if args.pdf_report:
+            pdf.savefig()
         #
