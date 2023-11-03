@@ -297,3 +297,5 @@ if __name__ == '__main__':
         #
         if args.pdf_report:
             pdf.close()
+        elif not args.pdf_report:
+            plt.show()
