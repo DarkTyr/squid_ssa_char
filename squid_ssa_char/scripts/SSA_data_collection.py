@@ -240,6 +240,7 @@ class SSA:
         '''
         Sweep SQUID SSA Bias and extract ADC_min, ADC_max, and ADC_modulation depth
         The units will be left in ADC units reported by DASTARD
+        The sweep end point is in the test config file and is determined by the SSA design
         '''
         # gather variables from configs
         phase_conf = self.test_conf['phase0_0']
@@ -302,7 +303,7 @@ class SSA:
    #work to get Mfb. ramp to icmax dac voltage then store the vphis
     def phase0_1(self):
         '''
-        Biases squids to ADC_max value then stores the vphis
+        Biases squids to ADC_max value then stores the vphis and the triangle
         The units will be left in ADC units reported by DASTARD
         '''
        #gather variables from config
@@ -338,7 +339,7 @@ class SSA:
     #send triangle down input to get min then store the vphis
     def phase1_0(self):
         '''
-        Sends signal to the inputs, biases the squids to ADC_max, then stores the vphis
+        Sends signal to the inputs, biases the squids to ADC_max, then stores the vphis and the triangle
         The units will be left in ADC units reported by DASTARD
         '''
         #gather variables from config
