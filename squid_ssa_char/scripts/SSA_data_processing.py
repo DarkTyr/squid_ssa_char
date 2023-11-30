@@ -111,7 +111,7 @@ if __name__ == '__main__':
         dVmodmin_dIsab = np.gradient(phase0_0_min_smooth*i.factor_adc_mV*1000, i.dac_sweep_array*i.sab_dac_factor)
         dVdI_sab = np.gradient(phase0_0_vphi_smooth*i.factor_adc_mV*1000, i.dac_sweep_array*i.sab_dac_factor)
 
-        #setup for data table
+        #setup for data table of calculated values
         tdata = [round((i.dac_ic_min*i.sab_dac_factor),2), round((i.dac_ic_max*i.sab_dac_factor),2), round((np.max(i.phase0_0_vmod_sab*i.factor_adc_mV)),2), \
                  round((i.M_fb),2), round((i.M_in),2), round((i.M_in)/(i.M_fb),2)]
         column_labels = ['Icmin [$\mu$A]', 'Icmax [$\mu$A]', 'Mod Depth [mV]', 'Mfb [pH]', 'Min [pH]', 'Min/Mfb']
@@ -125,11 +125,11 @@ if __name__ == '__main__':
         #TODO: currently it just makes everything for either argument, make more sophisticated
         if args.full_report or args.external_report:
             #start of plotting
-            fig1, (ax0, ax1, ax2) = plt.subplots(3,1)
+            fig1, (ax0, ax1, ax2) = plt.subplots(3,1, gridspec_kw={'height_ratios': [1, 10, 10]})
             fig1.set_size_inches(7.5, 10, forward=True)
             fig1.subplots_adjust(hspace=0.35)
             fig1.suptitle('Figure 1: device ' + i.chip_id, fontsize=14, fontweight='bold')
-            #table of values for the chip
+            #table of values for the chip - turn off axes and frame then make the table
             ax0.set_frame_on(False)
             ax0.set_xticks([])
             ax0.set_yticks([])
@@ -156,12 +156,13 @@ if __name__ == '__main__':
             #TODO: make labels for legend more accurate
             ax2.plot((i.dac_sweep_array * i.sab_dac_factor), (i.phase0_0_vmod_min * i.factor_adc_mV), label = '$V_{min}$')
             ax2.plot((i.dac_sweep_array * i.sab_dac_factor), (i.phase0_0_vmod_max * i.factor_adc_mV), label = '$V_{max}$')
-            ax2.set_title('')
+            ax2.set_title('Ask Malcolm what to call this')
             ax2.set_ylabel('SSA Voltage [mV]')
             ax2.set_xlabel('I$_{SAB}$ [$\mu$A]')
             ax2.legend()
             ax2.text(np.max(i.dac_sweep_array*i.sab_dac_factor)*.95, np.max(i.phase0_0_vmod_min*i.factor_adc_mV)*.65, '$V_{min}$', ha='center', va='center', color='black', backgroundcolor='w',fontsize=10)
-            
+            ax2.text(np.max(i.dac_sweep_array*i.sab_dac_factor)*.7, np.max(i.phase0_0_vmod_max*i.factor_adc_mV)*.85, '$V_{max}$', ha='center', va='center', color='black', backgroundcolor='w',fontsize=10)
+
             if args.pdf_report:
                 pdf.savefig()
 
