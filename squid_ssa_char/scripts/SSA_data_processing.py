@@ -110,6 +110,11 @@ if __name__ == '__main__':
         dVmodmax_dIsab = np.gradient(phase0_0_max_smooth*i.factor_adc_mV*1000, i.dac_sweep_array*i.sab_dac_factor)
         dVmodmin_dIsab = np.gradient(phase0_0_min_smooth*i.factor_adc_mV*1000, i.dac_sweep_array*i.sab_dac_factor)
         dVdI_sab = np.gradient(phase0_0_vphi_smooth*i.factor_adc_mV*1000, i.dac_sweep_array*i.sab_dac_factor)
+
+        #setup for data table
+        tdata = [round((i.dac_ic_min*i.sab_dac_factor),2), round((i.dac_ic_max*i.sab_dac_factor),2), round((np.max(i.phase0_0_vmod_sab*i.factor_adc_mV)),2), \
+                 round((i.M_fb),2), round((i.M_in),2), round((i.M_in)/(i.M_fb),2)]
+        column_labels = ['Icmin [$\mu$A]', 'Icmax [$\mu$A]', 'Mod Depth [mV]', 'Mfb [pH]', 'Min [pH]', 'Min/Mfb']
         
         #TODO: actually name the file path this is a HUGE filler right now
         if args.pdf_report:
@@ -120,10 +125,18 @@ if __name__ == '__main__':
         #TODO: currently it just makes everything for either argument, make more sophisticated
         if args.full_report or args.external_report:
             #start of plotting
-            fig1, (ax1, ax2) = plt.subplots(2,1)
+            fig1, (ax0, ax1, ax2) = plt.subplots(3,1)
             fig1.set_size_inches(7.5, 10, forward=True)
             fig1.subplots_adjust(hspace=0.35)
             fig1.suptitle('Figure 1: device ' + i.chip_id, fontsize=14, fontweight='bold')
+            #table of values for the chip
+            ax0.set_frame_on(False)
+            ax0.set_xticks([])
+            ax0.set_yticks([])
+            table = ax0.table(cellText=[tdata], colLabels=column_labels, loc='upper left', cellLoc='center', colColours=['lightgray']*7, fontsize=20)
+            table.auto_set_font_size(False)
+            table.set_fontsize(8)
+            ax0.set_title(i.chip_id + ': Table of Calculated Values')
             # plot 1: mod depth [mV] vs SA bias current [uA]
             ax1.plot((i.dac_sweep_array * i.sab_dac_factor), (i.phase0_0_vmod_sab * i.factor_adc_mV))
             ax1.set_title('Voltage Modulation Depth vs Sa Bias')
@@ -136,7 +149,7 @@ if __name__ == '__main__':
                     ha='center', va='center', color = 'blue', backgroundcolor='w',fontsize=10)
             ax1.text(i.dac_ic_max * i.sab_dac_factor, np.max(i.phase0_0_vmod_sab * i.factor_adc_mV)*0.4, '$I_{cmax}$ \n %.1f $\mu$A' %(i.dac_ic_max*i.sab_dac_factor), \
                     ha='center', va='center', color = 'blue', backgroundcolor='w',fontsize=10)
-            ax1.text((i.dac_sweep_array[-1]*i.sab_dac_factor)*.95, np.max(i.phase0_0_vmod_sab*i.factor_adc_mV)*0.97, \
+            ax1.text((i.dac_sweep_array[-1]*i.sab_dac_factor)*.95, np.max(i.phase0_0_vmod_sab*i.factor_adc_mV)*0.93, \
                     '$V_{mod}$\n %.1f mV' %np.max(i.phase0_0_vmod_sab*i.factor_adc_mV), ha='center', va='center', color='blue', backgroundcolor ='w', fontsize=10)
 
             # plot 2: V_ssa_min and V_ssa_max [mV] vs SA bias [uA]
