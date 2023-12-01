@@ -261,23 +261,23 @@ if __name__ == '__main__':
             fig4.suptitle('Figure 4: device ' + i.chip_id, fontsize=14, fontweight='bold')
             # plot 7: dVssa/dIsab vs Isab
             #TODO: update title and axes labels
-            ax7.plot(i.dac_sweep_array*i.sab_dac_factor, dVmodmax_dIsab, label = 'dV$_{max}$/dI$_{SAB}$')
-            ax7.plot(i.dac_sweep_array*i.sab_dac_factor, dVmodmin_dIsab, label = 'dV$_{min}$/dI$_{SAB}$')
+            ax7.plot(i.dac_sweep_array[0:-5]*i.sab_dac_factor, dVmodmax_dIsab[0:-5], label = 'dV$_{max}$/dI$_{SAB}$')
+            ax7.plot(i.dac_sweep_array[0:-5]*i.sab_dac_factor, dVmodmin_dIsab[0:-5], label = 'dV$_{min}$/dI$_{SAB}$')
             ax7.set_title('Not sure What this is called just yet')
             ax7.set_ylabel('dV$_{SSA}$/dI$_{SAB}$ [$\mu$V/$\mu$A]')
             ax7.set_xlabel('I$_{SAB}$ [$\mu$A]')
             ax7.legend()
-            asymptote_max = np.mean(dVmodmax_dIsab[-7:-1])
-            asymptote_min = np.mean(dVmodmin_dIsab[-7:-1])
-            baseline = np.mean([np.mean(dVmodmax_dIsab[0:10]), np.mean(dVmodmin_dIsab[0:10])])
+            asymptote_max = np.mean(dVmodmax_dIsab[-20:-5])
+            asymptote_min = np.mean(dVmodmin_dIsab[-12:-5])
+            baseline = np.mean([np.mean(dVmodmax_dIsab[0:30]), np.mean(dVmodmin_dIsab[0:10])])
             ax7.axhline(y=asymptote_max, xmin=0, xmax=1, lw=0.5, ls='--', color='k')
             ax7.axhline(y=asymptote_min, xmin=0, xmax=1, lw=0.5, ls = '--', color='k')
             ax7.axhline(y=baseline, xmin=0, xmax=1, lw=0.5, ls = '--', color='k')
-            ax7.text(i.dac_sweep_array[-1]*i.sab_dac_factor, dVmodmax_dIsab[-1]*.8, '%.1f ohms' %asymptote_max, \
+            ax7.text(i.dac_sweep_array[-1]*i.sab_dac_factor, asymptote_max*.8, '%.1f Ohms' %asymptote_max, \
                     ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)
-            ax7.text(i.dac_sweep_array[-1]*i.sab_dac_factor, dVmodmin_dIsab[-1]*1.2, '%.1f ohms' %asymptote_min, \
+            ax7.text(i.dac_sweep_array[-1]*i.sab_dac_factor, asymptote_min*1.2, '%.1f Ohms' %asymptote_min, \
                     ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)
-            ax7.text(i.dac_sweep_array[-1]*i.sab_dac_factor, baseline*1.2, '%.1f ohms' %baseline, \
+            ax7.text(i.dac_sweep_array[-1]*i.sab_dac_factor, baseline*1.2, '%.1f Ohms' %baseline, \
                     ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)          
             # plot 8: dV/dIin vs Vssa
             #           transimpedance? - TODO: malcolm also wanted this bs Ifbx but I think thats already in ax4? derivative of Vssa vs Iin vs Iin?
