@@ -111,10 +111,21 @@ if __name__ == '__main__':
         dVmodmin_dIsab = np.gradient(phase0_0_min_smooth*i.factor_adc_mV*1000, i.dac_sweep_array*i.sab_dac_factor)
         dVdI_sab = np.gradient(phase0_0_vphi_smooth*i.factor_adc_mV*1000, i.dac_sweep_array*i.sab_dac_factor)
 
-        #setup for data table of calculated values
+        #setup for data table of calculated values, creates lables and the list of data for the cells (rounded to 2 decimal places)
         tdata = [round((i.dac_ic_min*i.sab_dac_factor),2), round((i.dac_ic_max*i.sab_dac_factor),2), round((np.max(i.phase0_0_vmod_sab*i.factor_adc_mV)),2), \
                  round((i.M_fb),2), round((i.M_in),2), round((i.M_in)/(i.M_fb),2)]
         column_labels = ['Icmin [$\mu$A]', 'Icmax [$\mu$A]', 'Mod Depth [mV]', 'Mfb [pH]', 'Min [pH]', 'Min/Mfb']
+
+        #Rdyn calculation 
+        find_max = np.where(i.phase0_0_vphis == i.phase0_1_icmax_vphi)
+        max_idx = int(np.mean(find_max[0]))
+        phi_step = 3
+        phi_diff = i.phase0_0_vphis[max_idx+phi_step] - i.phase0_0_vphis[max_idx]
+        dacI_diff = i.dac_sweep_array[max_idx+phi_step] - i.phase0_0_vphis[max_idx]
+        volt_diff = phi_diff*i.factor_adc_mV*(1e-3)
+        curr_diff = dacI_diff*i.sab_dac_factor*(1e-6)
+        rdyn = volt_diff/curr_diff
+
         
         #TODO: actually name the file path this is a HUGE filler right now
         if args.pdf_report:
@@ -295,10 +306,10 @@ if __name__ == '__main__':
             fig5.suptitle('*THIS IS WRONG* Figure 5: device ' + i.chip_id, fontsize=14, fontweight='bold')
             # plot 9: dV/dIsab vs Vssa
             #           dynamic resistance TODO: update title, check if data products are right (unlikely)
-            ax9.plot(i.phase0_0_vmod_sab*i.factor_adc_mV, dVdI_sab)
-            ax9.set_title('Not sure what this is or if its right YAY')
-            ax9.set_xlabel('V$_{SSA}$ [mV]')
-            ax9.set_ylabel('dV$_{SSA}$/dI$_{SAB}$')
+            ax9.plot(i.phase0_1_triangle*Mfb_scale_factor, rdyn)
+            ax9.set_title('Dynamic Resistence')
+            ax9.set_xlabel('I$_{SAB}$ [$\mu$A]')
+            ax9.set_ylabel('Resistance [Ohms]')
             # plot 10: dV/dIsab vs Ifbx
             #           also dynamic resisance? TODO: update title, check if data products are right (unlikely)
             ax10.plot(i.phase0_1_triangle[0:len(dVdI_sab)]*Mfb_scale_factor, dVdI_sab)
