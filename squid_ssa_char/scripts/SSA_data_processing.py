@@ -303,19 +303,17 @@ if __name__ == '__main__':
             fig5, (ax9, ax10) = plt.subplots(2,1)
             fig5.set_size_inches(7.5, 10, forward=True)
             fig5.subplots_adjust(hspace=0.35)
-            fig5.suptitle('*THIS IS WRONG* Figure 5: device ' + i.chip_id, fontsize=14, fontweight='bold')
+            fig5.suptitle('Figure 5: device ' + i.chip_id, fontsize=14, fontweight='bold')
             # plot 9: dV/dIsab vs Vssa
-            #           dynamic resistance TODO: update title, check if data products are right (unlikely)
             ax9.plot(i.phase0_1_triangle*Mfb_scale_factor, rdyn)
-            ax9.set_title('Dynamic Resistence')
+            ax9.set_title('Dynamic Resistence vs Current')
             ax9.set_xlabel('I$_{SAB}$ [$\mu$A]')
             ax9.set_ylabel('Resistance [Ohms]')
             # plot 10: dV/dIsab vs Ifbx
-            #           also dynamic resisance? TODO: update title, check if data products are right (unlikely)
-            ax10.plot(i.phase0_1_triangle[0:len(dVdI_sab)]*Mfb_scale_factor, dVdI_sab)
-            ax10.set_title('Same as above my dude')
-            ax10.set_xlabel('I$_{FBX}$')
-            ax10.set_ylabel('dV$_{SSA}$/dI$_{SAB}$')
+            ax10.plot(i.phase0_1_icmax_vphi*i.factor_adc_mV, rdyn)
+            ax10.set_title('Dynamic Resistance vs Voltage')
+            ax10.set_xlabel('V$_{SSA}$ feedback [mV]')
+            ax10.set_ylabel('Resistance [Ohms]')
             #
             if args.pdf_report:
                 pdf.savefig()
