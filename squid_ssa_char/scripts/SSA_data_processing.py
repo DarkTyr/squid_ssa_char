@@ -286,7 +286,7 @@ if __name__ == '__main__':
             ax7.axhline(y=baseline, xmin=0, xmax=1, lw=0.5, ls = '--', color='k')
             ax7.text(i.dac_sweep_array[-1]*i.sab_dac_factor, asymptote_max*.8, '%.1f Ohms' %asymptote_max, \
                     ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)
-            ax7.text(i.dac_sweep_array[-1]*i.sab_dac_factor, asymptote_min*1.2, '%.1f Ohms' %asymptote_min, \
+            ax7.text(i.dac_sweep_array[-1]*i.sab_dac_factor, asymptote_min*1.1, '%.1f Ohms' %asymptote_min, \
                     ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)
             ax7.text(i.dac_sweep_array[-1]*i.sab_dac_factor, baseline*1.2, '%.1f Ohms' %baseline, \
                     ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)          
