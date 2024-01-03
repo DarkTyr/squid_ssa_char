@@ -75,6 +75,20 @@ if __name__ == '__main__':
     
     args = parser.parse_args()
     
+    #breaks up the list of files into individual things
+    fnames = glob.glob(str(args.list_of_files))
+    fnames.sort()
+
+    if len(fnames) == 0:
+        print('glob did not parse the given string and fnames has length zero')
+
+    #this is for navigating directories - to be used with wafer plots
+    fname_arr = []
+
+    for element in fnames:
+        fname_arr.append(element.rsplit('/', 1)[-1][:11])
+
+    fname_arr = np.array(fname_arr)
 
     #TODO: add .load after SSA_Data_Class
     data = [ssa_data_class.SSA_Data_Class(fnames[0])]
@@ -129,7 +143,7 @@ if __name__ == '__main__':
         
         #TODO: actually name the file path this is a HUGE filler right now
         if args.pdf_report:
-            report_name = fname_path + '/' + fname + '.pdf'
+            report_name = fnames[i] + '.pdf'
             pdf = PdfPages(report_name)
             print('Generating Report: ', report_name)
 
