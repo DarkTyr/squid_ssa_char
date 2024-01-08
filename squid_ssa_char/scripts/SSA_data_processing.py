@@ -51,6 +51,13 @@ def calculate_Ms(m_data, triangle_data, scale_factor):
     m_end = m_end * scale_factor  
     return M, m_start, m_end
 
+#smooths the data using functions within interpolate. Takes the x axis of the plot and the y axis of the plot [prescaled to be the same length
+#with no overlapping values (triangle is cut at just the up-slope)]. Also takes smoothing paramater s for splrep higher->more smoothed
+def smooth(x_arr, y_arr, sm_lev):
+   first_pass = interpolate.splrep(x_arr, y_arr, k=2, s=sm_lev)
+   second_pass = interpolate.splev(x_arr, first_pass, der=0)
+   return second_pass
+
 #TODO: talk with John about file path for final report storage                                           
 
 #TODO: update help aspect to parser arguments
@@ -109,18 +116,13 @@ if __name__ == '__main__':
         #These are derived then smoothed - we found for phase01 and phase10 data this method reduced noise without eliminating features
         dVdI_fb = np.gradient(i.phase0_1_icmax_vphi*i.factor_adc_mV, i.phase0_1_triangle*Mfb_scale_factor)
         dVdI_in = np.gradient(i.phase1_0_icmax_vphi*i.factor_adc_mV, i.phase1_0_triangle*Min_scale_factor)
-        intermediate01 = interpolate.splrep(i.phase0_1_triangle[0:int(0.5*len(i.phase0_1_triangle))], dVdI_fb[0:int(0.5*len(i.phase0_1_triangle))], k=2, s=15)
-        intermediate10 = interpolate.splrep(i.phase1_0_triangle[0:int(0.5*len(i.phase1_0_triangle))], dVdI_in[0:int(0.5*len(i.phase1_0_triangle))], k=2, s=9)
-        dVdI_fb_smooth = interpolate.splev(i.phase0_1_triangle[0:int(0.5*len(i.phase0_1_triangle))], intermediate01, der=0)*1000
-        dVdI_in_smooth = interpolate.splev(i.phase1_0_triangle[0:int(0.5*len(i.phase1_0_triangle))], intermediate10, der=0)*1000
+        dVdI_fb_smooth = (smooth(i.phase0_1_triangle[0:int(0.5*len(i.phase0_1_triangle))], dVdI_fb[0:int(0.5*len(i.phase0_1_triangle))], 15))*1000
+        dVdI_in_smooth = (smooth(i.phase1_0_triangle[0:int(0.5*len(i.phase1_0_triangle))], dVdI_in[0:int(0.5*len(i.phase1_0_triangle))], 9))*1000
 
         #these are smoothed then derived - for phase00 data this method reduced noise without eliminating features 
-        intermediate00_max = interpolate.splrep(i.dac_sweep_array, i.phase0_0_vmod_max, k=2, s=9)
-        intermediate00_min = interpolate.splrep(i.dac_sweep_array, i.phase0_0_vmod_min, k=2, s=9)
-        intermediate00_sab = interpolate.splrep(i.dac_sweep_array, i.phase0_0_vmod_sab, k=2, s=9)
-        phase0_0_max_smooth = interpolate.splev(i.dac_sweep_array, intermediate00_max, der=0) 
-        phase0_0_min_smooth = interpolate.splev(i.dac_sweep_array, intermediate00_min, der=0)
-        phase0_0_vphi_smooth = interpolate.splev(i.dac_sweep_array, intermediate00_sab, der=0)
+        phase0_0_max_smooth = smooth(i.dac_sweep_array, i.phase0_0_vmod_max, 9)
+        phase0_0_min_smooth = smooth(i.dac_sweep_array, i.phase0_0_vmod_min, 9)
+        phase0_0_vphi_smooth = smooth(i.dac_sweep_array, i.phase0_0_vmod_sab, 9)
         dVmodmax_dIsab = np.gradient(phase0_0_max_smooth*i.factor_adc_mV*1000, i.dac_sweep_array*i.sab_dac_factor)
         dVmodmin_dIsab = np.gradient(phase0_0_min_smooth*i.factor_adc_mV*1000, i.dac_sweep_array*i.sab_dac_factor)
         dVdI_sab = np.gradient(phase0_0_vphi_smooth*i.factor_adc_mV*1000, i.dac_sweep_array*i.sab_dac_factor)
