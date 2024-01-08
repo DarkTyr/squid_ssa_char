@@ -133,13 +133,13 @@ if __name__ == '__main__':
         column_labels = ['Icmin [$\mu$A]', 'Icmax [$\mu$A]', 'Mod Depth [mV]', 'Mfb [pH]', 'Min [pH]', 'Min/Mfb']
 
         #Rdyn calculation 
+            #find the vphi for icmax, store the indexes where thats true, take first instance then some step of vphis up or down (we chose 3 steps up)
+            #difference the instance from the vphi some step away, then convert from dac units to volts and amps, divide the voltage change by the current changes
         find_max = np.where(i.phase0_0_vphis == i.phase0_1_icmax_vphi)
         max_idx = int(np.mean(find_max[0]))
         phi_step = 3
-        phi_diff = i.phase0_0_vphis[max_idx+phi_step] - i.phase0_0_vphis[max_idx]
-        dacI_diff = i.dac_sweep_array[max_idx+phi_step] - i.dac_sweep_array[max_idx]
-        volt_diff = phi_diff*i.factor_adc_mV*(1e-3)
-        curr_diff = dacI_diff*i.sab_dac_factor*(1e-6)
+        volt_diff = (i.phase0_0_vphis[max_idx+phi_step] - i.phase0_0_vphis[max_idx])*i.factor_adc_mV*1(1e-3)
+        curr_diff = (i.dac_sweep_array[max_idx+phi_step] - i.dac_sweep_array[max_idx])*i.sab_dac_factor*(1e-6)
         rdyn = volt_diff/curr_diff
 
         
@@ -230,9 +230,9 @@ if __name__ == '__main__':
             ax4.set_xlim(0, sain_xlim)
             ax4.axhline(y=np.max(dVdI_in_smooth), xmin=0, xmax=1, lw=0.5)
             ax4.axhline(y=np.min(dVdI_in_smooth), xmin=0, xmax=1, lw=0.5)
-            ax4.text(sain_xlim*0.95, np.min(dVdI_in_smooth), '%.1f' %np.min(dVdI_fb_smooth), \
+            ax4.text(sain_xlim*0.95, np.min(dVdI_in_smooth), '%.1f' %np.min(dVdI_in_smooth), \
                     ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)
-            ax4.text(sain_xlim*0.95, np.max(dVdI_in_smooth), '%.1f' %np.max(dVdI_fb_smooth), \
+            ax4.text(sain_xlim*0.95, np.max(dVdI_in_smooth), '%.1f' %np.max(dVdI_in_smooth), \
                     ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)
 
             if args.pdf_report:
