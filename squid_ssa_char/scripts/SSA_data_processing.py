@@ -58,7 +58,7 @@ def smooth(x_arr, y_arr, sm_lev):
    second_pass = interpolate.splev(x_arr, first_pass, der=0)
    return second_pass
 
-#TODO: talk with John about file path for final report storage                                           
+#TODO: talk with John about file path for final report storage                                  
 
 #TODO: update help aspect to parser arguments
 if __name__ == '__main__':
@@ -306,8 +306,7 @@ if __name__ == '__main__':
                     ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)
             ax7.text(i.dac_sweep_array[-1]*i.sab_dac_factor, baseline*1.2, '%.1f Ohms' %baseline, \
                     ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)          
-            # plot 8: dV/dIin vs Vssa
-            #           transimpedance? - TODO: malcolm also wanted this bs Ifbx but I think thats already in ax4? derivative of Vssa vs Iin vs Iin?
+            # plot 8: Device Transimpedance vs Device Volgtage
             ax8.plot(i.phase1_0_icmax_vphi[0:int(0.5*len(i.phase1_0_triangle))]*i.factor_adc_mV, dVdI_in_smooth)
             ax8.set_title('Device Transimpedance vs Device Voltage')
             ax8.set_xlabel('V$_{SSA}$ input [mV]')
@@ -320,13 +319,15 @@ if __name__ == '__main__':
             fig5.set_size_inches(7.5, 10, forward=True)
             fig5.subplots_adjust(hspace=0.35)
             fig5.suptitle('Figure 5: device ' + i.chip_id, fontsize=14, fontweight='bold')
-            # plot 9: dV/dIsab vs Vssa
-            ax9.plot(i.phase0_1_triangle*Mfb_scale_factor, rdyn)
+            # plot 9: Dynamic Resistance vs Current
+            #rdyn is repeating twice, plot half to get cleaner data
+            ax9.plot(i.phase0_1_triangle[0:int(0.5*len(rdyn))]*Mfb_scale_factor, rdyn[0:int(0.5*len(rdyn))])
             ax9.set_title('Dynamic Resistence vs Current')
             ax9.set_xlabel('I$_{SAB}$ [$\mu$A]')
             ax9.set_ylabel('Resistance [Ohms]')
-            # plot 10: dV/dIsab vs Ifbx
-            ax10.plot(i.phase0_1_icmax_vphi*i.factor_adc_mV, rdyn)
+            # plot 10: Dynamic Resistance vs Voltage
+            #circles over itself 4 times within the range, plot only 1/4 to get cleaner plot
+            ax10.plot(i.phase0_1_icmax_vphi[0:int(0.25*len(rdyn))]*i.factor_adc_mV, rdyn[0:int(0.25*len(rdyn))])
             ax10.set_title('Dynamic Resistance vs Voltage')
             ax10.set_xlabel('V$_{SSA}$ feedback [mV]')
             ax10.set_ylabel('Resistance [Ohms]')
