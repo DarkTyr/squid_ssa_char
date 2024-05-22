@@ -138,7 +138,7 @@ if __name__ == '__main__':
         find_max = np.where(i.phase0_0_vphis == i.phase0_1_icmax_vphi)
         max_idx = int(np.mean(find_max[0]))
         phi_step = 3
-        volt_diff = (i.phase0_0_vphis[max_idx+phi_step] - i.phase0_0_vphis[max_idx])*i.factor_adc_mV*1(1e-3)
+        volt_diff = (i.phase0_0_vphis[max_idx+phi_step] - i.phase0_0_vphis[max_idx])*i.factor_adc_mV*(1e-3)
         curr_diff = (i.dac_sweep_array[max_idx+phi_step] - i.dac_sweep_array[max_idx])*i.sab_dac_factor*(1e-6)
         rdyn = volt_diff/curr_diff
 
