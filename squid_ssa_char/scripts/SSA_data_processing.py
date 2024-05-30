@@ -9,7 +9,7 @@
 #
 #################################################################################
 
-#all imports from original - lets see what we end up using!
+#TODO: remove butter and lfiter if not used - check later
 import argparse
 import glob
 from scipy.signal import butter, lfilter
@@ -95,12 +95,14 @@ def main():
         fname_arr.append(element.rsplit('/', 1)[-1][:11])
 
     fname_arr = np.array(fname_arr)
-    #TODO: add .load after SSA_Data_Class
+    #data load and format into string if file names
     data = [ssa_data_class.SSA_Data_Class.load(fnames[0])]
     for i in range(len(fnames) - 1):
         data.append(ssa_data_class.SSA_Data_Class.load(fnames[i + 1]))
 
+    #counter for numerical indexing during data file loop
     cnt = -1
+
     for i in data:
         cnt += 1
         #plotting scaling factors and call of M value calculations
