@@ -11,9 +11,7 @@
 
 #all imports from original - lets see what we end up using!
 import argparse
-import IPython
 import glob
-import os
 from scipy.signal import butter, lfilter
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
@@ -61,7 +59,7 @@ def smooth(x_arr, y_arr, sm_lev):
 #TODO: talk with John about file path for final report storage                                  
 
 #TODO: update help aspect to parser arguments
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser(description='Take data from QA_DAQ, scale it, plot it and generate a PDF report'
                                      'for each device specified in list of files')
     parser.add_argument('list_of_files',
@@ -76,7 +74,7 @@ if __name__ == '__main__':
                         action='store_true',
                         help='Makes a pdf report for each chip including the selected plots generated in this script ')
     parser.add_argument('-e',
-                        dest='external_reports',
+                        dest='external_report',
                         action='store_true',
                         help='Creates only the plots we need to go with our deliverables')
     
@@ -93,17 +91,18 @@ if __name__ == '__main__':
     fname_arr = []
 
     for element in fnames:
+        print(element)
         fname_arr.append(element.rsplit('/', 1)[-1][:11])
 
     fname_arr = np.array(fname_arr)
-
     #TODO: add .load after SSA_Data_Class
-    data = [ssa_data_class.SSA_Data_Class(fnames[0])]
+    data = [ssa_data_class.SSA_Data_Class.load(fnames[0])]
     for i in range(len(fnames) - 1):
-        data.append(ssa_data_class.SSA_Data_Class(fnames[i + 1]))
+        data.append(ssa_data_class.SSA_Data_Class.load(fnames[i + 1]))
 
-
+    cnt = -1
     for i in data:
+        cnt += 1
         #plotting scaling factors and call of M value calculations
         Mfb_scale_factor = ((i.sys.daq_dac_vref * scale_uA) / ((2**(i.sys.daq_dac_nbits) - 1) * i.sys.fb_bias_r)) * i.sys.daq_dac_gain
         Min_scale_factor = ((i.sys.in_dac_vref * scale_uA) / ((2**(i.sys.daq_dac_nbits) - 1) * i.sys.in_bias_r)) * i.sys.daq_dac_gain
@@ -142,10 +141,10 @@ if __name__ == '__main__':
         curr_diff = (i.dac_sweep_array[max_idx+phi_step] - i.dac_sweep_array[max_idx])*i.sab_dac_factor*(1e-6)
         rdyn = volt_diff/curr_diff
 
-        
+
         #TODO: actually name the file path this is a HUGE filler right now
         if args.pdf_report:
-            report_name = fnames[i] + '.pdf'
+            report_name = fnames[cnt] + '.pdf'
             pdf = PdfPages(report_name)
             print('Generating Report: ', report_name)
 
@@ -339,3 +338,6 @@ if __name__ == '__main__':
             pdf.close()
         elif not args.pdf_report:
             plt.show()
+
+if __name__ == '__main__':
+    main()
