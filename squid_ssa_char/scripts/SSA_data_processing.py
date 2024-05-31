@@ -12,7 +12,7 @@
 #TODO: remove butter and lfiter if not used - check later
 import argparse
 import glob
-from scipy.signal import butter, lfilter
+#from scipy.signal import butter, lfilter
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import numpy as np
@@ -146,12 +146,12 @@ def main():
 
         #TODO: actually name the file path this is a HUGE filler right now
         if args.pdf_report:
-            report_name = fnames[cnt] + '.pdf'
+            report_name = fname_arr[cnt] + '_' + str(now) + '.pdf'
             pdf = PdfPages(report_name)
             print('Generating Report: ', report_name)
 
         #TODO: currently it just makes everything for either argument, make more sophisticated
-        if args.full_report or args.external_report:
+        if args.full_report or args.external_report or args.pdf_report:
             #start of plotting
             fig1, (ax0, ax1, ax2) = plt.subplots(3,1, gridspec_kw={'height_ratios': [1, 10, 10]})
             fig1.set_size_inches(7.5, 10, forward=True)
