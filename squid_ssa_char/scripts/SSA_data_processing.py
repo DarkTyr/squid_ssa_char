@@ -19,6 +19,7 @@ import numpy as np
 import time
 from squid_ssa_char.modules import ssa_data_class
 from scipy import interpolate
+import IPython
 
 #for date/time stamps on reports, now goes out to minutes 
 today = time.localtime()
@@ -77,6 +78,10 @@ def main():
                         dest='external_report',
                         action='store_true',
                         help='Creates only the plots we need to go with our deliverables')
+    parser.add_argument('-i',
+                        dest='interactive',
+                        action='store_true',
+                        help='Enter interactive mode at end of script')
     
     args = parser.parse_args()
     
@@ -123,10 +128,8 @@ def main():
         #these are smoothed then derived - for phase00 data this method reduced noise without eliminating features 
         phase0_0_max_smooth = smooth(i.dac_sweep_array, i.phase0_0_vmod_max, 9)
         phase0_0_min_smooth = smooth(i.dac_sweep_array, i.phase0_0_vmod_min, 9)
-        phase0_0_vphi_smooth = smooth(i.dac_sweep_array, i.phase0_0_vmod_sab, 9)
         dVmodmax_dIsab = np.gradient(phase0_0_max_smooth*i.factor_adc_mV*1000, i.dac_sweep_array*i.sab_dac_factor)
         dVmodmin_dIsab = np.gradient(phase0_0_min_smooth*i.factor_adc_mV*1000, i.dac_sweep_array*i.sab_dac_factor)
-        dVdI_sab = np.gradient(phase0_0_vphi_smooth*i.factor_adc_mV*1000, i.dac_sweep_array*i.sab_dac_factor)
 
         #setup for data table of calculated values, creates lables and the list of data for the cells (rounded to 2 decimal places)
         tdata = [round((i.dac_ic_min*i.sab_dac_factor),2), round((i.dac_ic_max*i.sab_dac_factor),2), round((np.max(i.phase0_0_vmod_sab*i.factor_adc_mV)),2), \
@@ -338,8 +341,11 @@ def main():
         #
         if args.pdf_report:
             pdf.close()
-        elif not args.pdf_report:
-            plt.show()
+
+    if not args.pdf_report:
+        plt.show()
+    if args.interactive:
+        IPython.start_ipython(argv=[], user_ns=locals())
 
 if __name__ == '__main__':
     main()
