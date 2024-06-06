@@ -10,6 +10,7 @@
 #################################################################################
 
 #TODO: remove butter and lfiter if not used - check later
+#TODO: checked whats holding up the program when script called - its hanging on argparse and glob
 import argparse
 import glob
 #from scipy.signal import butter, lfilter
@@ -86,6 +87,7 @@ def main():
     args = parser.parse_args()
     
     #breaks up the list of files into individual things
+    print(str(args.list_of_files))
     fnames = glob.glob(str(args.list_of_files))
     fnames.sort()
 
@@ -101,6 +103,8 @@ def main():
 
     fname_arr = np.array(fname_arr)
     #data load and format into string if file names
+    
+    #TODO: check fnames for length greater than one, if not, report that there were no files found and print out what was passed in
     data = [ssa_data_class.SSA_Data_Class.load(fnames[0])]
     for i in range(len(fnames) - 1):
         data.append(ssa_data_class.SSA_Data_Class.load(fnames[i + 1]))
@@ -171,7 +175,7 @@ def main():
             # plot 1: mod depth [mV] vs SA bias current [uA]
             ax1.plot((i.dac_sweep_array * i.sab_dac_factor), (i.phase0_0_vmod_sab * i.factor_adc_mV))
             ax1.set_title('Voltage Modulation Depth vs Sa Bias')
-            ax1.set_xlabel('I$_{SAB}$ [$\mu$A]')
+            ax1.set_xlabel('I$_{SAFB}$ [$\mu$A]')
             ax1.set_ylabel('SA Modulation Depth [mV]')
             ax1.axvline(x = i.dac_ic_min * i.sab_dac_factor, ymin=0, ymax=1, color='b', lw=0.5)
             ax1.axvline(x = i.dac_ic_max * i.sab_dac_factor, ymin=0, ymax=1, color='b', lw=0.5)
@@ -189,7 +193,7 @@ def main():
             ax2.plot((i.dac_sweep_array * i.sab_dac_factor), (i.phase0_0_vmod_max * i.factor_adc_mV), label = '$V_{max}$')
             ax2.set_title('Ask Malcolm what to call this')
             ax2.set_ylabel('SSA Voltage [mV]')
-            ax2.set_xlabel('I$_{SAB}$ [$\mu$A]')
+            ax2.set_xlabel('I$_{SAFB}$ [$\mu$A]')
             ax2.legend()
             ax2.text(np.max(i.dac_sweep_array*i.sab_dac_factor)*.95, np.max(i.phase0_0_vmod_min*i.factor_adc_mV)*.65, '$V_{min}$', ha='center', va='center', color='black', backgroundcolor='w',fontsize=10)
             ax2.text(np.max(i.dac_sweep_array*i.sab_dac_factor)*.7, np.max(i.phase0_0_vmod_max*i.factor_adc_mV)*.85, '$V_{max}$', ha='center', va='center', color='black', backgroundcolor='w',fontsize=10)
@@ -296,7 +300,7 @@ def main():
             ax7.plot(i.dac_sweep_array[0:-5]*i.sab_dac_factor, dVmodmin_dIsab[0:-5], label = 'dV$_{min}$/dI$_{SAB}$')
             ax7.set_title('Not sure What this is called just yet')
             ax7.set_ylabel('dV$_{SSA}$/dI$_{SAB}$ [$\mu$V/$\mu$A]')
-            ax7.set_xlabel('I$_{SAB}$ [$\mu$A]')
+            ax7.set_xlabel('I$_{SAFB}$ [$\mu$A]')
             ax7.legend()
             asymptote_max = np.mean(dVmodmax_dIsab[-20:-5])
             asymptote_min = np.mean(dVmodmin_dIsab[-12:-5])
@@ -327,14 +331,14 @@ def main():
             #rdyn is repeating twice, plot half to get cleaner data
             ax9.plot(i.phase0_1_triangle[0:int(0.5*len(rdyn))]*Mfb_scale_factor, rdyn[0:int(0.5*len(rdyn))])
             ax9.set_title('Dynamic Resistence vs Current')
-            ax9.set_xlabel('I$_{SAB}$ [$\mu$A]')
-            ax9.set_ylabel('Resistance [Ohms]')
+            ax9.set_xlabel('I$_{SAFB}$ [$\mu$A]')
+            ax9.set_ylabel('Resistance [$\omega$]')
             # plot 10: Dynamic Resistance vs Voltage
             #circles over itself 4 times within the range, plot only 1/4 to get cleaner plot
             ax10.plot(i.phase0_1_icmax_vphi[0:int(0.25*len(rdyn))]*i.factor_adc_mV, rdyn[0:int(0.25*len(rdyn))])
             ax10.set_title('Dynamic Resistance vs Voltage')
             ax10.set_xlabel('V$_{SSA}$ feedback [mV]')
-            ax10.set_ylabel('Resistance [Ohms]')
+            ax10.set_ylabel('Resistance [$\omega$]')
             #
             if args.pdf_report:
                 pdf.savefig()
