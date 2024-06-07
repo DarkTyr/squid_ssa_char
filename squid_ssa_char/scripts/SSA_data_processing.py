@@ -19,7 +19,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 import numpy as np
 import time
 from squid_ssa_char.modules import ssa_data_class
-from scipy import interpolate
+import scipy.signal as sig
 import IPython
 
 #for date/time stamps on reports, now goes out to minutes 
@@ -53,10 +53,13 @@ def calculate_Ms(m_data, triangle_data, scale_factor):
 
 #smooths the data using functions within interpolate. Takes the x axis of the plot and the y axis of the plot [prescaled to be the same length
 #with no overlapping values (triangle is cut at just the up-slope)]. Also takes smoothing paramater s for splrep higher->more smoothed
-def smooth(x_arr, y_arr, sm_lev):
-   first_pass = interpolate.splrep(x_arr, y_arr, k=2, s=sm_lev)
-   second_pass = interpolate.splev(x_arr, first_pass, der=0)
-   return second_pass
+def smooth(y_arr, sm_lev):
+   #first_pass = interpolate.splrep(x_arr, y_arr, k=2, s=sm_lev)
+   #second_pass = interpolate.splev(x_arr, first_pass, der=0)
+
+   filtercoeffs = sig.firwin(sm_lev,0.1,window=('hamming'))    # amt of taps passed in by call, low-pass at 0.1*fsamp/2
+   ysmooth = sig.filtfilt(filtercoeffs,1.0,y_arr)              # Applies filter forward and backward
+   return ysmooth
 
 #TODO: talk with John about file path for final report storage                                  
 
@@ -126,14 +129,14 @@ def main():
         #These are derived then smoothed - we found for phase01 and phase10 data this method reduced noise without eliminating features
         dVdI_fb = np.gradient(i.phase0_1_icmax_vphi*i.factor_adc_mV, i.phase0_1_triangle*Mfb_scale_factor)
         dVdI_in = np.gradient(i.phase1_0_icmax_vphi*i.factor_adc_mV, i.phase1_0_triangle*Min_scale_factor)
-        dVdI_fb_smooth = (smooth(i.phase0_1_triangle[0:int(0.5*len(i.phase0_1_triangle))], dVdI_fb[0:int(0.5*len(i.phase0_1_triangle))], 15))*1000
-        dVdI_in_smooth = (smooth(i.phase1_0_triangle[0:int(0.5*len(i.phase1_0_triangle))], dVdI_in[0:int(0.5*len(i.phase1_0_triangle))], 9))*1000
+        dVdI_fb_smooth = (smooth(dVdI_fb[0:int(0.5*len(i.phase0_1_triangle))], 51))*1000
+        dVdI_in_smooth = (smooth(dVdI_in[0:int(0.5*len(i.phase1_0_triangle))], 31))*1000
 
         #these are smoothed then derived - for phase00 data this method reduced noise without eliminating features 
-        phase0_0_max_smooth = smooth(i.dac_sweep_array, i.phase0_0_vmod_max, 9)
-        phase0_0_min_smooth = smooth(i.dac_sweep_array, i.phase0_0_vmod_min, 9)
-        dVmodmax_dIsab = np.gradient(phase0_0_max_smooth*i.factor_adc_mV*1000, i.dac_sweep_array*i.sab_dac_factor)
-        dVmodmin_dIsab = np.gradient(phase0_0_min_smooth*i.factor_adc_mV*1000, i.dac_sweep_array*i.sab_dac_factor)
+        dVmodmax_dIsafb = np.gradient(i.phase0_0_vmod_max*i.factor_adc_mV*1000, i.dac_sweep_array*i.sab_dac_factor)
+        dVmodmin_dIsafb = np.gradient(i.phase0_0_vmod_min*i.factor_adc_mV*1000, i.dac_sweep_array*i.sab_dac_factor)
+        dVmodmax_dIsafb_smooth = smooth(dVmodmax_dIsafb, 11)
+        dVmodmin_dIsafb_smooth = smooth(dVmodmin_dIsafb, 11)
 
         #setup for data table of calculated values, creates lables and the list of data for the cells (rounded to 2 decimal places)
         tdata = [round((i.dac_ic_min*i.sab_dac_factor),2), round((i.dac_ic_max*i.sab_dac_factor),2), round((np.max(i.phase0_0_vmod_sab*i.factor_adc_mV)),2), \
@@ -149,6 +152,7 @@ def main():
         volt_diff = (i.phase0_0_vphis[max_idx+phi_step] - i.phase0_0_vphis[max_idx])*i.factor_adc_mV*(1e-3)
         curr_diff = (i.dac_sweep_array[max_idx+phi_step] - i.dac_sweep_array[max_idx])*i.sab_dac_factor*(1e-6)
         rdyn = volt_diff/curr_diff
+        rdyn_smooth = smooth(rdyn, 31)
 
 
         #TODO: actually name the file path this is a HUGE filler right now
@@ -296,15 +300,15 @@ def main():
             fig4.suptitle('Figure 4: device ' + i.chip_id, fontsize=14, fontweight='bold')
             # plot 7: dVssa/dIsab vs Isab
             #TODO: update title and axes labels
-            ax7.plot(i.dac_sweep_array[0:-5]*i.sab_dac_factor, dVmodmax_dIsab[0:-5], label = 'dV$_{max}$/dI$_{SAB}$')
-            ax7.plot(i.dac_sweep_array[0:-5]*i.sab_dac_factor, dVmodmin_dIsab[0:-5], label = 'dV$_{min}$/dI$_{SAB}$')
+            ax7.plot(i.dac_sweep_array[0:-5]*i.sab_dac_factor, dVmodmax_dIsafb[0:-5], label = 'dV$_{max}$/dI$_{SAB}$')
+            ax7.plot(i.dac_sweep_array[0:-5]*i.sab_dac_factor, dVmodmin_dIsafb[0:-5], label = 'dV$_{min}$/dI$_{SAB}$')
             ax7.set_title('Not sure What this is called just yet')
             ax7.set_ylabel('dV$_{SSA}$/dI$_{SAB}$ [$\mu$V/$\mu$A]')
             ax7.set_xlabel('I$_{SAFB}$ [$\mu$A]')
             ax7.legend()
-            asymptote_max = np.mean(dVmodmax_dIsab[-20:-5])
-            asymptote_min = np.mean(dVmodmin_dIsab[-12:-5])
-            baseline = np.mean([np.mean(dVmodmax_dIsab[0:30]), np.mean(dVmodmin_dIsab[0:10])])
+            asymptote_max = np.mean(dVmodmax_dIsafb[-20:-5])
+            asymptote_min = np.mean(dVmodmin_dIsafb[-12:-5])
+            baseline = np.mean([np.mean(dVmodmax_dIsafb[0:40]), np.mean(dVmodmin_dIsafb[0:15])])
             ax7.axhline(y=asymptote_max, xmin=0, xmax=1, lw=0.5, ls='--', color='k')
             ax7.axhline(y=asymptote_min, xmin=0, xmax=1, lw=0.5, ls = '--', color='k')
             ax7.axhline(y=baseline, xmin=0, xmax=1, lw=0.5, ls = '--', color='k')
@@ -329,16 +333,16 @@ def main():
             fig5.suptitle('Figure 5: device ' + i.chip_id, fontsize=14, fontweight='bold')
             # plot 9: Dynamic Resistance vs Current
             #rdyn is repeating twice, plot half to get cleaner data
-            ax9.plot(i.phase0_1_triangle[0:int(0.5*len(rdyn))]*Mfb_scale_factor, rdyn[0:int(0.5*len(rdyn))])
+            ax9.plot(i.phase0_1_triangle[0:int(0.5*len(rdyn))]*Mfb_scale_factor, rdyn_smooth[0:int(0.5*len(rdyn))])
             ax9.set_title('Dynamic Resistence vs Current')
             ax9.set_xlabel('I$_{SAFB}$ [$\mu$A]')
-            ax9.set_ylabel('Resistance [$\omega$]')
+            ax9.set_ylabel('Resistance [$\Omega$]')
             # plot 10: Dynamic Resistance vs Voltage
             #circles over itself 4 times within the range, plot only 1/4 to get cleaner plot
-            ax10.plot(i.phase0_1_icmax_vphi[0:int(0.25*len(rdyn))]*i.factor_adc_mV, rdyn[0:int(0.25*len(rdyn))])
+            ax10.plot(i.phase0_1_icmax_vphi[0:int(0.25*len(rdyn))]*i.factor_adc_mV, rdyn_smooth[0:int(0.25*len(rdyn))])
             ax10.set_title('Dynamic Resistance vs Voltage')
             ax10.set_xlabel('V$_{SSA}$ feedback [mV]')
-            ax10.set_ylabel('Resistance [$\omega$]')
+            ax10.set_ylabel('Resistance [$\Omega$]')
             #
             if args.pdf_report:
                 pdf.savefig()
