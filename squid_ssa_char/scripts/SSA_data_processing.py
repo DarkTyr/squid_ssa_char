@@ -240,11 +240,11 @@ def main():
             ax4.set_ylabel('dV$_{dev}$/dI$_{SAIN}$ [$\mu$V/$\mu$A]')
             ax4.set_xlabel('SAIN Current [$\mu$A]')
             ax4.set_xlim(0, sain_xlim)
-            ax4.axhline(y=np.max(dVdI_in_smooth), xmin=0, xmax=1, lw=0.5)
-            ax4.axhline(y=np.min(dVdI_in_smooth), xmin=0, xmax=1, lw=0.5)
-            ax4.text(sain_xlim*0.95, np.min(dVdI_in_smooth), '%.1f' %np.min(dVdI_in_smooth), \
+            ax4.axhline(y=np.max(dVdI_in_smooth[5:-5]), xmin=0, xmax=1, lw=0.5)
+            ax4.axhline(y=np.min(dVdI_in_smooth[5:-5]), xmin=0, xmax=1, lw=0.5)
+            ax4.text(sain_xlim*0.95, np.min(dVdI_in_smooth[5:-5]), '%.1f' %np.min(dVdI_in_smooth[5:-5]), \
                     ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)
-            ax4.text(sain_xlim*0.95, np.max(dVdI_in_smooth), '%.1f' %np.max(dVdI_in_smooth), \
+            ax4.text(sain_xlim*0.95, np.max(dVdI_in_smooth[5:-5]), '%.1f' %np.max(dVdI_in_smooth[5:-5]), \
                     ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)
 
             if args.pdf_report:
@@ -284,11 +284,11 @@ def main():
             ax6.set_ylabel('dV$_{dev}$/dI$_{SAFB}$ [$\mu$V/$\mu$A]')
             ax6.set_xlabel('SAFB Current [$\mu$A]')
             ax6.set_xlim(0, safb_xlim)
-            ax6.axhline(y=np.max(dVdI_fb_smooth), xmin=0, xmax=1, lw=0.5)
-            ax6.axhline(y=np.min(dVdI_fb_smooth), xmin=0, xmax=1, lw=0.5)
-            ax6.text(safb_xlim*0.95, np.min(dVdI_fb_smooth), '%.1f' %np.min(dVdI_fb_smooth), \
+            ax6.axhline(y=np.max(dVdI_fb_smooth[5:-5]), xmin=0, xmax=1, lw=0.5)
+            ax6.axhline(y=np.min(dVdI_fb_smooth[5:-5]), xmin=0, xmax=1, lw=0.5)
+            ax6.text(safb_xlim*0.95, np.min(dVdI_fb_smooth[5:-5]), '%.1f' %np.min(dVdI_fb_smooth[5:-5]), \
                     ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)
-            ax6.text(safb_xlim*0.95, np.max(dVdI_fb_smooth), '%.1f' %np.max(dVdI_fb_smooth), \
+            ax6.text(safb_xlim*0.95, np.max(dVdI_fb_smooth[5:-5]), '%.1f' %np.max(dVdI_fb_smooth[5:-5]), \
                     ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)
 
             if args.pdf_report:
