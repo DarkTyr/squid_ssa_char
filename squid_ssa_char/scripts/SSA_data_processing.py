@@ -166,7 +166,7 @@ def main():
             #start of plotting
             fig1, (ax0, ax1, ax2) = plt.subplots(3,1, gridspec_kw={'height_ratios': [1, 10, 10]})
             fig1.set_size_inches(7.5, 10, forward=True)
-            fig1.subplots_adjust(hspace=0.35)
+            fig1.subplots_adjust(hspace=0.45)
             fig1.suptitle('Figure 1: device ' + i.chip_id, fontsize=14, fontweight='bold')
             #table of values for the chip - turn off axes and frame then make the table
             ax0.set_frame_on(False)
