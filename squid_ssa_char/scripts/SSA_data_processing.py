@@ -178,7 +178,7 @@ def main():
             ax0.set_title(i.chip_id + ': Table of Calculated Values', fontsize=16)
             # plot 1: mod depth [mV] vs SA bias current [uA]
             ax1.plot((i.dac_sweep_array * i.sab_dac_factor), (i.phase0_0_vmod_sab * i.factor_adc_mV))
-            ax1.set_title('Voltage Modulation Depth vs Sa Bias', fontsize=16)
+            ax1.set_title('Voltage Modulation Depth vs SA Bias', fontsize=16)
             ax1.set_xlabel('I$_{SAFB}$ [$\mu$A]', fontsize=14)
             ax1.set_ylabel('SA Modulation Depth [mV]', fontsize=14)
             ax1.axvline(x = i.dac_ic_min * i.sab_dac_factor, ymin=0, ymax=1, color='b', lw=0.5)
@@ -195,7 +195,7 @@ def main():
             #TODO: make labels for legend more accurate
             ax2.plot((i.dac_sweep_array * i.sab_dac_factor), (i.phase0_0_vmod_min * i.factor_adc_mV), label = '$V_{min}$')
             ax2.plot((i.dac_sweep_array * i.sab_dac_factor), (i.phase0_0_vmod_max * i.factor_adc_mV), label = '$V_{max}$')
-            ax2.set_title('Ask Malcolm what to call this', fontsize=16)
+            ax2.set_title('Device Voltage vs Bias Current', fontsize=16)
             ax2.set_ylabel('SSA Voltage [mV]', fontsize=14)
             ax2.set_xlabel('I$_{SAFB}$ [$\mu$A]', fontsize=14)
             ax2.legend()
@@ -299,10 +299,10 @@ def main():
             fig4.subplots_adjust(hspace=0.35)
             fig4.suptitle('Figure 4: device ' + i.chip_id, fontsize=14, fontweight='bold')
             # plot 7: dVssa/dIsab vs Isab
-            #TODO: update title and axes labels
+            #TODO: Ask carl about this title - not sure we should call this dynamic resistance when we have that later? Im confused.
             ax7.plot(i.dac_sweep_array[0:-5]*i.sab_dac_factor, dVmodmax_dIsafb[0:-5], label = 'dV$_{max}$/dI$_{SAB}$')
             ax7.plot(i.dac_sweep_array[0:-5]*i.sab_dac_factor, dVmodmin_dIsafb[0:-5], label = 'dV$_{min}$/dI$_{SAB}$')
-            ax7.set_title('Not sure What this is called just yet', fontsize=16)
+            ax7.set_title('Dynamic Resistance vs Bias Current', fontsize=16)
             ax7.set_ylabel('dV$_{SSA}$/dI$_{SAB}$ [$\mu$V/$\mu$A]', fontsize=14)
             ax7.set_xlabel('I$_{SAFB}$ [$\mu$A]', fontsize=14)
             ax7.legend()
