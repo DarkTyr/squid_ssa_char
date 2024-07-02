@@ -44,11 +44,18 @@ def calculate_Ms(m_data, triangle_data, scale_factor):
         delta1 = triangle_data[m_zeros[3]] - triangle_data[m_zeros[1]]
         m_start = triangle_data[m_zeros[0]]
         m_end = triangle_data[m_zeros[2]]
+    else:
+        delta0, m_start, m_end = 0,0,0
 
     #scale the values to current 
-    M = (phi0 / (delta0 * scale_factor)) * scale_L                #this combines all scaling - to be used if we put these values in the class
-    m_start = m_start * scale_factor
-    m_end = m_end * scale_factor  
+    if delta0 != 0:
+        M = (phi0 / (delta0 * scale_factor)) * scale_L                #this combines all scaling - to be used if we put these values in the class
+        m_start = m_start * scale_factor
+        m_end = m_end * scale_factor 
+    else:                                                               #done to fix when M doesnt exist
+        M = 0
+        m_start = 0
+        m_end = 0
     return M, m_start, m_end
 
 #smooths the data using functions within interpolate. Takes the x axis of the plot and the y axis of the plot [prescaled to be the same length
@@ -146,11 +153,19 @@ def main():
         #Rdyn calculation 
             #find the vphi for icmax, store the indexes where thats true, take first instance then some step of vphis up or down (we chose 3 steps up)
             #difference the instance from the vphi some step away, then convert from dac units to volts and amps, divide the voltage change by the current changes
-        find_max = np.where(i.phase0_0_vphis == i.phase0_1_icmax_vphi)
-        max_idx = int(np.mean(find_max[0]))
+        max_idx = np.where(i.dac_sweep_array == i.dac_ic_max)[0][0]
+        print("max_idx = :%i", max_idx)
+
         phi_step = 3
+        #rdyn calculation works by going either up or down a few steps from the icmax, this allows us to work with bad chips that put the icmax at the 
+        #end of the array of vphis AND still possibly get a decent rdyn calculation.
+        if (max_idx + phi_step > len(i.phase0_0_vphis)):
+            phi_step = -3
+        
         volt_diff = (i.phase0_0_vphis[max_idx+phi_step] - i.phase0_0_vphis[max_idx])*i.factor_adc_mV*(1e-3)
         curr_diff = (i.dac_sweep_array[max_idx+phi_step] - i.dac_sweep_array[max_idx])*i.sab_dac_factor*(1e-6)
+        print(volt_diff)
+        print(curr_diff)
         rdyn = volt_diff/curr_diff
         rdyn_smooth = smooth(rdyn, 31)
 
