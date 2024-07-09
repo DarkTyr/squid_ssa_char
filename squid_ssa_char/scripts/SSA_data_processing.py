@@ -154,18 +154,14 @@ def main():
             #find the vphi for icmax, store the indexes where thats true, take first instance then some step of vphis up or down (we chose 3 steps up)
             #difference the instance from the vphi some step away, then convert from dac units to volts and amps, divide the voltage change by the current changes
         max_idx = np.where(i.dac_sweep_array == i.dac_ic_max)[0][0]
-        print("max_idx = :%i", max_idx)
-
         phi_step = 3
         #rdyn calculation works by going either up or down a few steps from the icmax, this allows us to work with bad chips that put the icmax at the 
         #end of the array of vphis AND still possibly get a decent rdyn calculation.
-        if (max_idx + phi_step > len(i.phase0_0_vphis)):
+        if (max_idx + phi_step >= len(i.phase0_0_vphis)):
             phi_step = -3
         
         volt_diff = (i.phase0_0_vphis[max_idx+phi_step] - i.phase0_0_vphis[max_idx])*i.factor_adc_mV*(1e-3)
         curr_diff = (i.dac_sweep_array[max_idx+phi_step] - i.dac_sweep_array[max_idx])*i.sab_dac_factor*(1e-6)
-        print(volt_diff)
-        print(curr_diff)
         rdyn = volt_diff/curr_diff
         rdyn_smooth = smooth(rdyn, 31)
 
