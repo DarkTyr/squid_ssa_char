@@ -9,7 +9,6 @@
 #
 #################################################################################
 
-#TODO: remove butter and lfiter if not used - check later
 #TODO: checked whats holding up the program when script called - its hanging on argparse and glob
 import argparse
 import glob
@@ -67,8 +66,7 @@ def smooth(y_arr, sm_lev):
    filtercoeffs = sig.firwin(sm_lev,0.1,window=('hamming'))    # amt of taps passed in by call, low-pass at 0.1*fsamp/2
    ysmooth = sig.filtfilt(filtercoeffs,1.0,y_arr)              # Applies filter forward and backward
    return ysmooth
-
-#TODO: talk with John about file path for final report storage                                  
+                                
 
 #TODO: update help aspect to parser arguments
 def main():
@@ -114,10 +112,13 @@ def main():
     fname_arr = np.array(fname_arr)
     #data load and format into string if file names
     
-    #TODO: check fnames for length greater than one, if not, report that there were no files found and print out what was passed in
-    data = [ssa_data_class.SSA_Data_Class.load(fnames[0])]
-    for i in range(len(fnames) - 1):
-        data.append(ssa_data_class.SSA_Data_Class.load(fnames[i + 1]))
+    if len(fnames) >= 1:
+        data = [ssa_data_class.SSA_Data_Class.load(fnames[0])]
+        for i in range(len(fnames) - 1):
+                data.append(ssa_data_class.SSA_Data_Class.load(fnames[i + 1]))
+    else:
+        print('There were no files found./n')
+        print('Contents of file list: ' + fnames)
 
     #counter for numerical indexing during data file loop
     cnt = -1
@@ -166,7 +167,6 @@ def main():
         rdyn_smooth = smooth(rdyn, 31)
 
 
-        #TODO: actually name the file path this is a HUGE filler right now
         if args.pdf_report:
             report_name = fname_arr[cnt] + '_' + str(now) + '.pdf'
             pdf = PdfPages(report_name)
