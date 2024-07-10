@@ -312,6 +312,8 @@ def main():
             #TODO: Ask carl about this title - not sure we should call this dynamic resistance when we have that later? Im confused.
             ax7.plot(i.dac_sweep_array[5:-7]*i.sab_dac_factor, dVmodmax_dIsafb[5:-7], label = 'dV$_{max}$/dI$_{SAB}$')
             ax7.plot(i.dac_sweep_array[5:-7]*i.sab_dac_factor, dVmodmin_dIsafb[5:-7], label = 'dV$_{min}$/dI$_{SAB}$')
+            # ax7.plot(i.dac_sweep_array[5:-7]*i.sab_dac_factor, dVmodmax_dIsafb_smooth[5:-7], label = 'dV$_{max}$/dI$_{SAB}$')
+            # ax7.plot(i.dac_sweep_array[5:-7]*i.sab_dac_factor, dVmodmin_dIsafb_smooth[5:-7], label = 'dV$_{min}$/dI$_{SAB}$')            
             ax7.set_title('Dynamic Resistance vs Bias Current', fontsize=16)
             ax7.set_ylabel('dV$_{SSA}$/dI$_{SAB}$ [$\mu$V/$\mu$A]', fontsize=14)
             ax7.set_xlabel('I$_{SAFB}$ [$\mu$A]', fontsize=14)
