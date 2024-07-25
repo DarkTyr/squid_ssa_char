@@ -60,9 +60,6 @@ def calculate_Ms(m_data, triangle_data, scale_factor):
 #smooths the data using functions within interpolate. Takes the x axis of the plot and the y axis of the plot [prescaled to be the same length
 #with no overlapping values (triangle is cut at just the up-slope)]. Also takes smoothing paramater s for splrep higher->more smoothed
 def smooth(y_arr, sm_lev):
-   #first_pass = interpolate.splrep(x_arr, y_arr, k=2, s=sm_lev)
-   #second_pass = interpolate.splev(x_arr, first_pass, der=0)
-
    filtercoeffs = sig.firwin(sm_lev,0.1,window=('hamming'))    # amt of taps passed in by call, low-pass at 0.1*fsamp/2
    ysmooth = sig.filtfilt(filtercoeffs,1.0,y_arr)              # Applies filter forward and backward
    return ysmooth
@@ -310,10 +307,8 @@ def main():
             fig4.suptitle('Figure 4: device ' + i.chip_id, fontsize=14, fontweight='bold')
             # plot 7: dVssa/dIsab vs Isab
             #TODO: Ask carl about this title - not sure we should call this dynamic resistance when we have that later? Im confused.
-            ax7.plot(i.dac_sweep_array[5:-7]*i.sab_dac_factor, dVmodmax_dIsafb[5:-7], label = 'dV$_{max}$/dI$_{SAB}$')
-            ax7.plot(i.dac_sweep_array[5:-7]*i.sab_dac_factor, dVmodmin_dIsafb[5:-7], label = 'dV$_{min}$/dI$_{SAB}$')
-            # ax7.plot(i.dac_sweep_array[5:-7]*i.sab_dac_factor, dVmodmax_dIsafb_smooth[5:-7], label = 'dV$_{max}$/dI$_{SAB}$')
-            # ax7.plot(i.dac_sweep_array[5:-7]*i.sab_dac_factor, dVmodmin_dIsafb_smooth[5:-7], label = 'dV$_{min}$/dI$_{SAB}$')            
+            ax7.plot(i.dac_sweep_array[5:-7]*i.sab_dac_factor, dVmodmax_dIsafb_smooth[5:-7], label = 'dV$_{max}$/dI$_{SAB}$')
+            ax7.plot(i.dac_sweep_array[5:-7]*i.sab_dac_factor, dVmodmin_dIsafb_smooth[5:-7], label = 'dV$_{min}$/dI$_{SAB}$')            
             ax7.set_title('Dynamic Resistance vs Bias Current', fontsize=16)
             ax7.set_ylabel('dV$_{SSA}$/dI$_{SAB}$ [$\mu$V/$\mu$A]', fontsize=14)
             ax7.set_xlabel('I$_{SAFB}$ [$\mu$A]', fontsize=14)

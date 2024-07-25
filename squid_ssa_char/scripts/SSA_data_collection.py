@@ -171,8 +171,11 @@ class SSA:
             # For finding Ic_min take the std of the traces at each bias point
             vphi_std = np.std(col.phase0_0_vphis, axis=1)
 
-            # find all of the indexs less than n times the std, and take the greatest index
-            icmin_idx = np.where(vphi_std < col.baselines_std * self.test_conf['phase0_0']['icmin_pickoff'])[-1][-1]
+            # Determine Ic_max based on Vmod depths
+            icmax_idx = col.phase0_0_vmod_sab.argmax()
+
+            # find all of the indexs less than n times the std, and take the greatest index. limit to below icmax to avoid rail issues
+            icmin_idx = np.where(vphi_std[:icmax_idx] < col.baselines_std * self.test_conf['phase0_0']['icmin_pickoff'])[-1][-1]
             
             # If the found index is the last point in the sweep array, we really didn't find the Ic_min
             # so set it to the max DAC value the system can have
@@ -180,10 +183,6 @@ class SSA:
                 col.dac_ic_min = 2**16 - 1
             else:
                 col.dac_ic_min = col.dac_sweep_array[icmin_idx]
-
-            
-            # Determine Ic_max based on Vmod depths
-            icmax_idx = col.phase0_0_vmod_sab.argmax()
             
             if (icmax_idx == (len(col.dac_sweep_array) - 1)):
                 col.dac_ic_max = 0
