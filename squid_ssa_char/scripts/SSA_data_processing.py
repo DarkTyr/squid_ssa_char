@@ -41,14 +41,14 @@ def calculate_Ms(m_data, triangle_data, scale_factor):
         #currently this picks M off the shifted 0s so still accurate but will be visually different
         delta0 = triangle_data[m_zeros[2]] - triangle_data[m_zeros[0]]      # ADC value for M - the spacing between one full waveform of zeros
         delta1 = triangle_data[m_zeros[3]] - triangle_data[m_zeros[1]]
-        m_start = triangle_data[m_zeros[0]]
-        m_end = triangle_data[m_zeros[2]]
+        m_start = triangle_data[m_zeros[1]]
+        m_end = triangle_data[m_zeros[3]]
     else:
-        delta0, m_start, m_end = 0,0,0
+        delta1, m_start, m_end = 0,0,0
 
     #scale the values to current 
-    if delta0 != 0:
-        M = (phi0 / (delta0 * scale_factor)) * scale_L                #this combines all scaling - to be used if we put these values in the class
+    if delta1 != 0:
+        M = (phi0 / (delta1 * scale_factor)) * scale_L                #this combines all scaling - to be used if we put these values in the class
         m_start = m_start * scale_factor
         m_end = m_end * scale_factor 
     else:                                                               #done to fix when M doesnt exist
@@ -122,11 +122,11 @@ def main():
 
     for i in data:
         cnt += 1
-        #plotting scaling factors and call of M value calculations
+        #plotting scaling factors and call of M value calculations, M calculation done on smoothed values to avoid noisy extra 0s
         Mfb_scale_factor = ((i.sys.daq_dac_vref * scale_uA) / ((2**(i.sys.daq_dac_nbits) - 1) * i.sys.fb_bias_r)) * i.sys.daq_dac_gain
         Min_scale_factor = ((i.sys.in_dac_vref * scale_uA) / ((2**(i.sys.daq_dac_nbits) - 1) * i.sys.in_bias_r)) * i.sys.daq_dac_gain
-        i.M_in, i.Min_start, i.Min_end = calculate_Ms(i.phase1_0_icmax_vphi, i.phase1_0_triangle, Min_scale_factor)
-        i.M_fb, i.Mfb_start, i.Mfb_end = calculate_Ms(i.phase0_1_icmax_vphi, i.phase0_1_triangle, Mfb_scale_factor)
+        i.M_in, i.Min_start, i.Min_end = calculate_Ms(smooth(i.phase1_0_icmax_vphi,11), i.phase1_0_triangle, Min_scale_factor)
+        i.M_fb, i.Mfb_start, i.Mfb_end = calculate_Ms(smooth(i.phase0_1_icmax_vphi,11), i.phase0_1_triangle, Mfb_scale_factor)
         i.factor_adc_mV = ((i.sys.daq_adc_vrange) / (2**i.sys.daq_adc_nbits - 1) / (i.sys.daq_adc_gain) / (i.sys.amp_gain)) * 1000
         i.sab_dac_factor = ((i.sys.amp_dac_vref * scale_uA) / ((2**(i.sys.amp_dac_nbits) - 1) * i.sys.amp_bias_r)) / i.sys.amp_dac_gain
 
