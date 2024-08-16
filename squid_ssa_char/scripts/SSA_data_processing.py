@@ -143,10 +143,27 @@ def main():
         dVmodmax_dIsafb_smooth = smooth(dVmodmax_dIsafb, 11)
         dVmodmin_dIsafb_smooth = smooth(dVmodmin_dIsafb, 11)
 
+       #TODO: add if statments to fix 0s breaking this
         #setup for data table of calculated values, creates lables and the list of data for the cells (rounded to 2 decimal places)
-        tdata = [round((i.dac_ic_min*i.sab_dac_factor),2), round((i.dac_ic_max*i.sab_dac_factor),2), round((np.max(i.phase0_0_vmod_sab*i.factor_adc_mV)),2), \
-                 round((i.M_fb),2), round((i.M_in),2), round((i.M_in)/(i.M_fb),2)]
+        ic_min_table = round((i.dac_ic_min*i.sab_dac_factor),2)
+        ic_max_table = round((i.dac_ic_max*i.sab_dac_factor),2)
+        mod_depth_table = round((np.max(i.phase0_0_vmod_sab*i.factor_adc_mV)),2)
+        M_fb_table = round((i.M_fb),2)
+        M_in_table = round((i.M_in),2)
+        if i.M_fb > 0 and i.M_in > 0:
+                M_ratio_table = round((i.M_in)/(i.M_fb),2)
+        elif i.M_fb <= 0 and i.M_in > 0:
+                M_ratio_table = float('inf')
+        elif i.M_fb > 0 and i.M_in <= 0:
+                M_ratio_table = 0
+        else:
+             M_ratio_table = None
+
+        tdata = [ic_min_table, ic_max_table, mod_depth_table, M_fb_table, M_in_table, M_ratio_table]
         column_labels = ['Icmin [$\mu$A]', 'Icmax [$\mu$A]', 'Mod Depth [mV]', 'Mfb [pH]', 'Min [pH]', 'Min/Mfb']
+        print('\n' + i.chip_id)
+        print(column_labels)
+        print(tdata)      
 
         #Rdyn calculation 
             #find the vphi for icmax, store the indexes where thats true, take first instance then some step of vphis up or down (we chose 3 steps up)
