@@ -351,9 +351,9 @@ def main():
             if args.pdf_report:
                 pdf.savefig()
             #
-            fig5, (ax9, ax10) = plt.subplots(2,1)
+            fig5, (ax9, ax10, ax11) = plt.subplots(3,1, gridspec_kw={'height_ratios': [10, 10, 1]})
             fig5.set_size_inches(7.5, 10, forward=True)
-            fig5.subplots_adjust(hspace=0.35)
+            fig5.subplots_adjust(hspace=0.45)
             fig5.suptitle('Figure 5: device ' + i.chip_id, fontsize=14, fontweight='bold')
             # plot 9: Dynamic Resistance vs Current
             #rdyn is repeating twice, plot half to get cleaner data
@@ -367,6 +367,17 @@ def main():
             ax10.set_title('Dynamic Resistance vs Voltage', fontsize=16)
             ax10.set_xlabel('V$_{SSA}$ feedback [mV]', fontsize=14)
             ax10.set_ylabel('Resistance [$\Omega$]', fontsize=14)
+            #table of values for the chip - turn off axes and frame then make the table
+            ax11.set_frame_on(False)
+            ax11.set_xticks([])
+            ax11.set_yticks([])
+            info_table = [i.system_name, i.qa_name, 'SA13ax', '3x2', now]      #to be used for testing with old data that doesnt have all the class attributes
+        #     info_table = [i.system_name, i.qa_name, i.wafer_type, i.chip_flavor, i.timestamp]
+            info_labels = ['QA System', 'User', 'Wafer Type', 'Chip Flavor', 'Data Timestamp']
+            table = ax11.table(cellText=[info_table], colLabels=info_labels, loc='upper left', cellLoc='center', colColours=['lightgray']*7, fontsize=20)
+            table.auto_set_font_size(False)
+            table.set_fontsize(9)
+            ax11.set_title('\n'+'\n'+'\n'+ i.chip_id + ': Testing Setup & Device Information', fontsize=16)
             #
             if args.pdf_report:
                 pdf.savefig()
