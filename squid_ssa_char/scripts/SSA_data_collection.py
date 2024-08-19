@@ -197,6 +197,9 @@ class SSA:
             chan_num = int(self.test_conf['test_globals']['columns'][idx])
             self.data[idx].qa_name = self.test_conf['info']['user']
             self.data[idx].chip_id = self.test_conf['info']['chip_ids'][idx]
+            self.data[idx].system_name = self.test_conf['info']['system']
+            self.data[idx].chip_flavor = self.test_conf['info']['chip_flavor'][idx]
+            self.data[idx].wafer_type = self.test_conf['info']['wafer_type'][idx]
             self.data[idx].file_name = self.test_conf['info']['chip_ids'][idx] + '_' + \
                 self.date + '_chan{0:02}'.format(self.test_conf['test_globals']['columns'][idx])
             #TODO: figure out how to access the test conf dictionary since its already been read in

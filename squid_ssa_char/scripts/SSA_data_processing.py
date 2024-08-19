@@ -163,7 +163,7 @@ def main():
         column_labels = ['Icmin [$\mu$A]', 'Icmax [$\mu$A]', 'Mod Depth [mV]', 'Mfb [pH]', 'Min [pH]', 'Min/Mfb']
         print('\n' + i.chip_id)
         print(column_labels)
-        print(tdata)      
+        print(tdata) 
 
         #Rdyn calculation 
             #find the vphi for icmax, store the indexes where thats true, take first instance then some step of vphis up or down (we chose 3 steps up)

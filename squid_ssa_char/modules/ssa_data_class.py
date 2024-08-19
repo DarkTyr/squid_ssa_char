@@ -49,6 +49,8 @@ class SSA_Data_Class:
         self.chip_id = ''       # CHIP  ID
         self.qa_name = ''       #Name of the Person performing the test
         self.system_name = ''   # Name fo the system the test was performed on
+        self.wafer_type = ''    #Device type 
+        self.chip_flavor = ''   #Device flavor (layout of squids)
         self.file_name = ''     # Name of the file if/when saved
         self.test_conf_path = ''    # holder for the test_conf file name
         self.system_conf_path = ''  # holder for the system_conf file name
