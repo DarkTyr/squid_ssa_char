@@ -88,6 +88,27 @@ def main():
                         dest='interactive',
                         action='store_true',
                         help='Enter interactive mode at end of script')
+    parser.add_argument('-1',
+                        dest='fig1',
+                        action='store_true',
+                        help='Loads data from .npz and creates figure 1 - modulation depth vs SA bias, '
+                             'load line / P')
+    parser.add_argument('-2',
+                        dest='fig2',
+                        action='store_true',
+                        help='Loads data from .npz and creates figure 2 - Vdev vs SAIN current at Icmax')
+    parser.add_argument('-3',
+                        dest='fig3',
+                        action='store_true',
+                        help='Loads data from .npz and creates figure 3 - Vdev vs SAFB current at Icmax')
+    parser.add_argument('-4',
+                        dest='fig4',
+                        action='store_true',
+                        help='Loads data from .npz and creates figure 4 - Dynamic Resistance vs Bias Current (derivative)')
+    parser.add_argument('-5',
+                        dest='fig5',
+                        action='store_true',
+                        help='Loads data from .npz and creates figure 5 - Dynamic Resistance vs Bias Current (differential)')   
     
     args = parser.parse_args()
     
@@ -187,7 +208,7 @@ def main():
             print('Generating Report: ', report_name)
 
         #TODO: currently it just makes everything for either argument, make more sophisticated
-        if args.full_report or args.external_report or args.pdf_report:
+        if args.full_report or args.external_report or args.pdf_report or args.fig1:
             #start of plotting
             fig1, (ax0, ax1, ax2) = plt.subplots(3,1, gridspec_kw={'height_ratios': [1, 10, 10]})
             fig1.set_size_inches(7.5, 10, forward=True)
@@ -229,7 +250,8 @@ def main():
             if args.pdf_report:
                 pdf.savefig()
 
-
+        if args.full_report or args.external_report or args.pdf_report or args.fig2:
+            
             fig2, (ax3, ax4) = plt.subplots(2,1)
             fig2.set_size_inches(7.5, 10, forward=True)
             fig2.subplots_adjust(hspace=0.35)
@@ -272,8 +294,9 @@ def main():
                     ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)
 
             if args.pdf_report:
-                pdf.savefig()          
-            
+                pdf.savefig()     
+
+        if args.full_report or args.external_report or args.pdf_report or args.fig3:    
             # plot 5: Vssa [mV] vs Ifab [uA], Mfb marked on this plot
             fig3, (ax5, ax6) = plt.subplots(2,1)
             fig3.set_size_inches(7.5, 10, forward=True)
@@ -318,6 +341,8 @@ def main():
             if args.pdf_report:
                 pdf.savefig()        
 
+        if args.full_report or args.external_report or args.pdf_report or args.fig4:
+            
             fig4, (ax7, ax8) = plt.subplots(2,1)
             fig4.set_size_inches(7.5, 10, forward=True)
             fig4.subplots_adjust(hspace=0.35)
@@ -350,7 +375,8 @@ def main():
 
             if args.pdf_report:
                 pdf.savefig()
-            #
+        if args.full_report or args.external_report or args.pdf_report or args.fig5:
+            
             fig5, (ax9, ax10, ax11) = plt.subplots(3,1, gridspec_kw={'height_ratios': [10, 10, 1]})
             fig5.set_size_inches(7.5, 10, forward=True)
             fig5.subplots_adjust(hspace=0.45)
@@ -372,7 +398,7 @@ def main():
             ax11.set_xticks([])
             ax11.set_yticks([])
             info_table = [i.system_name, i.qa_name, 'SA13ax', '3x2', now]      #to be used for testing with old data that doesnt have all the class attributes
-        #     info_table = [i.system_name, i.qa_name, i.wafer_type, i.chip_flavor, i.timestamp]
+        #   info_table = [i.system_name, i.qa_name, i.wafer_type, i.chip_flavor, i.timestamp]
             info_labels = ['QA System', 'User', 'Wafer Type', 'Chip Flavor', 'Data Timestamp']
             table = ax11.table(cellText=[info_table], colLabels=info_labels, loc='upper left', cellLoc='center', colColours=['lightgray']*7, fontsize=20)
             table.auto_set_font_size(False)
