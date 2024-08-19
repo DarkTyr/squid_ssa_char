@@ -9,10 +9,8 @@
 #
 #################################################################################
 
-#TODO: checked whats holding up the program when script called - its hanging on argparse and glob
 import argparse
 import glob
-#from scipy.signal import butter, lfilter
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import numpy as np
@@ -65,7 +63,6 @@ def smooth(y_arr, sm_lev):
    return ysmooth
                                 
 
-#TODO: update help aspect to parser arguments
 def main():
     parser = argparse.ArgumentParser(description='Take data from QA_DAQ, scale it, plot it and generate a PDF report'
                                      'for each device specified in list of files')
@@ -83,7 +80,7 @@ def main():
     parser.add_argument('-e',
                         dest='external_report',
                         action='store_true',
-                        help='Creates only the plots we need to go with our deliverables')
+                        help='Creates only the plots we need to go with our deliverables, currently this is just all plots')
     parser.add_argument('-i',
                         dest='interactive',
                         action='store_true',
@@ -91,8 +88,7 @@ def main():
     parser.add_argument('-1',
                         dest='fig1',
                         action='store_true',
-                        help='Loads data from .npz and creates figure 1 - modulation depth vs SA bias, '
-                             'load line / P')
+                        help='Loads data from .npz and creates figure 1 - modulation depth vs SA bias and table of calculated values')
     parser.add_argument('-2',
                         dest='fig2',
                         action='store_true',
@@ -104,11 +100,11 @@ def main():
     parser.add_argument('-4',
                         dest='fig4',
                         action='store_true',
-                        help='Loads data from .npz and creates figure 4 - Dynamic Resistance vs Bias Current (derivative)')
+                        help='Loads data from .npz and creates figure 4 - Rdyn vs SA Bias (derivative)')
     parser.add_argument('-5',
                         dest='fig5',
                         action='store_true',
-                        help='Loads data from .npz and creates figure 5 - Dynamic Resistance vs Bias Current (differential)')   
+                        help='Loads data from .npz and creates figure 5 - Rdyn vs SA Bias (differential) and system/device info table')   
     
     args = parser.parse_args()
     
