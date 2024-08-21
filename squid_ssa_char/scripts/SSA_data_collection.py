@@ -322,20 +322,25 @@ class SSA:
         # Zero all the columns
         self.zero_everything()
 
-        # Loop through the columns and ramp up to the icmax dac voltage
-        for col in range(self.ncol):
-            self.ramp_to_voltage(self.sel_col[col], self.data[col].dac_ic_max)
-        
-        # Sleep to let system transient settle out before taking data
-        time.sleep(phase_conf['bias_change_wait_ms'] / 1000.0)
 
-        #Take data that has been rolled then averaged across all rows
-        fb, err = self.daq.take_average_data_roll(avg_all_rows=True)
-        
-        #store gathered data for processing
-        for col in range(self.ncol):
-            self.data[col].phase0_1_icmax_vphi = err[self.sel_col[col]]
-            self.data[col].phase0_1_triangle = fb[self.sel_col[col]]
+        try:
+            # Loop through the columns and ramp up to the icmax dac voltages        
+            for col in range(self.ncol):
+                self.ramp_to_voltage(self.sel_col[col], self.data[col].dac_ic_max)
+        except Exception as e:
+            print(e)
+            print('Likely Icmax is 0 - try again')
+        else:
+            # Sleep to let system transient settle out before taking data
+            time.sleep(phase_conf['bias_change_wait_ms'] / 1000.0)
+            
+            #Take data that has been rolled then averaged across all rows
+            fb, err = self.daq.take_average_data_roll(avg_all_rows=True)
+            
+            #store gathered data for processing
+            for col in range(self.ncol):
+                self.data[col].phase0_1_icmax_vphi = err[self.sel_col[col]]
+                self.data[col].phase0_1_triangle = fb[self.sel_col[col]]
 
     
 
@@ -358,20 +363,24 @@ class SSA:
         #zero all the columns
         self.zero_everything()
 
-        #loop throught the columns and ramp up to the icmax dac voltage
-        for col in range(self.ncol):
-            self.ramp_to_voltage(self.sel_col[col], self.data[col].dac_ic_max)
-        
-        #sleep to let system transient settle out before taking data
-        time.sleep(phase_conf['bias_change_wait_ms'] / 1000.0)
+        try:
+            #loop throught the columns and ramp up to the icmax dac voltage
+            for col in range(self.ncol):
+                self.ramp_to_voltage(self.sel_col[col], self.data[col].dac_ic_max)
+        except Exception as e:
+            print(e)
+            print('Likely Icmax is 0 - try again')
+        else:
+            #sleep to let system transient settle out before taking data
+            time.sleep(phase_conf['bias_change_wait_ms'] / 1000.0)
 
-        #take data that has been rolled then averaged across all rows
-        fb, err = self.daq.take_average_data_roll(avg_all_rows=True)
+            #take data that has been rolled then averaged across all rows
+            fb, err = self.daq.take_average_data_roll(avg_all_rows=True)
 
-        #store gathered data for processing
-        for col in range(self.ncol):
-            self.data[col].phase1_0_icmax_vphi = err[self.sel_col[col]]
-            self.data[col].phase1_0_triangle = fb[self.sel_col[col]]
+            #store gathered data for processing
+            for col in range(self.ncol):
+                self.data[col].phase1_0_icmax_vphi = err[self.sel_col[col]]
+                self.data[col].phase1_0_triangle = fb[self.sel_col[col]]
        
     #saves data results - john currently has this as part of the dataclass module  
     def save_data(self):
