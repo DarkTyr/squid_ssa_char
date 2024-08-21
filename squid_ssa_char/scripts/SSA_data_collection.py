@@ -199,7 +199,7 @@ class SSA:
             self.data[idx].chip_id = self.test_conf['info']['chip_ids'][idx]
             self.data[idx].system_name = self.test_conf['info']['system']
             self.data[idx].chip_flavor = self.test_conf['info']['chip_flavor'][idx]
-            self.data[idx].wafer_type = self.test_conf['info']['wafer_type'][idx]
+            self.data[idx].SSA_type = self.test_conf['info']['SSA_type'][idx]
             self.data[idx].timestamp = self.date
             self.data[idx].file_name = self.test_conf['info']['chip_ids'][idx] + '_' + \
                 self.date + '_chan{0:02}'.format(self.test_conf['test_globals']['columns'][idx])
