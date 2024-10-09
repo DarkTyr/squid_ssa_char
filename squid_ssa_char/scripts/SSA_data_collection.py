@@ -168,7 +168,7 @@ class SSA:
             self.data[col].baselines_average = np.average(err[self.sel_col[col]])
             print("\t{:5.2f} | ".format(self.data[col].baselines_average), end="", flush=True)
             self.data[col].baselines_SNR = self.data[col].baselines_average/self.data[col].baselines_std
-            print("\t{:9.3f} | ".format(self.data[col].baselines_average), end="", flush=True)
+            print("\t{:9.3f} | ".format(self.data[col].baselines_SNR), end="", flush=True)
             self.data[col].baselines_trace = err[self.sel_col[col]]
         
 
