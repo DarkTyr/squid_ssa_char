@@ -175,11 +175,11 @@ class SSA:
             + "\tICMax_DAC | "
             + "\tICMin_DAC")
         for col in self.data:
-            print("{:6i} | ".format(col.sys.channel_num), end="")
+            print("{:6d} | ".format(col.sys.channel_num), end="", flush=True)
 
             # Determine Ic_max based on Vmod depths
             icmax_idx = col.phase0_0_vmod_sab.argmax()
-            print("\t{:9i} | ".format(icmax_idx), end="")
+            print("\t{:9d} | ".format(icmax_idx), end="", flush=True)
 
             # For finding Ic_min take the std of the traces at each bias point
             vphi_std = np.std(col.phase0_0_vphis, axis=1)
@@ -189,7 +189,7 @@ class SSA:
                 icmin_idx = np.where(vphi_std[:icmax_idx] < col.baselines_std * self.test_conf['phase0_0']['icmin_pickoff'])[-1][-1]
             else:
                 icmin_idx = len(col.dac_sweep_array) - 1
-            print("\t{:9i} | ".format(icmin_idx), end="")
+            print("\t{:9d} | ".format(icmin_idx), end="", flush=True)
 
             # If the found index is the last point in the sweep array, we really didn't find the Ic_min
             # so set it to the max DAC value the system can have
@@ -202,8 +202,8 @@ class SSA:
                 col.dac_ic_max = 0
             else:
                 col.dac_ic_max = col.dac_sweep_array[icmax_idx]
-            print("\t{:9i} | ".format(col.dac_ic_max), end="")
-            print("\t{:9i}".format(col.dac_ic_min))
+            print("\t{:9d} | ".format(col.dac_ic_max), end="", flush=True)
+            print("\t{:9d}".format(col.dac_ic_min), flush=True)
 
     def bookkeeping(self):
         '''This will copy values from the config files to the SSA data structures. These values will be used to either 
