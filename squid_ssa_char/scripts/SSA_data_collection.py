@@ -21,8 +21,6 @@ import time
 import IPython
 import named_serial # Can be sourced from multiple repos at NIST
 import tqdm
-#from statsmodels.nonparametric.smoothers_lowess import lowess
-# from scipy.signal import butter, lfilter, freqz
 
 # Local Imports
 from squid_ssa_char.modules import load_conf_yaml, ssa_data_class, daq, towerchannel
@@ -170,12 +168,6 @@ class SSA:
             self.data[col].baselines_SNR = self.data[col].baselines_average/self.data[col].baselines_std
             print("\t{:11.3f} | ".format(self.data[col].baselines_SNR), flush=True)
             self.data[col].baselines_trace = err[self.sel_col[col]]
-        
-
-        # TODO: print out for outliers - CHECK value for baseline and decide if we want it at all
-        # for col in range(len(self.baselines_std)):
-        #     if self.baselines_std[col] > 20:
-        #         print('The standard deviation for col: ' + str(col) + ' is high: ' + str(self.baselines_std[col]))
     
     def calculate_ics(self):
         '''takes bias sweep results, picks off Icmin when peaks occur, picks vmod and icmax when modulation amplitude is max'''
@@ -231,7 +223,6 @@ class SSA:
             self.data[idx].timestamp = self.date
             self.data[idx].file_name = self.test_conf['info']['chip_ids'][idx] + '_' + \
                 self.date + '_chan{0:02}'.format(self.test_conf['test_globals']['columns'][idx])
-            #TODO: figure out how to access the test conf dictionary since its already been read in
             self.data[idx].sys.channel_num = self.test_conf['test_globals']['columns'][idx]
             self.data[idx].test_conf_path = self._test_config_path
             self.data[idx].system_conf_path = self._system_config_path
@@ -332,7 +323,7 @@ class SSA:
         # Calc ics for the next two phases to use
         self.calculate_ics()
 
-   #work to get Mfb. ramp to icmax dac voltage then store the vphis
+    #work to get Mfb. ramp to icmax dac voltage then store the vphis
     def phase0_1(self):
         '''
         Biases squids to ADC_max value then stores the vphis and the triangle
@@ -370,8 +361,6 @@ class SSA:
             for col in range(self.ncol):
                 self.data[col].phase0_1_icmax_vphi = err[self.sel_col[col]]
                 self.data[col].phase0_1_triangle = fb[self.sel_col[col]]
-
-    
 
     #send triangle down input to get min then store the vphis
     def phase1_0(self):
@@ -421,10 +410,7 @@ class SSA:
             i.save(self.save_all_data_flag)
 
 HELP_TEXT = '''\
-This is the main SQUID Series Array Testing and Quality Assurance Data Script
-
-
-Currently a work in progress
+This is the main SQUID Series Array Testing and Quality Assurance Data Collection Script
 '''
 
 def main():
