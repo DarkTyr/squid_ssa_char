@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "SQUID_SSA_Char"
+description = "SQUID Series Array Testing Script"
+readme = "README.md"
+version = "0.0.0"
+requires-python = ">= 3.10.8"
+dependencies = [
+    "numpy",
+    "scipy",
+    "matplotlib",
+    "tqdm",
+    "pyserial",
+    "pyyaml",
+    "ipython",
+]
+authors = [
+    {name = "Johnathon Gard", email = "johnathon.gard@colorado.edu"},
+    {name = "Erin Maloney", email = "Erin.Maloney@nist.gov"},
+]
+maintainers = [
+    {name = "Johnathon Gard", email = "johnathon.gard@colorado.edu"},
+    {name = "Erin Maloney", email = "Erin.Maloney@nist.gov"},
+]
+
+[project.urls]
+Homepage = "https://github.com/DarkTyr/squid_ssa_char"
+Issues = "https://github.com/DarkTyr/squid_ssa_char/issues"
+Repository = "https://github.com/DarkTyr/squid_ssa_char"
+
+[project.scripts]
+SSA_data_collection = "squid_ssa_char.scripts.SSA_data_collection:main"
+SSA_data_processing = "squid_ssa_char.scripts.SSA_data_processing:main"
+
