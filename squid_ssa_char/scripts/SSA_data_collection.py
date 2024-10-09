@@ -39,9 +39,7 @@ class SSA:
         self._conf_parser = load_conf_yaml.Load_Conf_YAML(test_config_path, system_config_path, verbosity)
         self.sys_conf = self._conf_parser.read_system_config()
         self.test_conf = self._conf_parser.read_test_config()
-        self.verbosity = verbosity
-        self.save_all_data_flag = False  # TODO: Should this be in the config? - Erin says yes, this is a leftover from day1
-        
+        self.verbosity = verbosity        
         self.number_rows = self.test_conf['test_globals']['n_rows']
         self.sel_col = self.test_conf['test_globals']['columns'] # Array of the selected columns
         self.ncol = len(self.test_conf['test_globals']['columns'])   # length of the selectred columns
@@ -407,7 +405,8 @@ class SSA:
         Save the data classes which contain the data with the assigned names from bookkeeping()
         '''
         for i in self.data:
-            i.save(self.save_all_data_flag)
+            # Removed save_all_data flag from the script and will always pass in True to the save call
+            i.save(True)
 
 HELP_TEXT = '''\
 This is the main SQUID Series Array Testing and Quality Assurance Data Collection Script
@@ -431,13 +430,9 @@ def main():
     parser.add_argument('-i', '--interactive', 
                         help='Drop into Interactive mode after setting up classes',
                         action='store_true')
-    parser.add_argument('-a', '--save_all_data', 
-                        help='Save all the VPhis from the Bias sweep, takes ~17 MB unzipped',
-                        action='store_true')
     args = parser.parse_args()
 
     test = SSA(args.sys_file_path, args.config_file_path, args.verbosity)
-    test.save_all_data_flag = args.save_all_data
 
     banner = "________   SSA_data_collection   ________\n" \
         + "Squid Series Array Data Collection Script\n" \
