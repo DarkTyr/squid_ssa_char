@@ -162,13 +162,13 @@ class SSA:
         for col in range(self.ncol):
             print("{:6d} | ".format(self.data[col].sys.channel_num), end="", flush=True)
             self.data[col].baselines_std = np.std(err[self.sel_col[col]])
-            print("\t{:10.3f} | ".format(self.data[col].baselines_std), end="", flush=True)
+            print("\t{:13.4f} | ".format(self.data[col].baselines_std), end="", flush=True)
             self.data[col].baselines_range = np.max(err[self.sel_col[col]]) - np.min(err[self.sel_col[col]])
-            print("\t{:5d} | ".format(self.data[col].baselines_range), end="", flush=True)
+            print("\t{:5f} | ".format(self.data[col].baselines_range), end="", flush=True)
             self.data[col].baselines_average = np.average(err[self.sel_col[col]])
-            print("\t{:5.2f} | ".format(self.data[col].baselines_average), end="", flush=True)
+            print("\t{:8.4f} | ".format(self.data[col].baselines_average), end="", flush=True)
             self.data[col].baselines_SNR = self.data[col].baselines_average/self.data[col].baselines_std
-            print("\t{:9.3f} | ".format(self.data[col].baselines_SNR), end="", flush=True)
+            print("\t{:11.4f} | ".format(self.data[col].baselines_SNR), end="", flush=True)
             self.data[col].baselines_trace = err[self.sel_col[col]]
         
 
