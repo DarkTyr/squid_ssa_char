@@ -185,7 +185,7 @@ class SSA:
             + "\tICMax_IDX | "
             + "\tICMin_IDX | "
             + "\tICMax_DAC | "
-            + "\tICMin_DAC")
+            + "\tICMin_DAC |")
         for col in self.data:
             print("{:6d} | ".format(col.sys.channel_num), end="", flush=True)
 
@@ -215,7 +215,7 @@ class SSA:
             else:
                 col.dac_ic_max = col.dac_sweep_array[icmax_idx]
             print("\t{:9d} | ".format(col.dac_ic_max), end="", flush=True)
-            print("\t{:9d}".format(col.dac_ic_min), flush=True)
+            print("\t{:9d} |".format(col.dac_ic_min), flush=True)
 
     def bookkeeping(self):
         '''This will copy values from the config files to the SSA data structures. These values will be used to either 
