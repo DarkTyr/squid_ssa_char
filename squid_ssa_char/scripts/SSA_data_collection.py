@@ -151,12 +151,24 @@ class SSA:
         time.sleep(self.test_conf['test_globals']['bias_change_wait_ms'] / 1000.0)
 
         fb, err = self.daq.take_average_data()
+
+        print("Baseline Noise Data\n"
+            + "Column | "
+            + "\tStd Deivation | "
+            + "\tRange | "
+            + "\tAverage | "
+            + "\tStd/Avg SNR")
         
         for col in range(self.ncol):
+            print("{:6d} | ".format(self.data[col].sys.channel_num), end="", flush=True)
             self.data[col].baselines_std = np.std(err[self.sel_col[col]])
+            print("\t{:10.3f} | ".format(self.data[col].baselines_std), end="", flush=True)
             self.data[col].baselines_range = np.max(err[self.sel_col[col]]) - np.min(err[self.sel_col[col]])
+            print("\t{:5d} | ".format(self.data[col].baselines_range), end="", flush=True)
             self.data[col].baselines_average = np.average(err[self.sel_col[col]])
+            print("\t{:5.2f} | ".format(self.data[col].baselines_average), end="", flush=True)
             self.data[col].baselines_SNR = self.data[col].baselines_average/self.data[col].baselines_std
+            print("\t{:9.3f} | ".format(self.data[col].baselines_average), end="", flush=True)
             self.data[col].baselines_trace = err[self.sel_col[col]]
         
 
