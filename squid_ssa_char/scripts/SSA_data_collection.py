@@ -175,7 +175,7 @@ class SSA:
             + "\tICMax_DAC | "
             + "\tICMin_DAC")
         for col in self.data:
-            print("{} | ".format(col.channel_num))
+            print("{} | ".format(col.sys.channel_num))
 
             # Determine Ic_max based on Vmod depths
             icmax_idx = col.phase0_0_vmod_sab.argmax()
