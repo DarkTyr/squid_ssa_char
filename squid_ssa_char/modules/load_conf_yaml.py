@@ -57,7 +57,7 @@ class Load_Conf_YAML:
         # Check the file paths and apply precedence
         self.check_system_conf_path()
         self.check_test_conf_path()
-        if(self.verbosity != 0)
+        if(self.verbosity != 0):
             print('_______Arguments_______')
             print('Current Working Directory: ' + self.cwd)
             print('  System Config File path: ' + self.sys_file_path)
