@@ -430,7 +430,7 @@ Currently a work in progress
 def main():
     # Setup the flag and argument parser for the script
     parser = argparse.ArgumentParser(
-        prog='config_check',
+        prog='SSA_data_collection',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=textwrap.dedent(HELP_TEXT))
     
@@ -446,12 +446,38 @@ def main():
                         help='Drop into Interactive mode after setting up classes',
                         action='store_true')
     parser.add_argument('-a', '--save_all_data', 
-                        help='Save all the VPhis from the Bias sweep, takes ~17 mB unzipped',
+                        help='Save all the VPhis from the Bias sweep, takes ~17 MB unzipped',
                         action='store_true')
     args = parser.parse_args()
 
+
+
     test = SSA(args.sys_file_path, args.config_file_path, args.verbosity)
     test.save_all_data_flag = args.save_all_data
+
+    banner = "________   SSA_data_collection   ________\n" \
+           + "Squid Series Array Data Collection Script\n" \
+           + "_______Arguments_______\n" \
+           + "\tCurrent Working Directory: " + test._conf_parser.cwd + "\n" \
+           + "\t  System Config File path: " + test._conf_parser.sys_file_path + "\n" \
+           + "\tSSA test Config File Path: " + test._conf_parser.config_file_path + "\n" \
+           + "\t          Verbosity level: " + str(args.verbosity) + "\n" + \
+           + "\n" \
+           + "Defined Classed:\n" \
+           + "  test = SSA() : Test System level class containing the phases of testing.\n" \
+           + "  test.data[n] : SSA_Data class which will contain the data that has been calculated or taken.\n" \
+           + "\n" \
+           + "_______Example Usage_______\n" \
+           + "Once the system has been configured using Cringe and DATARD is running you can\n" \
+           + "run the phases of testing.\n" \
+           + "    test.phase0_0()   :  This runs the bias sweep to determine IC_Mod_Max and IC_Min.\n" \
+           + "    test.phase0_1()   :  This biases each SSA at IC_Mod_Max and saves the SQUID VPhi.\n" \
+           + "                         expecting the Feed Back to be swept by a triangle\n" \
+           + "    test.phase1_0()   :  This biases each SSA at IC_Mod_Max and saves the SQUID VPhi\n" \
+           + "                         expecting the Input to be swept by a triangle\n" \
+           + "    test.save_data()  :  Will save all of the data to disk as pickles, each containing\n" \
+           + "                         a pickle file for a single SSA and all related data.\n"
+    
     if(args.interactive):
         IPython.start_ipython(argv=[], user_ns=locals())
 
