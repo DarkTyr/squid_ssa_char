@@ -167,16 +167,30 @@ class SSA:
     
     def calculate_ics(self):
         '''takes bias sweep results, picks off Icmin when peaks occur, picks vmod and icmax when modulation amplitude is max'''
+        # Print header for usefull stuff to the console
+        print("Calculating IC Parameters\n"
+            + "Column | "
+            + "\tICMax_IDX | "
+            + "\tICMin_IDX | "
+            + "\tICMax_DAC | "
+            + "\tICMin_DAC")
         for col in self.data:
-            # For finding Ic_min take the std of the traces at each bias point
-            vphi_std = np.std(col.phase0_0_vphis, axis=1)
+            print("{} | ".format(col.channel_num))
 
             # Determine Ic_max based on Vmod depths
             icmax_idx = col.phase0_0_vmod_sab.argmax()
+            print("\t{} | ".format(icmax_idx))
 
-            # find all of the indexs less than n times the std, and take the greatest index. limit to below icmax to avoid rail issues
-            icmin_idx = np.where(vphi_std[:icmax_idx] < col.baselines_std * self.test_conf['phase0_0']['icmin_pickoff'])[-1][-1]
-            
+            # For finding Ic_min take the std of the traces at each bias point
+            vphi_std = np.std(col.phase0_0_vphis, axis=1)
+
+            # find all of the indices less than n times the std, and take the greatest index. limit to below icmax to avoid rail issues
+            if(icmax_idx != 0):
+                icmin_idx = np.where(vphi_std[:icmax_idx] < col.baselines_std * self.test_conf['phase0_0']['icmin_pickoff'])[-1][-1]
+            else:
+                icmin_idx = len(col.dac_sweep_array) - 1
+            print("\t{} | ".format(icmin_idx))
+
             # If the found index is the last point in the sweep array, we really didn't find the Ic_min
             # so set it to the max DAC value the system can have
             if (icmin_idx == (len(col.dac_sweep_array) - 1)):
@@ -188,6 +202,8 @@ class SSA:
                 col.dac_ic_max = 0
             else:
                 col.dac_ic_max = col.dac_sweep_array[icmax_idx]
+            print("\t{} | ".format(col.dac_ic_max))
+            print("\t{}".format(col.dac_ic_min))
 
     def bookkeeping(self):
         '''This will copy values from the config files to the SSA data structures. These values will be used to either 
