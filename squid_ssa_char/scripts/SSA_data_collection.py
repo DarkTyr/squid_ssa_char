@@ -305,6 +305,7 @@ class SSA:
         # This will then be used as the previous value for the ramp_to_voltage call
         previous_bias = phase_conf['bias_sweep_start']
 
+        print("Phase0_0 Bias Sweep")
         # Main outter for loop wrapped with tqdm class to display a progress bar and estimated time
         for sweep_point in tqdm.tqdm(range(phase_conf['bias_sweep_npoints'])):
             
@@ -350,7 +351,7 @@ class SSA:
         # Zero all the columns
         self.zero_everything()
 
-
+        print("Phase0_1 Bias to IC_Max and Save VPhi with Triagnle on SSA_FB")
         try:
             # Loop through the columns and ramp up to the icmax dac voltages        
             for col in range(self.ncol):
@@ -391,6 +392,7 @@ class SSA:
         #zero all the columns
         self.zero_everything()
 
+        print("Phase1_0 Bias to IC_Max and Save VPhi with Triagnle on SSA_INPUT")
         try:
             #loop throught the columns and ramp up to the icmax dac voltage
             for col in range(self.ncol):
