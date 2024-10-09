@@ -447,7 +447,7 @@ def main():
         + "\tCurrent Working Directory: " + test._conf_parser.cwd + "\n" \
         + "\t  System Config File path: " + test._conf_parser.sys_file_path + "\n" \
         + "\tSSA test Config File Path: " + test._conf_parser.config_file_path + "\n" \
-        + "\t          Verbosity level: " + str(args.verbosity) + "\n" + \
+        + "\t          Verbosity level: " + str(args.verbosity) + "\n" \
         + "\n" \
         + "Defined Classed:\n" \
         + "  test = SSA() : Test System level class containing the phases of testing.\n" \
@@ -469,7 +469,3 @@ def main():
 
 if (__name__ == '__main__'):
     main()
-            #    + "\tCurrent Working Directory: " + test._conf_parser.cwd + "\n" \
-        #    + "\t  System Config File path: " + test._conf_parser.sys_file_path + "\n" \
-        #    + "\tSSA test Config File Path: " + test._conf_parser.config_file_path + "\n" \
-        #    + "\t          Verbosity level: " + str(args.verbosity) + "\n" + \
