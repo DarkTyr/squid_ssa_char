@@ -9,10 +9,8 @@
 #
 #################################################################################
 
-#TODO: checked whats holding up the program when script called - its hanging on argparse and glob
 import argparse
 import glob
-#from scipy.signal import butter, lfilter
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 import numpy as np
@@ -65,7 +63,6 @@ def smooth(y_arr, sm_lev):
    return ysmooth
                                 
 
-#TODO: update help aspect to parser arguments
 def main():
     parser = argparse.ArgumentParser(description='Take data from QA_DAQ, scale it, plot it and generate a PDF report'
                                      'for each device specified in list of files')
@@ -83,11 +80,31 @@ def main():
     parser.add_argument('-e',
                         dest='external_report',
                         action='store_true',
-                        help='Creates only the plots we need to go with our deliverables')
+                        help='Creates only the plots we need to go with our deliverables, currently this is just all plots')
     parser.add_argument('-i',
                         dest='interactive',
                         action='store_true',
                         help='Enter interactive mode at end of script')
+    parser.add_argument('-1',
+                        dest='fig1',
+                        action='store_true',
+                        help='Loads data from .npz and creates figure 1 - modulation depth vs SA bias and table of calculated values')
+    parser.add_argument('-2',
+                        dest='fig2',
+                        action='store_true',
+                        help='Loads data from .npz and creates figure 2 - Vdev vs SAIN current at Icmax')
+    parser.add_argument('-3',
+                        dest='fig3',
+                        action='store_true',
+                        help='Loads data from .npz and creates figure 3 - Vdev vs SAFB current at Icmax')
+    parser.add_argument('-4',
+                        dest='fig4',
+                        action='store_true',
+                        help='Loads data from .npz and creates figure 4 - Rdyn vs SA Bias (derivative)')
+    parser.add_argument('-5',
+                        dest='fig5',
+                        action='store_true',
+                        help='Loads data from .npz and creates figure 5 - Rdyn vs SA Bias (differential) and system/device info table')   
     
     args = parser.parse_args()
     
@@ -143,10 +160,27 @@ def main():
         dVmodmax_dIsafb_smooth = smooth(dVmodmax_dIsafb, 11)
         dVmodmin_dIsafb_smooth = smooth(dVmodmin_dIsafb, 11)
 
+       #TODO: add if statments to fix 0s breaking this
         #setup for data table of calculated values, creates lables and the list of data for the cells (rounded to 2 decimal places)
-        tdata = [round((i.dac_ic_min*i.sab_dac_factor),2), round((i.dac_ic_max*i.sab_dac_factor),2), round((np.max(i.phase0_0_vmod_sab*i.factor_adc_mV)),2), \
-                 round((i.M_fb),2), round((i.M_in),2), round((i.M_in)/(i.M_fb),2)]
+        ic_min_table = round((i.dac_ic_min*i.sab_dac_factor),2)
+        ic_max_table = round((i.dac_ic_max*i.sab_dac_factor),2)
+        mod_depth_table = round((np.max(i.phase0_0_vmod_sab*i.factor_adc_mV)),2)
+        M_fb_table = round((i.M_fb),2)
+        M_in_table = round((i.M_in),2)
+        if i.M_fb > 0 and i.M_in > 0:
+                M_ratio_table = round((i.M_in)/(i.M_fb),2)
+        elif i.M_fb <= 0 and i.M_in > 0:
+                M_ratio_table = float('inf')
+        elif i.M_fb > 0 and i.M_in <= 0:
+                M_ratio_table = 0
+        else:
+             M_ratio_table = None
+
+        tdata = [ic_min_table, ic_max_table, mod_depth_table, M_fb_table, M_in_table, M_ratio_table]
         column_labels = ['Icmin [$\mu$A]', 'Icmax [$\mu$A]', 'Mod Depth [mV]', 'Mfb [pH]', 'Min [pH]', 'Min/Mfb']
+        print('\n' + i.chip_id)
+        print(column_labels)
+        print(tdata) 
 
         #Rdyn calculation 
             #find the vphi for icmax, store the indexes where thats true, take first instance then some step of vphis up or down (we chose 3 steps up)
@@ -170,7 +204,7 @@ def main():
             print('Generating Report: ', report_name)
 
         #TODO: currently it just makes everything for either argument, make more sophisticated
-        if args.full_report or args.external_report or args.pdf_report:
+        if args.full_report or args.external_report or args.pdf_report or args.fig1:
             #start of plotting
             fig1, (ax0, ax1, ax2) = plt.subplots(3,1, gridspec_kw={'height_ratios': [1, 10, 10]})
             fig1.set_size_inches(7.5, 10, forward=True)
@@ -212,7 +246,8 @@ def main():
             if args.pdf_report:
                 pdf.savefig()
 
-
+        if args.full_report or args.external_report or args.pdf_report or args.fig2:
+            
             fig2, (ax3, ax4) = plt.subplots(2,1)
             fig2.set_size_inches(7.5, 10, forward=True)
             fig2.subplots_adjust(hspace=0.35)
@@ -255,8 +290,9 @@ def main():
                     ha='center', va='center',color='blue',backgroundcolor='w',fontsize=8)
 
             if args.pdf_report:
-                pdf.savefig()          
-            
+                pdf.savefig()     
+
+        if args.full_report or args.external_report or args.pdf_report or args.fig3:    
             # plot 5: Vssa [mV] vs Ifab [uA], Mfb marked on this plot
             fig3, (ax5, ax6) = plt.subplots(2,1)
             fig3.set_size_inches(7.5, 10, forward=True)
@@ -301,6 +337,8 @@ def main():
             if args.pdf_report:
                 pdf.savefig()        
 
+        if args.full_report or args.external_report or args.pdf_report or args.fig4:
+            
             fig4, (ax7, ax8) = plt.subplots(2,1)
             fig4.set_size_inches(7.5, 10, forward=True)
             fig4.subplots_adjust(hspace=0.35)
@@ -333,10 +371,11 @@ def main():
 
             if args.pdf_report:
                 pdf.savefig()
-            #
-            fig5, (ax9, ax10) = plt.subplots(2,1)
+        if args.full_report or args.external_report or args.pdf_report or args.fig5:
+            
+            fig5, (ax9, ax10, ax11) = plt.subplots(3,1, gridspec_kw={'height_ratios': [10, 10, 1]})
             fig5.set_size_inches(7.5, 10, forward=True)
-            fig5.subplots_adjust(hspace=0.35)
+            fig5.subplots_adjust(hspace=0.45)
             fig5.suptitle('Figure 5: device ' + i.chip_id, fontsize=14, fontweight='bold')
             # plot 9: Dynamic Resistance vs Current
             #rdyn is repeating twice, plot half to get cleaner data
@@ -350,6 +389,17 @@ def main():
             ax10.set_title('Dynamic Resistance vs Voltage', fontsize=16)
             ax10.set_xlabel('V$_{SSA}$ feedback [mV]', fontsize=14)
             ax10.set_ylabel('Resistance [$\Omega$]', fontsize=14)
+            #table of values for the chip - turn off axes and frame then make the table
+            ax11.set_frame_on(False)
+            ax11.set_xticks([])
+            ax11.set_yticks([])
+            info_table = [i.system_name, i.qa_name, 'SA13ax', '3x2', now]      #to be used for testing with old data that doesnt have all the class attributes
+        #   info_table = [i.system_name, i.qa_name, i.wafer_type, i.chip_flavor, i.timestamp]
+            info_labels = ['QA System', 'User', 'Wafer Type', 'Chip Flavor', 'Data Timestamp']
+            table = ax11.table(cellText=[info_table], colLabels=info_labels, loc='upper left', cellLoc='center', colColours=['lightgray']*7, fontsize=20)
+            table.auto_set_font_size(False)
+            table.set_fontsize(9)
+            ax11.set_title('\n'+'\n'+'\n'+ i.chip_id + ': Testing Setup & Device Information', fontsize=16)
             #
             if args.pdf_report:
                 pdf.savefig()

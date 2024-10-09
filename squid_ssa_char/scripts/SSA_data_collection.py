@@ -213,6 +213,10 @@ class SSA:
             chan_num = int(self.test_conf['test_globals']['columns'][idx])
             self.data[idx].qa_name = self.test_conf['info']['user']
             self.data[idx].chip_id = self.test_conf['info']['chip_ids'][idx]
+            self.data[idx].system_name = self.test_conf['info']['system']
+            self.data[idx].chip_flavor = self.test_conf['info']['chip_flavor'][idx]
+            self.data[idx].SSA_type = self.test_conf['info']['SSA_type'][idx]
+            self.data[idx].timestamp = self.date
             self.data[idx].file_name = self.test_conf['info']['chip_ids'][idx] + '_' + \
                 self.date + '_chan{0:02}'.format(self.test_conf['test_globals']['columns'][idx])
             #TODO: figure out how to access the test conf dictionary since its already been read in
@@ -334,20 +338,25 @@ class SSA:
         # Zero all the columns
         self.zero_everything()
 
-        # Loop through the columns and ramp up to the icmax dac voltage
-        for col in range(self.ncol):
-            self.ramp_to_voltage(self.sel_col[col], self.data[col].dac_ic_max)
-        
-        # Sleep to let system transient settle out before taking data
-        time.sleep(phase_conf['bias_change_wait_ms'] / 1000.0)
 
-        #Take data that has been rolled then averaged across all rows
-        fb, err = self.daq.take_average_data_roll(avg_all_rows=True)
-        
-        #store gathered data for processing
-        for col in range(self.ncol):
-            self.data[col].phase0_1_icmax_vphi = err[self.sel_col[col]]
-            self.data[col].phase0_1_triangle = fb[self.sel_col[col]]
+        try:
+            # Loop through the columns and ramp up to the icmax dac voltages        
+            for col in range(self.ncol):
+                self.ramp_to_voltage(self.sel_col[col], self.data[col].dac_ic_max)
+        except Exception as e:
+            print(e)
+            print('Likely Icmax is 0 - try again')
+        else:
+            # Sleep to let system transient settle out before taking data
+            time.sleep(phase_conf['bias_change_wait_ms'] / 1000.0)
+            
+            #Take data that has been rolled then averaged across all rows
+            fb, err = self.daq.take_average_data_roll(avg_all_rows=True)
+            
+            #store gathered data for processing
+            for col in range(self.ncol):
+                self.data[col].phase0_1_icmax_vphi = err[self.sel_col[col]]
+                self.data[col].phase0_1_triangle = fb[self.sel_col[col]]
 
     
 
@@ -370,20 +379,24 @@ class SSA:
         #zero all the columns
         self.zero_everything()
 
-        #loop throught the columns and ramp up to the icmax dac voltage
-        for col in range(self.ncol):
-            self.ramp_to_voltage(self.sel_col[col], self.data[col].dac_ic_max)
-        
-        #sleep to let system transient settle out before taking data
-        time.sleep(phase_conf['bias_change_wait_ms'] / 1000.0)
+        try:
+            #loop throught the columns and ramp up to the icmax dac voltage
+            for col in range(self.ncol):
+                self.ramp_to_voltage(self.sel_col[col], self.data[col].dac_ic_max)
+        except Exception as e:
+            print(e)
+            print('Likely Icmax is 0 - try again')
+        else:
+            #sleep to let system transient settle out before taking data
+            time.sleep(phase_conf['bias_change_wait_ms'] / 1000.0)
 
-        #take data that has been rolled then averaged across all rows
-        fb, err = self.daq.take_average_data_roll(avg_all_rows=True)
+            #take data that has been rolled then averaged across all rows
+            fb, err = self.daq.take_average_data_roll(avg_all_rows=True)
 
-        #store gathered data for processing
-        for col in range(self.ncol):
-            self.data[col].phase1_0_icmax_vphi = err[self.sel_col[col]]
-            self.data[col].phase1_0_triangle = fb[self.sel_col[col]]
+            #store gathered data for processing
+            for col in range(self.ncol):
+                self.data[col].phase1_0_icmax_vphi = err[self.sel_col[col]]
+                self.data[col].phase1_0_triangle = fb[self.sel_col[col]]
        
     #saves data results - john currently has this as part of the dataclass module  
     def save_data(self):
