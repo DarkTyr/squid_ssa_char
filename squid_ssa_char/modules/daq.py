@@ -60,6 +60,9 @@ class Daq:
         #Determine how far to roll for each element in the 2D array of time streams
         for i in range(fb.shape[0]):
             for j in range(fb.shape[1]):
+                # Check if there is a feedback value to roll too. Just print to console about the issue. 
+                if(np.all(fb[i,j,:] == fb[i,j,0])):
+                    raise self.FeedBackException("FB value is constant, this will cause erratic behavior in take_data_roll(). C={}, R={}".format(i, j))
                 nsamp_roll = -fb[i, j, :].argmin()
                 fb[i, j, :] = np.roll(fb[i, j, :], nsamp_roll)
                 err[i, j, :] = np.roll(err[i, j, :], nsamp_roll)
@@ -85,3 +88,7 @@ class Daq:
                 data = np.add(self.take_data_roll(avg_all_rows=avg_all_rows), (data))
 
             return data[0]/self.averages, data[1]/self.averages
+
+
+    class FeedBackException(Exception):
+        pass
