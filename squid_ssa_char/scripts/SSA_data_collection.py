@@ -436,8 +436,6 @@ def main():
                         action='store_true')
     args = parser.parse_args()
 
-
-
     test = SSA(args.sys_file_path, args.config_file_path, args.verbosity)
     test.save_all_data_flag = args.save_all_data
 
