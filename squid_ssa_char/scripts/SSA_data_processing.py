@@ -393,8 +393,7 @@ def main():
             ax11.set_frame_on(False)
             ax11.set_xticks([])
             ax11.set_yticks([])
-            info_table = [i.system_name, i.qa_name, 'SA13ax', '3x2', now]      #to be used for testing with old data that doesnt have all the class attributes
-        #   info_table = [i.system_name, i.qa_name, i.wafer_type, i.chip_flavor, i.timestamp]
+            info_table = [i.system_name, i.qa_name, i.wafer_type, i.chip_flavor, i.timestamp]
             info_labels = ['QA System', 'User', 'Wafer Type', 'Chip Flavor', 'Data Timestamp']
             table = ax11.table(cellText=[info_table], colLabels=info_labels, loc='upper left', cellLoc='center', colColours=['lightgray']*7, fontsize=20)
             table.auto_set_font_size(False)
